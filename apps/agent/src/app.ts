@@ -1,11 +1,10 @@
-import dotenv from "dotenv";
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
 import { ZodError } from "zod";
 import APIError from "./lib/api_error";
+import { githubWebhooks } from "./lib/github";
+import { registerWebhookListeners } from "./lib/github/webhooks";
 import router from "./routes/router";
-
-dotenv.config();
 
 const app = new Koa();
 app.use(bodyParser());
@@ -33,6 +32,9 @@ app.use(async (ctx, next) => {
     }
   }
 });
+
+// Register GitHub webhook listeners
+registerWebhookListeners(githubWebhooks);
 
 app.use(router.routes());
 

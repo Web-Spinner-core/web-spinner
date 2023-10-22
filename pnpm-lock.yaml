@@ -35,6 +35,9 @@ importers:
       '@octokit/types':
         specifier: ^12.0.0
         version: 12.0.0
+      '@octokit/webhooks':
+        specifier: ^12.0.3
+        version: 12.0.3
       '@t3-oss/env-core':
         specifier: ^0.7.1
         version: 0.7.1(typescript@5.2.2)(zod@3.22.4)

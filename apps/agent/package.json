@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.ts",
   "scripts": {
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register --files src/index.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register -r dotenv/config --files src/index.ts",
     "build": "echo 'Add build script here'",
     "test": "echo 'Add test script here'",
     "lint": "eslint --fix .",
@@ -16,6 +16,7 @@
     "@octokit/core": "^5.0.1",
     "@octokit/rest": "^20.0.2",
     "@octokit/types": "^12.0.0",
+    "@octokit/webhooks": "^12.0.3",
     "@t3-oss/env-core": "^0.7.1",
     "database": "workspace:*",
     "dotenv": "^16.3.1",

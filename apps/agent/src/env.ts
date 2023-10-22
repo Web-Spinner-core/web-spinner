@@ -11,7 +11,8 @@ export const env = createEnv({
     GH_APP_ID: z.string(),
     GH_CLIENT_ID: z.string(),
     GH_CLIENT_SECRET: z.string(),
-    GH_PRIVATE_KEY: z.string()
+    GH_PRIVATE_KEY: z.string(),
+    WEBHOOK_SECRET: z.string(),
   },
   client: {},
   runtimeEnv: process.env,

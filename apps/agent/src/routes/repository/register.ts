@@ -1,11 +1,9 @@
+import { ID_PREFIXES, generatePrefixedId, prisma } from "database";
 import { Context, Next } from "koa";
-import { z } from "zod";
-import { prisma } from "database";
-import { githubApp, githubClient } from "~/lib/github";
-import APIError from "~/lib/api_error";
 import { RequestError } from "octokit";
-import { generatePrefixedId } from "database";
-import { ID_PREFIXES } from "database";
+import { z } from "zod";
+import APIError from "~/lib/api_error";
+import { githubClient } from "~/lib/github";
 
 const bodySchema = z.object({
   owner: z.string(),
@@ -18,6 +16,7 @@ interface GithubRepositoryResponse {
     owner: {
       login: string;
     };
+    full_name: string;
     html_url: string;
   };
 }
@@ -30,10 +29,7 @@ export default async function registerRepository(ctx: Context, next: Next) {
 
   const existingRepository = await prisma.repository.findUnique({
     where: {
-      name_owner: {
-        name,
-        owner,
-      },
+      fullName: `${owner}/${name}`,
     },
   });
 
@@ -69,8 +65,8 @@ export default async function registerRepository(ctx: Context, next: Next) {
     data: {
       id: generatePrefixedId(ID_PREFIXES.REPOSITORY),
       name: ghRepository.data.name,
-      owner: ghRepository.data.owner.login,
-      url: ghRepository.data.html_url,
+      fullName: ghRepository.data.full_name,
+      installationId: "0",
     },
   });
   ctx.status = 200;

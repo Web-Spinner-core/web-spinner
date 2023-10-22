@@ -6,7 +6,7 @@ if (env.NODE_ENV === "development") {
   // Development webhook client
   const smee = new SmeeClient({
     source: "https://smee.io/QkyXAAfVb0awCQJh",
-    target: "http://localhost:3000/events",
+    target: "http://localhost:3000/webhooks",
     logger: console,
   });
   smee.start();
