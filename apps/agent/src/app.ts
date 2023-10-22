@@ -1,9 +1,9 @@
+import dotenv from "dotenv";
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
-import router from "./routes/router";
-import dotenv from "dotenv";
 import { ZodError } from "zod";
 import APIError from "./lib/api_error";
+import router from "./routes/router";
 
 dotenv.config();
 

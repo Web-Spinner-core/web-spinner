@@ -1,7 +1,7 @@
 import { Context, Next } from "koa";
 import { z } from "zod";
 import { prisma } from "database";
-import { githubClient } from "~/lib/github";
+import { githubApp, githubClient } from "~/lib/github";
 import APIError from "~/lib/api_error";
 import { RequestError } from "octokit";
 
