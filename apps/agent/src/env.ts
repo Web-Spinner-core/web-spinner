@@ -13,6 +13,7 @@ export const env = createEnv({
     GH_CLIENT_SECRET: z.string(),
     GH_PRIVATE_KEY: z.string(),
     WEBHOOK_SECRET: z.string(),
+    LOG_LEVEL: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
   },
   client: {},
   runtimeEnv: process.env,
