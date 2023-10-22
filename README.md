@@ -1,6 +1,6 @@
-# Turborepo starter
+# Web Spinner
 
-This is an official starter turborepo.
+Web Spinner is an LLM agent that can progressively build your web application using the context of a larger project design system.
 
 ## Using this example
 
