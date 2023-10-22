@@ -1,14 +1,16 @@
-import { v4 as uuidv4 } from "uuid";
-import b32 from "base32-encoding";
+import { init } from "@paralleldrive/cuid2";
+
+const createCuid = init({
+  random: Math.random,
+  length: 15,
+});
 
 /**
  * Generate a prefixed ID
  * e.g. generatePrefixedId("foo") => "foo_abcd1234"
  */
 export function generatePrefixedId(prefix: IDPrefix): string {
-  // Parse raw UUID buffer and convert to hex
-  const uuid = Buffer.from(uuidv4().replace(/-/g, ""), "hex");
-  return `${prefix}_${b32.stringify(uuid)}`;
+  return `${prefix}_${createCuid()}`;
 }
 
 /**
