@@ -1,11 +1,12 @@
-import Router from "@koa/router";
-import { EmitterWebhookEventName } from "@octokit/webhooks";
+import { type EmitterWebhookEventName } from "@octokit/webhooks";
 import { Context, Next } from "koa";
 import APIError from "~/lib/api_error";
 import { githubWebhooks } from "~/lib/github";
 
-const router = new Router();
-router.post("/webhooks", async (ctx: Context, next: Next) => {
+/**
+ * Handle an incoming webhook
+ */
+export default async function handleIncomingWebhook(ctx: Context, next: Next) {
   try {
     const { request } = ctx;
     githubWebhooks.verifyAndReceive({
@@ -24,6 +25,4 @@ router.post("/webhooks", async (ctx: Context, next: Next) => {
       message: "An error occured processing the webhook",
     });
   }
-});
-
-export default router;
+}

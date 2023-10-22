@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 import APIError from "./lib/api_error";
 import { githubWebhooks } from "./lib/github";
 import { registerWebhookListeners } from "./lib/github/webhooks";
-import router from "./routes/router";
+import router from "./routes";
 
 const app = new Koa();
 app.use(bodyParser());
