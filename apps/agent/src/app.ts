@@ -25,11 +25,10 @@ app.use(async (ctx, next) => {
       };
     } else {
       const typedError = err as APIError;
-      console.error(typedError?.message ?? typedError.code);
-
+      console.error(typedError?.message ?? typedError?.type ?? typedError);
       ctx.status = typedError?.statusCode ?? 500;
       ctx.body = {
-        message: typedError?.message ?? typedError?.code ?? "An error occured",
+        message: typedError?.message ?? typedError?.type ?? "An error occured",
       };
     }
   }

@@ -26,6 +26,9 @@ importers:
       '@octokit/core':
         specifier: ^5.0.1
         version: 5.0.1
+      '@octokit/rest':
+        specifier: ^20.0.2
+        version: 20.0.2
       '@octokit/types':
         specifier: ^12.0.0
         version: 12.0.0
@@ -835,6 +838,15 @@ packages:
       '@octokit/types': 12.0.0
     dev: false
 
+  /@octokit/plugin-request-log@4.0.0(@octokit/core@5.0.1):
+    resolution: {integrity: sha512-2uJI1COtYCq8Z4yNSnM231TgH50bRkheQ9+aH8TnZanB6QilOnx8RMD2qsnamSOXtDj0ilxvevf5fGsBhBBzKA==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      '@octokit/core': '>=5'
+    dependencies:
+      '@octokit/core': 5.0.1
+    dev: false
+
   /@octokit/plugin-rest-endpoint-methods@10.0.1(@octokit/core@5.0.1):
     resolution: {integrity: sha512-fgS6HPkPvJiz8CCliewLyym9qAx0RZ/LKh3sATaPfM41y/O2wQ4Z9MrdYeGPVh04wYmHFmWiGlKPC7jWVtZXQA==}
     engines: {node: '>= 18'}
@@ -886,6 +898,16 @@ packages:
       '@octokit/types': 12.0.0
       is-plain-object: 5.0.0
       universal-user-agent: 6.0.0
+    dev: false
+
+  /@octokit/rest@20.0.2:
+    resolution: {integrity: sha512-Ux8NDgEraQ/DMAU1PlAohyfBBXDwhnX2j33Z1nJNziqAfHi70PuxkFYIcIt8aIAxtRE7KVuKp8lSR8pA0J5iOQ==}
+    engines: {node: '>= 18'}
+    dependencies:
+      '@octokit/core': 5.0.1
+      '@octokit/plugin-paginate-rest': 9.0.0(@octokit/core@5.0.1)
+      '@octokit/plugin-request-log': 4.0.0(@octokit/core@5.0.1)
+      '@octokit/plugin-rest-endpoint-methods': 10.0.1(@octokit/core@5.0.1)
     dev: false
 
   /@octokit/types@11.1.0:

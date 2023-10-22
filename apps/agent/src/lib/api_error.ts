@@ -1,5 +1,5 @@
 // Mapping of error codes to HTTP status codes
-const errors = {
+const errorCodes = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
@@ -8,10 +8,10 @@ const errors = {
   INTERNAL_SERVER_ERROR: 500,
 };
 
-export type ErrorCode = keyof typeof errors;
+export type ErrorType = keyof typeof errorCodes;
 
 interface APIErrorArgs {
-  code: ErrorCode;
+  type: ErrorType;
   message?: string;
 }
 
@@ -19,12 +19,12 @@ interface APIErrorArgs {
  * Generic API error
  */
 export default class APIError extends Error {
+  public readonly type: ErrorType;
   public readonly statusCode: number;
-  public readonly code: ErrorCode;
 
-  constructor({ code, message }: APIErrorArgs) {
-    super(message ?? code);
-    this.code = code;
-    this.statusCode = errors[code];
+  constructor({ type, message }: APIErrorArgs) {
+    super(message ?? type);
+    this.type = type;
+    this.statusCode = errorCodes[type];
   }
 }

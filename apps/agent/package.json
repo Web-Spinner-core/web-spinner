@@ -12,6 +12,7 @@
   "dependencies": {
     "@koa/router": "^11.0.2",
     "@octokit/core": "^5.0.1",
+    "@octokit/rest": "^20.0.2",
     "@octokit/types": "^12.0.0",
     "@t3-oss/env-core": "^0.7.1",
     "database": "workspace:*",
