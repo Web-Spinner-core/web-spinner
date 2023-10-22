@@ -4,20 +4,22 @@ import { prisma } from "database";
 import { githubApp, githubClient } from "~/lib/github";
 import APIError from "~/lib/api_error";
 import { RequestError } from "octokit";
+import { generatePrefixedId } from "database";
+import { ID_PREFIXES } from "database";
 
 const bodySchema = z.object({
   owner: z.string(),
   name: z.string(),
-})
+});
 
 interface GithubRepositoryResponse {
   data: {
     name: string;
     owner: {
       login: string;
-    }
+    };
     html_url: string;
-  }
+  };
 }
 
 /**
@@ -31,16 +33,16 @@ export default async function registerRepository(ctx: Context, next: Next) {
       name_owner: {
         name,
         owner,
-      }
-    }
-  })
+      },
+    },
+  });
 
   if (existingRepository) {
     // Return existing repository
     ctx.status = 200;
     ctx.body = {
       repository: existingRepository,
-    }
+    };
     return next();
   }
 
@@ -50,27 +52,31 @@ export default async function registerRepository(ctx: Context, next: Next) {
     ghRepository = await githubClient.rest.repos.get({
       owner,
       repo: name,
-    })
+    });
   } catch (err) {
     if (err instanceof RequestError && err.status === 404) {
-      throw new APIError({ type: "NOT_FOUND", message: "Repository not found" })
+      throw new APIError({
+        type: "NOT_FOUND",
+        message: "Repository not found",
+      });
     } else {
       console.error(err);
-      throw new APIError({ type: "INTERNAL_SERVER_ERROR" })
+      throw new APIError({ type: "INTERNAL_SERVER_ERROR" });
     }
   }
-  
+
   const repository = await prisma.repository.create({
     data: {
+      id: generatePrefixedId(ID_PREFIXES.REPOSITORY),
       name: ghRepository.data.name,
       owner: ghRepository.data.owner.login,
       url: ghRepository.data.html_url,
-    }
-  })
+    },
+  });
   ctx.status = 200;
   ctx.body = {
     repository,
-  }
+  };
 
   next();
 }
