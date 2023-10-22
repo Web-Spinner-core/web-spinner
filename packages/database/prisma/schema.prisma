@@ -10,7 +10,7 @@ datasource db {
 
 // Represents a GH repository that we have access to
 model Repository {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  id    String @id @map("_id")
   name  String
   owner String
 

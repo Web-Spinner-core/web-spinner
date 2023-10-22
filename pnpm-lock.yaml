@@ -38,9 +38,6 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.7.1
         version: 0.7.1(typescript@5.2.2)(zod@3.22.4)
-      base32-encoding:
-        specifier: ^1.0.0
-        version: 1.0.0
       database:
         specifier: workspace:*
         version: link:../../packages/database
@@ -59,16 +56,10 @@ importers:
       smee-client:
         specifier: ^1.2.3
         version: 1.2.3
-      uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
       zod:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
-      '@types/base32-encoding':
-        specifier: ^1.0.1
-        version: 1.0.1
       '@types/koa':
         specifier: ^2.13.10
         version: 2.13.10
@@ -81,9 +72,6 @@ importers:
       '@types/node':
         specifier: ^17.0.12
         version: 17.0.45
-      '@types/uuid':
-        specifier: ^9.0.6
-        version: 9.0.6
       config:
         specifier: workspace:*
         version: link:../../packages/config
@@ -170,16 +158,28 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.7.1
         version: 0.7.1(typescript@4.9.5)(zod@3.22.4)
+      base32-encoding:
+        specifier: ^1.0.0
+        version: 1.0.0
       core:
         specifier: link:@t3-oss/env/core
         version: link:@t3-oss/env/core
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       zod:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
+      '@types/base32-encoding':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@types/node':
         specifier: ^17.0.12
         version: 17.0.45
+      '@types/uuid':
+        specifier: ^9.0.6
+        version: 9.0.6
       config:
         specifier: workspace:*
         version: link:../config
