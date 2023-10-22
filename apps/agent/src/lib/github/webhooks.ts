@@ -1,7 +1,7 @@
 import { EmitterWebhookEventName, Webhooks } from "@octokit/webhooks";
 import { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import { ID_PREFIXES, generatePrefixedId, prisma } from "database";
-import { log } from "./logger";
+import { log } from "../logger";
 
 /**
  * GitHub webhook handler
