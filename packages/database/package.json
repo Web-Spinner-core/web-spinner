@@ -24,9 +24,13 @@
     "studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.4.2"
+    "@prisma/client": "^5.4.2",
+    "@t3-oss/env-core": "^0.7.1",
+    "core": "link:@t3-oss/env/core",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/node": "^17.0.12",
     "config": "workspace:*",
     "eslint": "^8.12.0",
     "prisma": "^5.4.2",
