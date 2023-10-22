@@ -3,7 +3,6 @@ import { EmitterWebhookEventName } from "@octokit/webhooks";
 import { Context, Next } from "koa";
 import APIError from "~/lib/api_error";
 import { githubWebhooks } from "~/lib/github";
-import registerRepository from "./repository/register";
 
 const router = new Router();
 router.post("/webhooks", async (ctx: Context, next: Next) => {
@@ -26,6 +25,5 @@ router.post("/webhooks", async (ctx: Context, next: Next) => {
     });
   }
 });
-router.post("/repository", registerRepository);
 
 export default router;
