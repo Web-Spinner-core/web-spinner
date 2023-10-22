@@ -1,5 +1,14 @@
 {
   "extends": "tsconfig/node.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "paths": {
+      "~/*": ["./src/*"]
+    }
+  },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "tsup.config.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }

@@ -7,6 +7,7 @@ export const env = createEnv({
     PORT: z.string().optional(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     DATABASE_URL: z.string().url(),
+    GH_TOKEN: z.string()
   },
   client: {},
   runtimeEnv: process.env,

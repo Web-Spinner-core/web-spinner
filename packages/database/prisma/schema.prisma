@@ -10,13 +10,15 @@ datasource db {
 
 // Represents a GH repository that we have access to
 model Repository {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  fullName String
-  url      String
-  githubId String
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  owner String
 
+  url               String
   directoryAnalysis String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([name, owner])
 }
