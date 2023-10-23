@@ -6,6 +6,7 @@ import { getGithubInstallationClient } from "~/lib/github";
 import { openai } from "~/lib/openai";
 import { selectAction } from "./select_action";
 import { DIRECTORY_FUNCTIONS } from "./tools";
+import { RepositoryWalker } from "~/lib/github/repository";
 
 type GitHubContentResponse =
   RestEndpointMethodTypes["repos"]["getContent"]["response"];
@@ -34,25 +35,18 @@ export async function analyzeRepository(repository: Repository) {
   const installationClient = getGithubInstallationClient(
     repository.installationId
   );
+  const [owner, repo] = repository.fullName.split("/");
+  const walker = new RepositoryWalker(installationClient, owner, repo);
 
-  await analyzeDirectory(installationClient, repository, "");
+  await analyzeDirectory(walker, "");
 }
 
 /**
  * Analyze a directory and identify the next step to proceed
  */
-async function analyzeDirectory(
-  client: Octokit,
-  repository: Repository,
-  directory: string
-) {
-  const [owner, repo] = repository.fullName.split("/");
-  const content = await client.rest.repos.getContent({
-    owner,
-    repo,
-    path: directory,
-  });
-  const files = serializeDirectory(directory, content.data);
+async function analyzeDirectory(walker: RepositoryWalker, directory: string) {
+  const data = await walker.getFiles(directory);
+  const files = serializeDirectory(directory, data);
   const messages = [
     {
       role: "system",
@@ -74,7 +68,6 @@ async function analyzeDirectory(
       name: action,
     },
   });
-  console.log(response.choices[0].message);
 }
 
 /**
