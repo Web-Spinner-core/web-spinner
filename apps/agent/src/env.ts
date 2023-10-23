@@ -14,6 +14,7 @@ export const env = createEnv({
     GH_PRIVATE_KEY: z.string(),
     WEBHOOK_SECRET: z.string(),
     LOG_LEVEL: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
+    OPENAI_API_KEY: z.string(),
   },
   client: {},
   runtimeEnv: process.env,
