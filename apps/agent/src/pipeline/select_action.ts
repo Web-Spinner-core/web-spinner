@@ -1,50 +1,7 @@
-import {
-  ChatCompletionCreateParams,
-  ChatCompletionMessageParam,
-} from "openai/resources";
-import { z } from "zod";
+import { ChatCompletionMessageParam } from "openai/resources";
 import { openai } from "~/lib/openai";
-
-/**
- * Generate the OpenAI function for selecting an action
- */
-function getSelectActionFunction(
-  functions: ChatCompletionCreateParams.Function[]
-): ChatCompletionCreateParams.Function {
-  const functionNames = functions.map((f) => f.name);
-
-  return {
-    name: "select_action",
-    description: "Select an action to perform",
-    parameters: {
-      type: "object",
-      properties: {
-        action: {
-          type: "string",
-          description: "The action to perform",
-          enum: functionNames,
-        },
-      },
-      required: ["action"],
-    },
-  };
-}
-
-/**
- * Generate the zod schema for the select action function
- */
-function getSelectActionSchema(
-  functions: ChatCompletionCreateParams.Function[]
-) {
-  const functionNames = functions.map((f) => f.name);
-  if (functionNames.length < 1) {
-    throw new Error("Must provide at least one function!");
-  }
-
-  return z.object({
-    action: z.enum(functionNames as [string, ...string[]]),
-  });
-}
+import SelectActionTool from "./tools/select_action";
+import { AnyTool } from "./tools/tool";
 
 /**
  * Given a prior of messages, identify what action to perform next
@@ -52,17 +9,21 @@ function getSelectActionSchema(
  */
 export async function selectAction(
   messages: ChatCompletionMessageParam[],
-  functions: ChatCompletionCreateParams.Function[]
+  tools: [AnyTool, ...AnyTool[]]
 ) {
-  const selectActionFunction = getSelectActionFunction(functions);
-  const selectActionSchema = getSelectActionSchema(functions);
+  const actions = tools.map((tool) => tool.name) as [string, ...string[]];
+  const selectActionTool = new SelectActionTool(actions);
+
+  const toolSchemas = tools
+    .concat(selectActionTool)
+    .map((tool) => tool.toJsonSchema());
 
   const selectActionResponse = await openai.chat.completions.create({
     messages,
     model: "gpt-3.5-turbo",
-    functions: functions.concat([selectActionFunction]),
+    functions: toolSchemas,
     function_call: {
-      name: selectActionFunction.name,
+      name: selectActionTool.name,
     },
   });
 
@@ -72,6 +33,6 @@ export async function selectAction(
     throw new Error("No function call arguments provided!");
   }
 
-  const { action } = selectActionSchema.parse(JSON.parse(argumentsRaw));
+  const { action } = selectActionTool.parse(JSON.parse(argumentsRaw));
   return action;
 }
