@@ -7,11 +7,14 @@ import { AnyTool } from "./tools/tool";
  * Given a prior of messages, identify what action to perform next
  * This forces the model to select one of the provided functions
  */
-export async function selectAction(
+export async function selectAction<T extends readonly [AnyTool, ...AnyTool[]]>(
   messages: ChatCompletionMessageParam[],
-  tools: [AnyTool, ...AnyTool[]]
-) {
-  const actions = tools.map((tool) => tool.name) as [string, ...string[]];
+  tools: T
+): Promise<T[number]["name"]> {
+  const actions = tools.map((tool) => tool.name) as [
+    T[number]["name"],
+    ...T[number]["name"][],
+  ];
   const selectActionTool = new SelectActionTool(actions);
 
   const toolSchemas = tools
@@ -34,5 +37,5 @@ export async function selectAction(
   }
 
   const { action } = selectActionTool.parse(JSON.parse(argumentsRaw));
-  return action;
+  return action!;
 }

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import Tool from "./tool";
 
+const name = "save_analysis";
+const description = "Save the analysis of a repository";
 export const parameterSchema = z.object({
   pages: z
     .string()
@@ -17,12 +19,12 @@ export const parameterSchema = z.object({
     .describe("The path to the directory where new styles are created"),
 });
 
-export default class SaveAnalysisTool extends Tool<typeof parameterSchema> {
+export default class SaveAnalysisTool extends Tool<
+  typeof name,
+  typeof description,
+  typeof parameterSchema
+> {
   constructor() {
-    super(
-      "save_analysis",
-      "Save the analysis of a repository",
-      parameterSchema
-    );
+    super(name, description, parameterSchema);
   }
 }

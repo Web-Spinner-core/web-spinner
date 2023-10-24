@@ -10,10 +10,14 @@ interface JsonSchema {
 /**
  * Generic tool that can be used by an LLM
  */
-class Tool<T extends z.ZodObject<z.ZodRawShape>> {
+class Tool<
+  N extends string,
+  D extends string,
+  T extends z.ZodObject<z.ZodRawShape>,
+> {
   constructor(
-    public readonly name: string,
-    public readonly description: string,
+    public readonly name: N,
+    public readonly description: D,
     public readonly parameters: T
   ) {}
 
@@ -39,6 +43,6 @@ class Tool<T extends z.ZodObject<z.ZodRawShape>> {
   }
 }
 
-export type AnyTool = Tool<z.ZodObject<z.ZodRawShape>>;
+export type AnyTool = Tool<string, string, z.ZodObject<z.ZodRawShape>>;
 
 export default Tool;
