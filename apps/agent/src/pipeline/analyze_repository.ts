@@ -1,12 +1,13 @@
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import { Repository } from "database";
-import { Octokit } from "octokit";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { getGithubInstallationClient } from "~/lib/github";
+import { RepositoryWalker } from "~/lib/github/repository";
 import { openai } from "~/lib/openai";
 import { selectAction } from "./select_action";
-import { DIRECTORY_FUNCTIONS } from "./tools";
-import { RepositoryWalker } from "~/lib/github/repository";
+import ListFilesTool from "./tools/list_files";
+import ReadFileTool from "./tools/read_file";
+import SaveAnalysisTool from "./tools/save_analysis";
 
 type GitHubContentResponse =
   RestEndpointMethodTypes["repos"]["getContent"]["response"];
@@ -18,6 +19,12 @@ interface SerializedDirectory {
     type: "file" | "dir" | "submodule" | "symlink";
   }[];
 }
+
+const DIRECTORY_TOOLS = [
+  new ListFilesTool(),
+  new ReadFileTool(),
+  new SaveAnalysisTool(),
+].map((tool) => tool.toJsonSchema());
 
 const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:
@@ -63,11 +70,18 @@ async function analyzeDirectory(walker: RepositoryWalker, directory: string) {
   const response = await openai.chat.completions.create({
     messages,
     model: "gpt-3.5-turbo",
-    functions: DIRECTORY_FUNCTIONS,
+    functions: DIRECTORY_TOOLS,
     function_call: {
       name: action,
     },
   });
+
+  const functionCall = response.choices[0].message.function_call;
+  if (!functionCall) {
+    throw new Error("Expected function call!");
+  }
+  const { name, arguments: argumentsRaw } = functionCall;
+  const argumentsParsed = JSON.parse(argumentsRaw);
 }
 
 /**
