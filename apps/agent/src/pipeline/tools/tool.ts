@@ -14,11 +14,13 @@ class Tool<
   N extends string,
   D extends string,
   T extends z.ZodObject<z.ZodRawShape>,
+  R extends z.ZodSchema,
 > {
   constructor(
     public readonly name: N,
     public readonly description: D,
-    public readonly parameters: T
+    public readonly parameters: T,
+    public readonly resultSchema: R
   ) {}
 
   /**
@@ -41,8 +43,20 @@ class Tool<
   parse(raw: unknown): z.infer<T> {
     return this.parameters.parse(raw);
   }
+
+  /**
+   * Parse a raw JSON string into the parameters of this tool
+   */
+  parseJson(raw: string): z.infer<T> {
+    return this.parameters.parse(JSON.parse(raw));
+  }
 }
 
-export type AnyTool = Tool<string, string, z.ZodObject<z.ZodRawShape>>;
+export type AnyTool = Tool<
+  string,
+  string,
+  z.ZodObject<z.ZodRawShape>,
+  z.ZodSchema
+>;
 
 export default Tool;

@@ -18,13 +18,15 @@ export const parameterSchema = z.object({
     .optional()
     .describe("The path to the directory where new styles are created"),
 });
+const resultSchema = z.void();
 
 export default class SaveAnalysisTool extends Tool<
   typeof name,
   typeof description,
-  typeof parameterSchema
+  typeof parameterSchema,
+  typeof resultSchema
 > {
   constructor() {
-    super(name, description, parameterSchema);
+    super(name, description, parameterSchema, resultSchema);
   }
 }

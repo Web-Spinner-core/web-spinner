@@ -6,13 +6,15 @@ const description = "List files in a directory";
 const parameterSchema = z.object({
   directory: z.string().describe("The directory to list files in"),
 });
+const resultSchema = z.string().array();
 
 export default class ListFilesTool extends Tool<
   typeof name,
   typeof description,
-  typeof parameterSchema
+  typeof parameterSchema,
+  typeof resultSchema
 > {
   constructor() {
-    super(name, description, parameterSchema);
+    super(name, description, parameterSchema, resultSchema);
   }
 }
