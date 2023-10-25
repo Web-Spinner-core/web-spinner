@@ -67,5 +67,5 @@ export async function identifyToolArguments<T extends AnyTool>(
     throw new Error("No function call arguments provided!");
   }
 
-  return tool.parse(JSON.parse(argumentsRaw)).arguments;
+  return tool.parseJson(argumentsRaw);
 }

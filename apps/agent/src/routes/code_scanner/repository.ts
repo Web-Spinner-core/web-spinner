@@ -24,11 +24,9 @@ export default async function scanRepository(ctx: Context, next: Next) {
     });
   }
 
-  await analyzeRepository(repository);
+  const result = await analyzeRepository(repository);
 
   ctx.status = 200;
-  ctx.body = {
-    message: `Repository '${fullName}' found`,
-  };
+  ctx.body = result;
   return next();
 }

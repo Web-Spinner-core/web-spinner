@@ -1,7 +1,7 @@
 import { EmitterWebhookEventName, Webhooks } from "@octokit/webhooks";
 import { HandlerFunction } from "@octokit/webhooks/dist-types/types";
 import { ID_PREFIXES, generatePrefixedId, prisma } from "database";
-import { log } from "../logger";
+import { logger } from "../logger";
 
 /**
  * GitHub webhook handler
@@ -19,7 +19,7 @@ export async function registerWebhookListeners(webhooks: Webhooks) {
   webhooks.on("installation.suspend", onInstallationDeactivated);
   webhooks.on("installation.unsuspend", onInstallationReactivated);
   webhooks.onAny((event) => {
-    log("webhook", `Received event: '${event.name}'`);
+    logger.log("webhook", `Received event: '${event.name}'`);
   });
 }
 

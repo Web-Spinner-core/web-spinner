@@ -1,9 +1,4 @@
-import { RestEndpointMethodTypes } from "@octokit/rest";
-import { Repository } from "database";
 import { Octokit } from "octokit";
-
-type GitHubContentResponse =
-  RestEndpointMethodTypes["repos"]["getContent"]["response"];
 
 export interface File {
   name: string;
@@ -29,24 +24,28 @@ export class RepositoryWalker {
    * Get the contents of a directory
    */
   async getFiles(path: string): Promise<SerializedDirectory> {
-    const content = await this.client.rest.repos.getContent({
-      owner: this.owner,
-      repo: this.repo,
-      path,
-    });
+    try {
+      const content = await this.client.rest.repos.getContent({
+        owner: this.owner,
+        repo: this.repo,
+        path,
+      });
 
-    if (!Array.isArray(content.data)) {
-      throw new Error("Attempted to get files for non-directory!");
+      if (!Array.isArray(content.data)) {
+        throw new Error("Attempted to get files for non-directory!");
+      }
+
+      const serializedDirectory = {
+        path,
+        files: content.data.map((file) => ({
+          name: file.name,
+          type: file.type,
+        })),
+      };
+      return serializedDirectory;
+    } catch (err) {
+      throw new Error(`Error listing files for path ${path}`);
     }
-
-    const serializedDirectory = {
-      path,
-      files: content.data.map((file) => ({
-        name: file.name,
-        type: file.type,
-      })),
-    };
-    return serializedDirectory;
   }
 
   /**
