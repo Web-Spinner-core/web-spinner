@@ -14,10 +14,8 @@ type WebhookHandlerParameters<E extends EmitterWebhookEventName> = Parameters<
  * Register webhook listeners for the GitHub App
  */
 export async function registerWebhookListeners(webhooks: Webhooks) {
-  webhooks.on("installation.created", onInstallationCreated);
-  webhooks.on("installation.deleted", onInstallationDeactivated);
-  webhooks.on("installation.suspend", onInstallationDeactivated);
-  webhooks.on("installation.unsuspend", onInstallationReactivated);
+  webhooks.on("installation_repositories.added", onInstallationCreated);
+  webhooks.on("installation_repositories.removed", onInstallationDeactivated);
   webhooks.onAny((event) => {
     logger.log("webhook", `Received event: '${event.name}'`);
   });
@@ -28,9 +26,9 @@ export async function registerWebhookListeners(webhooks: Webhooks) {
  */
 async function onInstallationCreated({
   payload,
-}: WebhookHandlerParameters<"installation.created">) {
-  if (payload.repositories?.length) {
-    const repositories = payload.repositories.map((repo) => ({
+}: WebhookHandlerParameters<"installation_repositories.added">) {
+  if (payload.repositories_added?.length) {
+    const repositories = payload.repositories_added.map((repo) => ({
       id: generatePrefixedId(ID_PREFIXES.REPOSITORY),
       name: repo.name,
       fullName: repo.full_name,
@@ -46,6 +44,7 @@ async function onInstallationCreated({
           update: {
             installationId: repository.installationId,
             name: repository.name,
+            active: true,
           },
         })
       )
@@ -58,27 +57,18 @@ async function onInstallationCreated({
  */
 async function onInstallationDeactivated({
   payload,
-}: WebhookHandlerParameters<"installation.deleted" | "installation.suspend">) {
+}: WebhookHandlerParameters<"installation_repositories.removed">) {
   const { id } = payload.installation;
-  await prisma.repository.updateMany({
-    where: { installationId: id.toString() },
-    data: {
-      active: false,
-    },
-  });
-}
-
-/**
- * Reactivate a repository
- */
-async function onInstallationReactivated({
-  payload,
-}: WebhookHandlerParameters<"installation.unsuspend">) {
-  const { id } = payload.installation;
-  await prisma.repository.updateMany({
-    where: { installationId: id.toString() },
-    data: {
-      active: true,
-    },
-  });
+  if (payload.repositories_removed.length) {
+    const repositories = payload.repositories_removed.map(
+      (repo) => repo.full_name
+    );
+    await prisma.repository.updateMany({
+      where: {
+        installationId: id.toString(),
+        fullName: { in: repositories },
+      },
+      data: { active: false },
+    });
+  }
 }
