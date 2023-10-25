@@ -1,5 +1,6 @@
 import { ChatCompletionMessageParam } from "openai/resources";
 import { z } from "zod";
+import { logger } from "~/lib/logger";
 import { AnyTool } from "~/pipeline/tools/tool";
 
 /**
@@ -24,5 +25,10 @@ export function serializeFunctionCall<T extends AnyTool>(
     content: JSON.stringify(result),
   };
   const serialized = [functionCall, functionResult];
+  logger.log("ExplorerAgent", `Function call: ${JSON.stringify(functionCall)}`);
+  logger.log(
+    "ExplorerAgent",
+    `Function result: ${JSON.stringify(functionResult)}`
+  );
   return serialized;
 }

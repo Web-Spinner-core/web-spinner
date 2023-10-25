@@ -48,6 +48,7 @@ export default class ExplorerAgent<T extends z.ZodObject<z.ZodRawShape>> {
    * Begin searchign the repository
    */
   async execute(startPath = ""): Promise<z.infer<T>> {
+    logger.log(PREFIX, `Seed prompt: ${JSON.stringify(this.messages)}`);
     const initFiles = await this.walker.getFiles(startPath);
     this.messages.push(
       ...serializeFunctionCall(listFilesTool, { directory: "" }, initFiles)
@@ -84,7 +85,6 @@ export default class ExplorerAgent<T extends z.ZodObject<z.ZodRawShape>> {
    * Decide what action to take next
    */
   private async think(): Promise<FunctionCall<DirectoryTool>> {
-    logger.log(PREFIX, `Messages: ${JSON.stringify(this.messages)}`);
     logger.log(PREFIX, "Thinking...");
     const action = await identifyToolAction(this.messages, directoryTools);
     const tool = directoryTools.find((tool) => tool.name === action);
