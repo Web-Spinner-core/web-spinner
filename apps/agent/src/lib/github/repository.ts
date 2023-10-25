@@ -5,6 +5,16 @@ import { Octokit } from "octokit";
 type GitHubContentResponse =
   RestEndpointMethodTypes["repos"]["getContent"]["response"];
 
+export interface File {
+  name: string;
+  type: "file" | "dir" | "submodule" | "symlink";
+}
+
+export interface SerializedDirectory {
+  path: string;
+  files: File[];
+}
+
 /**
  * Utility class that makes it easier to traverse a repository
  */
@@ -18,7 +28,7 @@ export class RepositoryWalker {
   /**
    * Get the contents of a directory
    */
-  async getFiles(path: string): Promise<GitHubContentResponse["data"]> {
+  async getFiles(path: string): Promise<SerializedDirectory> {
     const content = await this.client.rest.repos.getContent({
       owner: this.owner,
       repo: this.repo,
@@ -28,6 +38,34 @@ export class RepositoryWalker {
     if (!Array.isArray(content.data)) {
       throw new Error("Attempted to get files for non-directory!");
     }
-    return content.data;
+
+    const serializedDirectory = {
+      path,
+      files: content.data.map((file) => ({
+        name: file.name,
+        type: file.type,
+      })),
+    };
+    return serializedDirectory;
+  }
+
+  /**
+   * Read the contents of a file
+   */
+  async readFile(path: string): Promise<string> {
+    const content = await this.client.rest.repos.getContent({
+      owner: this.owner,
+      repo: this.repo,
+      path,
+    });
+
+    if (Array.isArray(content.data)) {
+      throw new Error("Attempted to read directory!");
+    }
+    if (content.data.type !== "file") {
+      throw new Error("Attempted to read non-file!");
+    }
+
+    return Buffer.from(content.data.content, "base64").toString();
   }
 }
