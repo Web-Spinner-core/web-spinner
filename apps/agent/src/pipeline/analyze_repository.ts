@@ -1,9 +1,9 @@
 import { Repository } from "database";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
+import { logger } from "~/lib/logger";
 import ExplorerAgent from "./agents/explorer_agent";
 import SaveAnalysisTool from "./tools/save_analysis";
-import { logger } from "~/lib/logger";
 
 const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:

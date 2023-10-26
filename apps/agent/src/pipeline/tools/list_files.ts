@@ -1,28 +1,25 @@
+import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
-import Tool from "./tool";
+import { RepositoryWalker } from "~/lib/github/repository";
 
-const name = "list_files";
-const description = "List files in a directory";
 const parameterSchema = z.object({
   directory: z.string().describe("The directory to list files in"),
 });
-const resultSchema = z.object({
-  path: z.string().describe("The path to the file"),
-  files: z
-    .object({
-      name: z.string().describe("The name of the file"),
-      type: z.string().describe("The type of the file"),
-    })
-    .array(),
-});
 
-export default class ListFilesTool extends Tool<
-  typeof name,
-  typeof description,
-  typeof parameterSchema,
-  typeof resultSchema
-> {
-  constructor() {
-    super(name, description, parameterSchema, resultSchema);
+export class ListFilesTool extends StructuredTool<typeof parameterSchema> {
+  name = "list_files";
+  description = "List files in a directory";
+  schema = parameterSchema;
+
+  constructor(
+    private readonly repositoryWalker: RepositoryWalker,
+    toolParams?: ToolParams
+  ) {
+    super(toolParams);
+  }
+
+  async _call({ directory }: z.input<this["schema"]>): Promise<string> {
+    const files = await this.repositoryWalker.getFiles(directory);
+    return JSON.stringify(files);
   }
 }

@@ -1,20 +1,27 @@
+import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
-import Tool from "./tool";
+import { RepositoryWalker } from "~/lib/github/repository";
 
-const name = "read_file";
-const description = "Read a file";
 const parameterSchema = z.object({
   path: z.string().describe("The path of the file to read"),
 });
-const resultSchema = z.string();
 
-export default class ReadFileTool extends Tool<
-  typeof name,
-  typeof description,
-  typeof parameterSchema,
-  typeof resultSchema
+export default class ReadFileTool extends StructuredTool<
+  typeof parameterSchema
 > {
-  constructor() {
-    super(name, description, parameterSchema, resultSchema);
+  name = "read_file";
+  description = "Read a file";
+  schema = parameterSchema;
+
+  constructor(
+    private readonly repositoryWalker: RepositoryWalker,
+    toolParams?: ToolParams
+  ) {
+    super(toolParams);
+  }
+
+  async _call({ path }: z.input<this["schema"]>): Promise<string> {
+    const files = await this.repositoryWalker.readFile(path);
+    return JSON.stringify(files);
   }
 }

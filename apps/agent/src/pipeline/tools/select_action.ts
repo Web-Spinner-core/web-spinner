@@ -1,23 +1,24 @@
+import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
-import Tool from "./tool";
-
-const name = "select_action";
-const description = "Select an action to perform";
-const resultSchema = z.void();
 
 export default class SelectActionTool<
   T extends [string, ...string[]],
-> extends Tool<
-  typeof name,
-  typeof description,
-  z.ZodObject<{ action: z.ZodEnum<T> }>,
-  typeof resultSchema
-> {
-  constructor(actions: T) {
-    const parameterSchema = z.object({
-      action: z.enum(actions).describe("The action to perform"),
-    });
+> extends StructuredTool {
+  name = "select_action";
+  description = "Select an action to perform";
+  schema = z.object({
+    action: z.enum(["placeholder"]).describe("The action to perform"),
+  });
 
-    super(name, description, parameterSchema, resultSchema);
+  constructor(tools: T, toolParams?: ToolParams) {
+    super(toolParams);
+    // @ts-ignore: Need to override the schema at runtime to add the choices
+    this.schema = z.object({
+      action: z.enum(tools).describe("The action to perform"),
+    });
+  }
+
+  async _call(args: z.input<this["schema"]>): Promise<string> {
+    return JSON.stringify(args);
   }
 }

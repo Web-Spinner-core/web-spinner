@@ -1,8 +1,6 @@
+import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
-import Tool from "./tool";
 
-const name = "save_analysis";
-const description = "Save the analysis of a repository";
 export const parameterSchema = z.object({
   pages: z
     .string()
@@ -18,15 +16,19 @@ export const parameterSchema = z.object({
     .optional()
     .describe("The path to the directory where new styles are created"),
 });
-const resultSchema = z.void();
 
-export default class SaveAnalysisTool extends Tool<
-  typeof name,
-  typeof description,
-  typeof parameterSchema,
-  typeof resultSchema
+export default class SaveAnalysisTool extends StructuredTool<
+  typeof parameterSchema
 > {
-  constructor() {
-    super(name, description, parameterSchema, resultSchema);
+  name = "save_analysis";
+  description = "Save the analysis of a repository";
+  schema = parameterSchema;
+
+  constructor(toolParams?: ToolParams) {
+    super(toolParams);
+  }
+
+  async _call(args: z.input<this["schema"]>): Promise<string> {
+    return JSON.stringify(args);
   }
 }
