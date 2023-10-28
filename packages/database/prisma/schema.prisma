@@ -8,13 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-type RepositoryAnalysis {
-  pages      String
-  components String
-  utilities  String
-  styles     String?
-}
-
 // Represents a GH repository that we have access to
 model Repository {
   id             String @id @map("_id")
@@ -22,7 +15,7 @@ model Repository {
   fullName       String @unique
   installationId String
 
-  analysis RepositoryAnalysis?
+  analysis Json?
 
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
