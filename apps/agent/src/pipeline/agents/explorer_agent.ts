@@ -1,105 +1,64 @@
-import { ChatCompletionMessageParam } from "openai/resources";
-import { z } from "zod";
+import { AgentExecutor, OpenAIAgent } from "langchain/agents";
+import { LLMChain } from "langchain/chains";
+import { AIMessage, FunctionMessage } from "langchain/schema";
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+  SystemMessagePromptTemplate,
+} from "langchain/prompts";
 import { RepositoryWalker } from "~/lib/github/repository";
-import ListFilesTool from "../tools/list_files";
+import { chatOpenAi } from "~/lib/openai";
+import { ListFilesTool } from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
-import {
-  identifyToolAction,
-  identifyToolArguments,
-} from "./util/identify_tool";
-import { serializeFunctionCall } from "./util/serialize";
-import { logger } from "~/lib/logger";
 
-const listFilesTool = new ListFilesTool();
-const readFileTool = new ReadFileTool();
-const directoryTools = [
-  listFilesTool,
-  readFileTool,
-  new SaveAnalysisTool(),
-] as const;
+/***
+ * Create an agent to solve a specific agent
+ */
+export async function createExplorerAgentExecutor(
+  walker: RepositoryWalker,
+  prompt: string
+): Promise<AgentExecutor> {
+  // Repository exploration tools
+  const listFilesTool = new ListFilesTool(walker);
+  const tools = [
+    listFilesTool,
+    new ReadFileTool(walker),
+    new SaveAnalysisTool(),
+  ];
 
-type DirectoryTool = (typeof directoryTools)[number];
-
-interface FunctionCall<T extends DirectoryTool> {
-  tool: T;
-  arguments: z.infer<T["parameters"]>;
-}
-
-const PREFIX = "ExplorerAgent";
-
-export default class ExplorerAgent<T extends z.ZodObject<z.ZodRawShape>> {
-  private messages: ChatCompletionMessageParam[];
-
-  constructor(
-    private readonly objective: T,
-    private readonly walker: RepositoryWalker,
-    prompt: string
-  ) {
-    this.messages = [
-      {
-        role: "system",
-        content: prompt,
+  // Prompt
+  const seedFiles = await listFilesTool.call({ directory: "" });
+  const promptTemplate = ChatPromptTemplate.fromMessages([
+    SystemMessagePromptTemplate.fromTemplate(prompt),
+    new AIMessage({
+      content: "",
+      additional_kwargs: {
+        function_call: {
+          name: listFilesTool.name,
+          arguments: JSON.stringify({ directory: "" }),
+        },
       },
-    ] as ChatCompletionMessageParam[];
-  }
+    }),
+    new FunctionMessage(seedFiles, listFilesTool.name),
+    new MessagesPlaceholder("chat_history"),
+    new MessagesPlaceholder("agent_scratchpad"),
+  ]);
 
-  /**
-   * Begin searchign the repository
-   */
-  async execute(startPath = ""): Promise<z.infer<T>> {
-    logger.log(PREFIX, `Seed prompt: ${JSON.stringify(this.messages)}`);
-    const initFiles = await this.walker.getFiles(startPath);
-    this.messages.push(
-      ...serializeFunctionCall(listFilesTool, { directory: "" }, initFiles)
-    );
+  // Executors
+  const chain = new LLMChain({
+    prompt: promptTemplate,
+    llm: chatOpenAi,
+  });
+  const agent = new OpenAIAgent({
+    llmChain: chain,
+    allowedTools: tools.map((tool) => tool.name),
+    tools,
+  });
 
-    let { tool, arguments: args } = await this.think();
-    while (tool.name !== "save_analysis") {
-      if (tool.name === "list_files") {
-        const { directory } = args as z.infer<ListFilesTool["parameters"]>;
-        const files = await this.walker.getFiles(directory);
-        this.messages.push(
-          ...serializeFunctionCall(listFilesTool, { directory }, files)
-        );
-      } else if (tool.name === "read_file") {
-        const { path } = args as z.infer<ReadFileTool["parameters"]>;
-        const contents = await this.walker.readFile(path);
-        this.messages.push(
-          ...serializeFunctionCall(readFileTool, { path }, contents)
-        );
-      }
-
-      // Re-evaluate
-      ({ tool, arguments: args } = await this.think());
-    }
-    logger.log(
-      PREFIX,
-      `Analyzed repository with arguments ${JSON.stringify(args)}`
-    );
-
-    return args;
-  }
-
-  /**
-   * Decide what action to take next
-   */
-  private async think(): Promise<FunctionCall<DirectoryTool>> {
-    logger.log(PREFIX, "Thinking...");
-    const action = await identifyToolAction(this.messages, directoryTools);
-    const tool = directoryTools.find((tool) => tool.name === action);
-    if (!tool) {
-      throw new Error(`No tool found with name ${action}`);
-    }
-    const args = await identifyToolArguments(this.messages, tool);
-
-    logger.log(
-      PREFIX,
-      `Selected ${tool.name} with arguments ${JSON.stringify(args)}`
-    );
-    return {
-      tool,
-      arguments: args,
-    };
-  }
+  return new AgentExecutor({
+    agent,
+    tools,
+    verbose: true,
+  });
 }

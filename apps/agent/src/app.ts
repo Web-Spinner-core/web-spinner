@@ -24,6 +24,7 @@ app.use(async (ctx, next) => {
       };
     } else {
       const typedError = err as APIError;
+      console.error(err);
       console.error(typedError?.message ?? typedError?.type ?? typedError);
       ctx.status = typedError?.statusCode ?? 500;
       ctx.body = {

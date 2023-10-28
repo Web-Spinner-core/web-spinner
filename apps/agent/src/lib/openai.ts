@@ -1,9 +1,10 @@
-import OpenAI from "openai";
+import { ChatOpenAI } from "langchain/chat_models/openai";
 import { env } from "~/env";
 
 /**
- * Authenticated client for interacting with the openai api
+ * OpenAI chat model
  */
-export const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
+export const chatOpenAi = new ChatOpenAI({
+  openAIApiKey: env.OPENAI_API_KEY,
+  modelName: "gpt-3.5-turbo",
 });

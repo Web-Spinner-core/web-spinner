@@ -19,7 +19,13 @@ export class ListFilesTool extends StructuredTool<typeof parameterSchema> {
   }
 
   async _call({ directory }: z.input<this["schema"]>): Promise<string> {
-    const files = await this.repositoryWalker.getFiles(directory);
+    let cleanedDirectory = directory.trim();
+    if (cleanedDirectory.startsWith("/")) {
+      cleanedDirectory = cleanedDirectory.slice(1);
+    } else if (cleanedDirectory.startsWith("./")) {
+      cleanedDirectory = cleanedDirectory.slice(2);
+    }
+    const files = await this.repositoryWalker.getFiles(cleanedDirectory);
     return JSON.stringify(files);
   }
 }

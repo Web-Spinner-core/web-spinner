@@ -2,8 +2,7 @@ import { Repository } from "database";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
 import { logger } from "~/lib/logger";
-import ExplorerAgent from "./agents/explorer_agent";
-import SaveAnalysisTool from "./tools/save_analysis";
+import { createExplorerAgentExecutor } from "./agents/explorer_agent";
 
 const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:
@@ -24,14 +23,12 @@ export async function analyzeRepository(repository: Repository) {
   const [owner, repo] = repository.fullName.split("/");
   const walker = new RepositoryWalker(installationClient, owner, repo);
 
-  const saveAnalysisTool = new SaveAnalysisTool();
-  const explorerAgent = new ExplorerAgent(
-    saveAnalysisTool.parameters,
-    walker,
-    prompt
-  );
+  const explorer = await createExplorerAgentExecutor(walker, prompt);
+  const result = await explorer.call({
+    input: "",
+    chat_history: [],
+  });
 
-  const result = await explorerAgent.execute();
   logger.log("analyzeRepository", `Result: ${JSON.stringify(result)}`);
   return result;
 }

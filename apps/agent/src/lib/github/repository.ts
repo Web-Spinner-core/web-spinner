@@ -10,6 +10,10 @@ export interface SerializedDirectory {
   files: File[];
 }
 
+export interface ToolError {
+  error: string;
+}
+
 /**
  * Utility class that makes it easier to traverse a repository
  */
@@ -23,7 +27,7 @@ export class RepositoryWalker {
   /**
    * Get the contents of a directory
    */
-  async getFiles(path: string): Promise<SerializedDirectory> {
+  async getFiles(path: string): Promise<SerializedDirectory | ToolError> {
     try {
       const content = await this.client.rest.repos.getContent({
         owner: this.owner,
@@ -32,7 +36,9 @@ export class RepositoryWalker {
       });
 
       if (!Array.isArray(content.data)) {
-        throw new Error("Attempted to get files for non-directory!");
+        return {
+          error: `Error! Attempted to get files for non-directory ${path}`,
+        };
       }
 
       const serializedDirectory = {
@@ -44,7 +50,9 @@ export class RepositoryWalker {
       };
       return serializedDirectory;
     } catch (err) {
-      throw new Error(`Error listing files for path ${path}`);
+      return {
+        error: `Error! Could not get files for directory ${path}`,
+      };
     }
   }
 
