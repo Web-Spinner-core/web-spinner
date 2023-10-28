@@ -2,7 +2,7 @@ import { prisma } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
 import APIError from "~/lib/api_error";
-import { analyzeRepository } from "~/pipeline/analyze_repository";
+import { identifyDirectories } from "~/pipelines/identify_directories";
 
 const bodySchema = z.object({
   fullName: z.string(),
@@ -24,7 +24,7 @@ export default async function scanRepository(ctx: Context, next: Next) {
     });
   }
 
-  const result = await analyzeRepository(repository);
+  const result = await identifyDirectories(repository);
 
   ctx.status = 200;
   ctx.body = result;
