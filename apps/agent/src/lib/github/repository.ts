@@ -5,11 +5,6 @@ export interface File {
   type: "file" | "dir" | "submodule" | "symlink";
 }
 
-export interface SerializedDirectory {
-  path: string;
-  files: File[];
-}
-
 export interface ToolError {
   error: string;
 }
@@ -27,7 +22,7 @@ export class RepositoryWalker {
   /**
    * Get the contents of a directory
    */
-  async getFiles(path: string): Promise<SerializedDirectory | ToolError> {
+  async getFiles(path: string): Promise<File[] | ToolError> {
     try {
       const content = await this.client.rest.repos.getContent({
         owner: this.owner,
@@ -41,14 +36,10 @@ export class RepositoryWalker {
         };
       }
 
-      const serializedDirectory = {
-        path,
-        files: content.data.map((file) => ({
-          name: file.name,
-          type: file.type,
-        })),
-      };
-      return serializedDirectory;
+      return content.data.map((file) => ({
+        name: file.name,
+        type: file.type,
+      }));
     } catch (err) {
       return {
         error: `Error! Could not get files for directory ${path}`,
