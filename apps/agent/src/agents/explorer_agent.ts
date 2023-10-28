@@ -1,32 +1,34 @@
 import { AgentExecutor, OpenAIAgent } from "langchain/agents";
 import { LLMChain } from "langchain/chains";
-import { AIMessage, FunctionMessage } from "langchain/schema";
+import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
   SystemMessagePromptTemplate,
 } from "langchain/prompts";
+import { AIMessage, FunctionMessage } from "langchain/schema";
+import { env } from "~/env";
 import { RepositoryWalker } from "~/lib/github/repository";
-import { chatOpenAi } from "~/lib/openai";
 import { ListFilesTool } from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { env } from "~/env";
+import { ToolSchema } from "../tools/util";
 
 /***
  * Create an agent to solve a specific agent
  */
-export async function createExplorerAgentExecutor(
+export async function createExplorerAgentExecutor<T extends ToolSchema>(
   walker: RepositoryWalker,
-  prompt: string
+  prompt: string,
+  objectiveSchema: T,
+  objectiveDescription: string
 ): Promise<AgentExecutor> {
   // Repository exploration tools
   const listFilesTool = new ListFilesTool(walker);
   const tools = [
     listFilesTool,
     new ReadFileTool(walker),
-    new SaveAnalysisTool(),
+    new SaveAnalysisTool(objectiveSchema, objectiveDescription),
   ];
 
   // Prompt

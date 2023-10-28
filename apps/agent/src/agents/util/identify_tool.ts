@@ -1,7 +1,7 @@
 import { ChatCompletionMessageParam } from "openai/resources";
 import { z } from "zod";
 import { openai } from "~/lib/openai";
-import SelectActionTool from "~/pipeline/tools/select_action";
+import SelectActionTool from "~/tools/select_action";
 import { AnyTool } from "~/pipeline/tools/tool";
 
 /**

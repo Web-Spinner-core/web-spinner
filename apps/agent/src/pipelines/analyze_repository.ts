@@ -1,9 +1,9 @@
 import { Repository, prisma } from "database";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
-import { logger } from "~/lib/logger";
-import { createExplorerAgentExecutor } from "./agents/explorer_agent";
-import SaveAnalysisTool from "./tools/save_analysis";
+import { createExplorerAgentExecutor } from "../agents/explorer_agent";
+import SaveAnalysisTool from "../tools/save_analysis";
+import { z } from "zod";
 
 const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:
@@ -13,6 +13,22 @@ You need to identify four important directories in the repository:
 4) Where utilities are created
 
 Always call one of the provided functions to either submit your analysis or request more information.`;
+
+export const parameterSchema = z.object({
+  pages: z
+    .string()
+    .describe("The path to the directory where new pages are created"),
+  components: z
+    .string()
+    .describe("The path to the directory where new components are created"),
+  utilities: z
+    .string()
+    .describe("The path to the directory where utilities are created"),
+  styles: z
+    .string()
+    .optional()
+    .describe("The path to the directory where new styles are created"),
+});
 
 /**
  * Identify important parts of the repository
@@ -39,5 +55,5 @@ export async function analyzeRepository(repository: Repository) {
     },
   });
 
-  return result;
+  return analysis;
 }
