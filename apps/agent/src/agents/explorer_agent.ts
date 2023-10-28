@@ -32,19 +32,8 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
   ];
 
   // Prompt
-  const seedFiles = await listFilesTool.call({ directory: "" });
   const promptTemplate = ChatPromptTemplate.fromMessages([
     SystemMessagePromptTemplate.fromTemplate(prompt),
-    new AIMessage({
-      content: "",
-      additional_kwargs: {
-        function_call: {
-          name: listFilesTool.name,
-          arguments: JSON.stringify({ directory: "" }),
-        },
-      },
-    }),
-    new FunctionMessage(seedFiles, listFilesTool.name),
     new MessagesPlaceholder("chat_history"),
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
@@ -55,7 +44,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     llm: new ChatOpenAI({
       modelName: "gpt-3.5-turbo",
       openAIApiKey: env.OPENAI_API_KEY,
-      temperature: 0.1,
+      temperature: 0,
     }),
   });
   const agent = new OpenAIAgent({

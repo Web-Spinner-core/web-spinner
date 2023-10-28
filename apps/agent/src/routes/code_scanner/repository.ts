@@ -3,6 +3,7 @@ import { Context, Next } from "koa";
 import { z } from "zod";
 import APIError from "~/lib/api_error";
 import { identifyDirectories } from "~/pipelines/identify_directories";
+import { identifyTheme } from "~/pipelines/identify_theme";
 
 const bodySchema = z.object({
   fullName: z.string(),
@@ -24,7 +25,8 @@ export default async function scanRepository(ctx: Context, next: Next) {
     });
   }
 
-  const result = await identifyDirectories(repository);
+  // const result = await identifyDirectories(repository);
+  const result = await identifyTheme(repository);
 
   ctx.status = 200;
   ctx.body = result;
