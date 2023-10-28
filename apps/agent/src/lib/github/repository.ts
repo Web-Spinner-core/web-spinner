@@ -45,19 +45,43 @@ export class RepositoryWalker {
    * Read the contents of a file
    */
   async readFile(path: string): Promise<string> {
-    const content = await this.client.rest.repos.getContent({
-      owner: this.owner,
-      repo: this.repo,
-      path,
-    });
+    try {
+      const content = await this.client.rest.repos.getContent({
+        owner: this.owner,
+        repo: this.repo,
+        path,
+      });
 
-    if (Array.isArray(content.data)) {
-      throw new Error(`Error! Attempted to read directory ${path} as file`);
-    }
-    if (content.data.type !== "file") {
-      throw new Error("Attempted to read non-file!");
-    }
+      if (Array.isArray(content.data)) {
+        throw new Error(`Error! Attempted to read directory ${path} as file`);
+      }
+      if (content.data.type !== "file") {
+        throw new Error("Attempted to read non-file!");
+      }
 
-    return Buffer.from(content.data.content, "base64").toString();
+      return Buffer.from(content.data.content, "base64").toString();
+    } catch (err) {
+      if ((err as Error)?.message === "Not Found") {
+        const extensions = [
+          ".tsx",
+          ".ts",
+          ".jsx",
+          ".js",
+          ".module.css",
+          ".module.scss",
+        ];
+        const extension = extensions.find((ext) => path.endsWith(ext));
+        if (extension) {
+          // Suggest checking directory index file
+          const suggestion = path.replace(extension, `/index${extension}`);
+          throw new Error(
+            `Error! Could not find file ${path}. Did you mean "${suggestion}"?`
+          );
+        } else {
+          throw new Error(`Error! Could not find file ${path}.`);
+        }
+      }
+      throw err;
+    }
   }
 }

@@ -42,7 +42,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
   const chain = new LLMChain({
     prompt: promptTemplate,
     llm: new ChatOpenAI({
-      modelName: "gpt-3.5-turbo",
+      modelName: "gpt-3.5-turbo-16k",
       openAIApiKey: env.OPENAI_API_KEY,
       temperature: 0,
     }),

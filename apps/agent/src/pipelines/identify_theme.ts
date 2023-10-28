@@ -9,8 +9,8 @@ import { ListFilesTool } from "~/tools/list_files";
 
 const prompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
 create new pages, components, and styles. Your next task is to identify the theme and design language of the existing project. \
-Explore the repository by sampling a few pages and components to identify the theme and design language. Be thorough and also \
-check out any relevant config or global CSS files.
+Explore the repository and sample at least five pages and components to identify the theme and design language. Be thorough and \
+check out any relevant config or global CSS/SCSS files.
 
 Always call the provided functions to either submit your analysis or request more information.`;
 
