@@ -15,7 +15,7 @@ export const env = createEnv({
     WEBHOOK_SECRET: z.string(),
     LOG_LEVEL: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
     OPENAI_API_KEY: z.string(),
-    LANGCHAIN_TRACING_V2: z.boolean(),
+    LANGCHAIN_TRACING_V2: z.string(),
     LANGCHAIN_ENDPOINT: z.string().url(),
     LANGCHAIN_API_KEY: z.string(),
     LANGCHAIN_PROJECT: z.string(),
