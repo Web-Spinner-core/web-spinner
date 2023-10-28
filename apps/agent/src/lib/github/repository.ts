@@ -5,10 +5,6 @@ export interface File {
   type: "file" | "dir" | "submodule" | "symlink";
 }
 
-export interface ToolError {
-  error: string;
-}
-
 /**
  * Utility class that makes it easier to traverse a repository
  */
@@ -22,7 +18,7 @@ export class RepositoryWalker {
   /**
    * Get the contents of a directory
    */
-  async getFiles(path: string): Promise<File[] | ToolError> {
+  async getFiles(path: string): Promise<File[]> {
     try {
       const content = await this.client.rest.repos.getContent({
         owner: this.owner,
@@ -31,9 +27,9 @@ export class RepositoryWalker {
       });
 
       if (!Array.isArray(content.data)) {
-        return {
-          error: `Error! Attempted to get files for non-directory ${path}`,
-        };
+        throw new Error(
+          `Error! Attempted to get files for non-directory ${path}`
+        );
       }
 
       return content.data.map((file) => ({
@@ -41,9 +37,7 @@ export class RepositoryWalker {
         type: file.type,
       }));
     } catch (err) {
-      return {
-        error: `Error! Could not get files for directory ${path}`,
-      };
+      throw new Error(`Error! Could not get files for directory ${path}`);
     }
   }
 
@@ -58,7 +52,7 @@ export class RepositoryWalker {
     });
 
     if (Array.isArray(content.data)) {
-      throw new Error("Attempted to read directory!");
+      throw new Error(`Error! Attempted to read directory ${path} as file`);
     }
     if (content.data.type !== "file") {
       throw new Error("Attempted to read non-file!");

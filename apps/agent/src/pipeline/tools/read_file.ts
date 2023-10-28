@@ -1,5 +1,6 @@
 import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
+import { serializeToolError } from "~/lib/error";
 import { RepositoryWalker } from "~/lib/github/repository";
 
 const parameterSchema = z.object({
@@ -21,7 +22,12 @@ export default class ReadFileTool extends StructuredTool<
   }
 
   async _call({ path }: z.input<this["schema"]>): Promise<string> {
-    const files = await this.repositoryWalker.readFile(path);
-    return JSON.stringify(files);
+    let result: any;
+    try {
+      result = await this.repositoryWalker.readFile(path);
+    } catch (err) {
+      result = serializeToolError(err);
+    }
+    return JSON.stringify(result);
   }
 }

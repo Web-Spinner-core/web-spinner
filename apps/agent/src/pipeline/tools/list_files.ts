@@ -1,5 +1,6 @@
 import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
+import { serializeToolError } from "~/lib/error";
 import { RepositoryWalker } from "~/lib/github/repository";
 
 const parameterSchema = z.object({
@@ -25,7 +26,13 @@ export class ListFilesTool extends StructuredTool<typeof parameterSchema> {
     } else if (cleanedDirectory.startsWith("./")) {
       cleanedDirectory = cleanedDirectory.slice(2);
     }
-    const files = await this.repositoryWalker.getFiles(cleanedDirectory);
-    return JSON.stringify(files);
+
+    let result: any;
+    try {
+      result = await this.repositoryWalker.getFiles(cleanedDirectory);
+    } catch (err) {
+      result = serializeToolError(err);
+    }
+    return JSON.stringify(result);
   }
 }
