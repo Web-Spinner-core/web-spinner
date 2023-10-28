@@ -1,8 +1,9 @@
-import { Repository } from "database";
+import { Repository, prisma } from "database";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
 import { logger } from "~/lib/logger";
 import { createExplorerAgentExecutor } from "./agents/explorer_agent";
+import SaveAnalysisTool from "./tools/save_analysis";
 
 const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:
@@ -29,6 +30,14 @@ export async function analyzeRepository(repository: Repository) {
     chat_history: [],
   });
 
-  logger.log("analyzeRepository", `Result: ${JSON.stringify(result)}`);
+  const saveAnalysisTool = new SaveAnalysisTool();
+  const analysis = saveAnalysisTool.schema.parse(JSON.parse(result.output));
+  await prisma.repository.update({
+    where: { id: repository.id },
+    data: {
+      analysis,
+    },
+  });
+
   return result;
 }

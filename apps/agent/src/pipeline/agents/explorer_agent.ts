@@ -11,6 +11,8 @@ import { chatOpenAi } from "~/lib/openai";
 import { ListFilesTool } from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { env } from "~/env";
 
 /***
  * Create an agent to solve a specific agent
@@ -48,7 +50,11 @@ export async function createExplorerAgentExecutor(
   // Executors
   const chain = new LLMChain({
     prompt: promptTemplate,
-    llm: chatOpenAi,
+    llm: new ChatOpenAI({
+      modelName: "gpt-3.5-turbo",
+      openAIApiKey: env.OPENAI_API_KEY,
+      temperature: 0.1,
+    }),
   });
   const agent = new OpenAIAgent({
     llmChain: chain,

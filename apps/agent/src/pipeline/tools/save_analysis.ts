@@ -23,6 +23,7 @@ export default class SaveAnalysisTool extends StructuredTool<
   name = "save_analysis";
   description = "Save the analysis of a repository";
   schema = parameterSchema;
+  returnDirect = true;
 
   constructor(toolParams?: ToolParams) {
     super(toolParams);
