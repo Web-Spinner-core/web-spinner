@@ -53,7 +53,7 @@ export async function identifyTheme(repository: Repository) {
   );
 
   const repositoryAnalysis = identifyDirectoriesSchema.parse(
-    repository.analysis
+    repository.directoryAnalysis
   );
   const labeledRepositoryAnalysis = {} as Record<string, any>;
   const directoryKeys = Object.keys(identifyDirectoriesSchema.shape) as Array<
@@ -98,12 +98,12 @@ export async function identifyTheme(repository: Repository) {
   });
 
   const analysis = objectiveSchema.parse(JSON.parse(result.output));
-  // await prisma.repository.update({
-  //   where: { id: repository.id },
-  //   data: {
-  //     analysis,
-  //   },
-  // });
+  await prisma.repository.update({
+    where: { id: repository.id },
+    data: {
+      themeAnalysis: analysis,
+    },
+  });
 
   return analysis;
 }

@@ -72,7 +72,7 @@ export async function identifyDirectories(repository: Repository) {
   await prisma.repository.update({
     where: { id: repository.id },
     data: {
-      analysis,
+      directoryAnalysis: analysis,
     },
   });
 

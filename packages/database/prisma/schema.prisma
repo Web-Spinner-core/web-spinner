@@ -15,7 +15,8 @@ model Repository {
   fullName       String @unique
   installationId String
 
-  analysis Json?
+  directoryAnalysis Json?
+  themeAnalysis     Json?
 
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
