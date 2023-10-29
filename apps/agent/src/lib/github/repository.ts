@@ -71,8 +71,8 @@ export class RepositoryWalker {
           ".module.scss",
         ];
         const extension = extensions.find((ext) => path.endsWith(ext));
-        if (extension) {
-          // Suggest checking directory index file
+        if (extension && !path.includes("index")) {
+          // Suggest checking directory index file but prevent infinite loop
           const suggestion = path.replace(extension, `/index${extension}`);
           throw new Error(
             `Error! Could not find file ${path}. Did you mean "${suggestion}"?`
