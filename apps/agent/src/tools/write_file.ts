@@ -24,7 +24,7 @@ export default class WriteFileTool extends StructuredTool<
     let result: any;
     try {
       const id = uuid();
-      writeFileSync(`tmp/${id}.txt`, `Path: ${path}\n\n\n${content}`);
+      writeFileSync(`../tmp/${id}.txt`, `Path: ${path}\n\n\n${content}`);
       result = {
         success: true,
       };

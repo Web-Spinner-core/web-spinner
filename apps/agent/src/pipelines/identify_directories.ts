@@ -52,7 +52,10 @@ export async function getStarterMessages(
         },
       },
     }),
-    new FunctionMessage(seedFiles, listFilesTool.name),
+    new FunctionMessage({
+      name: listFilesTool.name,
+      content: seedFiles,
+    }),
   ];
 }
 

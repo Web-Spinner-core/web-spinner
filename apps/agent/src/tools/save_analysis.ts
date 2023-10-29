@@ -17,11 +17,15 @@ export default class SaveAnalysisTool<
   constructor(
     parameterSchema: T,
     description: string,
+    name?: string,
     toolParams?: ToolParams
   ) {
     super(toolParams);
     this.schema = parameterSchema;
     this.description = description;
+    if (name) {
+      this.name = name;
+    }
   }
 
   async _call(args: z.input<this["schema"]>): Promise<string> {

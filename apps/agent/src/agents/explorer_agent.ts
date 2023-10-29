@@ -22,7 +22,10 @@ export interface CreateExplorerAgentOptions<T extends ToolSchema> {
   objective?: {
     objectiveSchema: T;
     objectiveDescription: string;
+    objectiveFunctionName?: string;
   };
+  temperature?: number;
+  modelName?: string;
 }
 
 /***
@@ -33,6 +36,8 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>({
   prompt,
   canWrite,
   objective,
+  temperature,
+  modelName,
 }: CreateExplorerAgentOptions<T>): Promise<AgentExecutor> {
   // Repository exploration tools
   const listFilesTool = new ListFilesTool(walker);
@@ -47,7 +52,8 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>({
     tools.push(
       new SaveAnalysisTool(
         objective.objectiveSchema,
-        objective.objectiveDescription
+        objective.objectiveDescription,
+        objective.objectiveFunctionName
       )
     );
   }
@@ -63,9 +69,9 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>({
   const chain = new LLMChain({
     prompt: promptTemplate,
     llm: new ChatOpenAI({
-      modelName: "gpt-3.5-turbo-16k",
+      modelName: modelName ?? "gpt-3.5-turbo-16k",
       openAIApiKey: env.OPENAI_API_KEY,
-      temperature: 0,
+      temperature: temperature ?? 0,
     }),
   });
   const agent = new OpenAIAgent({
