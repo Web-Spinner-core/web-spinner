@@ -3,17 +3,17 @@ import { z } from "zod";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
-import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
+import { AIMessage, FunctionMessage } from "langchain/schema";
 import { objectiveSchema as identifyDirectoriesSchema } from "./identify_directories";
 import { ListFilesTool } from "~/tools/list_files";
-import { getStarterMessages as getDirectoryStarterMessages } from "./identify_directories";
 
 const prompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
-create new pages, components, and styles. Your next task is to identify the theme and design language of the existing project. \
-Explore the repository and sample at least five pages and components to identify the theme and design language. Be thorough and \
-check out any relevant config or global CSS/SCSS files.
+create new pages, components, and styles. You have also identified the theme and design language of the project. \
+Now, you are ready to create a new page. You will be given a high-level description of the page to create. \
+Modularize the code where it makes sense, by creating components \
+in the appropriate directories. Use existing components and styles where possible.
 
-Always call the provided functions to either submit your analysis or request more information.`;
+Write to a file or explore the repository using the provided tools`;
 
 const fontSchema = z.object({
   fontFace: z.string().describe("The font face used"),
@@ -37,47 +37,6 @@ const objectiveDescription =
   "Identify the design language being used in the project";
 
 /**
- * Get starter messages for identifying the theme and design language
- */
-export async function getStarterMessages(
-  walker: RepositoryWalker,
-  repository: Repository
-): Promise<BaseMessage[]> {
-  const repositoryAnalysis = identifyDirectoriesSchema.parse(
-    repository.directoryAnalysis
-  );
-  const labeledRepositoryAnalysis = {} as Record<string, any>;
-  const directoryKeys = Object.keys(identifyDirectoriesSchema.shape) as Array<
-    keyof typeof identifyDirectoriesSchema.shape
-  >;
-  for (const key of directoryKeys) {
-    labeledRepositoryAnalysis[key] = {
-      path: repositoryAnalysis[key],
-      description: identifyDirectoriesSchema.shape[key].description,
-    };
-  }
-
-  const directoryMessages = await getDirectoryStarterMessages(walker);
-
-  return [
-    ...directoryMessages,
-    new AIMessage({
-      content: "",
-      additional_kwargs: {
-        function_call: {
-          name: "identify_directories",
-          arguments: "",
-        },
-      },
-    }),
-    new FunctionMessage({
-      name: "identify_directories",
-      content: JSON.stringify(labeledRepositoryAnalysis),
-    }),
-  ];
-}
-
-/**
  * Identify the theme and design language of the project
  */
 export async function identifyTheme(repository: Repository) {
@@ -94,10 +53,49 @@ export async function identifyTheme(repository: Repository) {
     objectiveDescription
   );
 
-  const starterMessages = await getStarterMessages(walker, repository);
+  const repositoryAnalysis = identifyDirectoriesSchema.parse(
+    repository.directoryAnalysis
+  );
+  const labeledRepositoryAnalysis = {} as Record<string, any>;
+  const directoryKeys = Object.keys(identifyDirectoriesSchema.shape) as Array<
+    keyof typeof identifyDirectoriesSchema.shape
+  >;
+  for (const key of directoryKeys) {
+    labeledRepositoryAnalysis[key] = {
+      path: repositoryAnalysis[key],
+      description: identifyDirectoriesSchema.shape[key].description,
+    };
+  }
+
+  const listFilesTool = new ListFilesTool(walker);
+  const seedFiles = await listFilesTool.call({ directory: "" });
   const result = await explorer.call({
     input: "",
-    chat_history: starterMessages,
+    chat_history: [
+      new AIMessage({
+        content: "",
+        additional_kwargs: {
+          function_call: {
+            name: listFilesTool.name,
+            arguments: JSON.stringify({ directory: "" }),
+          },
+        },
+      }),
+      new FunctionMessage(seedFiles, listFilesTool.name),
+      new AIMessage({
+        content: "",
+        additional_kwargs: {
+          function_call: {
+            name: "identify_directories",
+            arguments: "",
+          },
+        },
+      }),
+      new FunctionMessage({
+        name: "identify_directories",
+        content: JSON.stringify(labeledRepositoryAnalysis),
+      }),
+    ],
   });
 
   const analysis = objectiveSchema.parse(JSON.parse(result.output));

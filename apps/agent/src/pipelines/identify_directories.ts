@@ -1,10 +1,10 @@
 import { Repository, prisma } from "database";
+import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
 import { z } from "zod";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
-import { createExplorerAgentExecutor } from "../agents/explorer_agent";
-import { AIMessage, FunctionMessage } from "langchain/schema";
 import { ListFilesTool } from "~/tools/list_files";
+import { createExplorerAgentExecutor } from "../agents/explorer_agent";
 
 const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:
@@ -34,6 +34,29 @@ export const objectiveSchema = z.object({
 const objectiveDescription = "Identify important directories in the repository";
 
 /**
+ * Get starter messages for identifying directories
+ */
+export async function getStarterMessages(
+  walker: RepositoryWalker
+): Promise<BaseMessage[]> {
+  const listFilesTool = new ListFilesTool(walker);
+  const seedFiles = await listFilesTool.call({ directory: "" });
+
+  return [
+    new AIMessage({
+      content: "",
+      additional_kwargs: {
+        function_call: {
+          name: listFilesTool.name,
+          arguments: JSON.stringify({ directory: "" }),
+        },
+      },
+    }),
+    new FunctionMessage(seedFiles, listFilesTool.name),
+  ];
+}
+
+/**
  * Identify directories in repository that need to be modified for development
  */
 export async function identifyDirectories(repository: Repository) {
@@ -50,22 +73,10 @@ export async function identifyDirectories(repository: Repository) {
     objectiveDescription
   );
 
-  const listFilesTool = new ListFilesTool(walker);
-  const seedFiles = await listFilesTool.call({ directory: "" });
+  const starterMessages = await getStarterMessages(walker);
   const result = await explorer.call({
     input: "",
-    chat_history: [
-      new AIMessage({
-        content: "",
-        additional_kwargs: {
-          function_call: {
-            name: listFilesTool.name,
-            arguments: JSON.stringify({ directory: "" }),
-          },
-        },
-      }),
-      new FunctionMessage(seedFiles, listFilesTool.name),
-    ],
+    chat_history: starterMessages,
   });
 
   const analysis = objectiveSchema.parse(JSON.parse(result.output));
