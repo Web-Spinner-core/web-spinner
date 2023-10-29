@@ -1,12 +1,14 @@
 import { Repository, prisma } from "database";
+import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
 import { z } from "zod";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
+import { labelRecordWithSchema } from "~/tools/util";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
-import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
-import { objectiveSchema as identifyDirectoriesSchema } from "./identify_directories";
-import { ListFilesTool } from "~/tools/list_files";
-import { getStarterMessages as getDirectoryStarterMessages } from "./identify_directories";
+import {
+  getStarterMessages as getDirectoryStarterMessages,
+  objectiveSchema as identifyDirectoriesSchema,
+} from "./identify_directories";
 
 const prompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
 create new pages, components, and styles. Your next task is to identify the theme and design language of the existing project. \
@@ -20,7 +22,7 @@ const fontSchema = z.object({
   fontSize: z.string().describe("The font size used, with corresponding units"),
 });
 
-const objectiveSchema = z.object({
+export const objectiveSchema = z.object({
   font: z.object({
     heading: fontSchema.describe("The font used for headings"),
     subheading: fontSchema.describe("The font used for subheadings"),
@@ -37,7 +39,7 @@ const objectiveDescription =
   "Identify the design language being used in the project";
 
 /**
- * Get starter messages for identifying the theme and design language
+ * Get starter messages containing the directory analysis
  */
 export async function getStarterMessages(
   walker: RepositoryWalker,
@@ -46,16 +48,10 @@ export async function getStarterMessages(
   const repositoryAnalysis = identifyDirectoriesSchema.parse(
     repository.directoryAnalysis
   );
-  const labeledRepositoryAnalysis = {} as Record<string, any>;
-  const directoryKeys = Object.keys(identifyDirectoriesSchema.shape) as Array<
-    keyof typeof identifyDirectoriesSchema.shape
-  >;
-  for (const key of directoryKeys) {
-    labeledRepositoryAnalysis[key] = {
-      path: repositoryAnalysis[key],
-      description: identifyDirectoriesSchema.shape[key].description,
-    };
-  }
+  const labeledRepositoryAnalysis = labelRecordWithSchema(
+    repositoryAnalysis,
+    identifyDirectoriesSchema
+  );
 
   const directoryMessages = await getDirectoryStarterMessages(walker);
 

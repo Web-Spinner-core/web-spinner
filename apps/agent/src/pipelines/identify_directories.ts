@@ -34,7 +34,7 @@ export const objectiveSchema = z.object({
 const objectiveDescription = "Identify important directories in the repository";
 
 /**
- * Get starter messages for identifying directories
+ * Get starter messages containing files in the root directory
  */
 export async function getStarterMessages(
   walker: RepositoryWalker
