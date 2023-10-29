@@ -6,30 +6,51 @@ import {
   MessagesPlaceholder,
   SystemMessagePromptTemplate,
 } from "langchain/prompts";
-import { AIMessage, FunctionMessage } from "langchain/schema";
+import { StructuredTool } from "langchain/tools";
 import { env } from "~/env";
 import { RepositoryWalker } from "~/lib/github/repository";
 import { ListFilesTool } from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
 import { ToolSchema } from "../tools/util";
+import WriteFileTool from "../tools/write_file";
+
+export interface CreateExplorerAgentOptions<T extends ToolSchema> {
+  walker: RepositoryWalker;
+  prompt: string;
+  canWrite: boolean;
+  objective?: {
+    objectiveSchema: T;
+    objectiveDescription: string;
+  };
+}
 
 /***
  * Create an agent to solve a specific agent
  */
-export async function createExplorerAgentExecutor<T extends ToolSchema>(
-  walker: RepositoryWalker,
-  prompt: string,
-  objectiveSchema: T,
-  objectiveDescription: string
-): Promise<AgentExecutor> {
+export async function createExplorerAgentExecutor<T extends ToolSchema>({
+  walker,
+  prompt,
+  canWrite,
+  objective,
+}: CreateExplorerAgentOptions<T>): Promise<AgentExecutor> {
   // Repository exploration tools
   const listFilesTool = new ListFilesTool(walker);
-  const tools = [
-    listFilesTool,
-    new ReadFileTool(walker),
-    new SaveAnalysisTool(objectiveSchema, objectiveDescription),
-  ];
+  const tools: StructuredTool[] = [listFilesTool, new ReadFileTool(walker)];
+  if (canWrite) {
+    // Add write capabilities
+    tools.push(new WriteFileTool());
+  }
+
+  if (objective) {
+    // Declare objective function
+    tools.push(
+      new SaveAnalysisTool(
+        objective.objectiveSchema,
+        objective.objectiveDescription
+      )
+    );
+  }
 
   // Prompt
   const promptTemplate = ChatPromptTemplate.fromMessages([

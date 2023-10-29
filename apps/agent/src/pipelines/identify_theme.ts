@@ -87,12 +87,12 @@ export async function identifyTheme(repository: Repository) {
   const [owner, repo] = repository.fullName.split("/");
   const walker = new RepositoryWalker(installationClient, owner, repo);
 
-  const explorer = await createExplorerAgentExecutor(
+  const explorer = await createExplorerAgentExecutor({
     walker,
     prompt,
-    objectiveSchema,
-    objectiveDescription
-  );
+    canWrite: false,
+    objective: { objectiveSchema, objectiveDescription },
+  });
 
   const starterMessages = await getStarterMessages(walker, repository);
   const result = await explorer.call({
