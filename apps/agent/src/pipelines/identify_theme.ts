@@ -88,6 +88,7 @@ export async function identifyTheme(repository: Repository) {
     prompt,
     canWrite: false,
     objective: { objectiveSchema, objectiveDescription },
+    modelName: "gpt-4",
   });
 
   const starterMessages = await getStarterMessages(walker, repository);
