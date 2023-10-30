@@ -1,9 +1,10 @@
 import { Repository, prisma } from "database";
-import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
+import { BaseMessage } from "langchain/schema";
 import { z } from "zod";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
 import { ListFilesTool } from "~/tools/list_files";
+import { serializeFunctionCall } from "~/tools/util";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
 
 const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
@@ -42,21 +43,11 @@ export async function getStarterMessages(
   const listFilesTool = new ListFilesTool(walker);
   const seedFiles = await listFilesTool.call({ directory: "" });
 
-  return [
-    new AIMessage({
-      content: "",
-      additional_kwargs: {
-        function_call: {
-          name: listFilesTool.name,
-          arguments: JSON.stringify({ directory: "" }),
-        },
-      },
-    }),
-    new FunctionMessage({
-      name: listFilesTool.name,
-      content: seedFiles,
-    }),
-  ];
+  return serializeFunctionCall(
+    listFilesTool,
+    JSON.stringify({ directory: "" }),
+    seedFiles
+  );
 }
 
 /**

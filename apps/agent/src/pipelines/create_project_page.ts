@@ -1,71 +1,61 @@
 import { Repository } from "database";
+import { z } from "zod";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
+import { ListFilesTool } from "~/tools/list_files";
+import { serializeFunctionCall } from "~/tools/util";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
 import {
-  getStarterMessages as getThemeStarterMessages,
-  objectiveSchema as identifyThemeSchema,
-} from "./identify_theme";
-import { labelRecordWithSchema } from "~/tools/util";
-import { AIMessage, FunctionMessage } from "langchain/schema";
-import { z } from "zod";
+  getStarterMessages as getDirectoryStarterMessages,
+  objectiveSchema as repositoryAnalysisSchema,
+} from "./identify_directories";
 
 const prompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
-create new pages, components, and styles. You have also identified the theme and design language of the project. \
-Now, you are ready to create a new page. Modularize the code where it makes sense, by creating components \
+create new pages, components, and styles. Now, you are ready to create a new page. Modularize the code where it makes sense, by creating components \
 in the appropriate directories. Use existing components and styles where possible. If you need to create additional style files or utilities, \
 make sure to write them as well.
 
-You must always use one of the provided functions to explore the repository, write to a file, or exit with a list of files that were written to.
 #################
-You must now create a page with the following description:
-{input}`;
+Create a page with the following description:
+{input}
+#################
+
+If you need to create multiple files, you can call the provided tools multiple times.
+You MUST ALWAYS use one of the provided tools to explore the repository, write to a file, or exit with a list of files that were written to.`;
 
 export const objectiveSchema = z.object({
   files: z
-    .object({
-      path: z.string().describe("The path to the file"),
-    })
-    .array(),
+    .string()
+    .array()
+    .describe("The paths to the files that were created"),
 });
 
 const objectiveFunctionName = "record_files";
 const objectiveDescription = "Record the new files that were created";
 
-/**
- * Get starter messages containing the directory and theme analyses
- */
 export async function getStarterMessages(
   walker: RepositoryWalker,
   repository: Repository
 ) {
-  const themeStarterMessages = await getThemeStarterMessages(
-    walker,
-    repository
+  const directoryStarterMessages = await getDirectoryStarterMessages(walker);
+  const directories = repositoryAnalysisSchema.parse(
+    repository.directoryAnalysis
   );
 
-  const themeAnalysis = identifyThemeSchema.parse(repository.themeAnalysis);
-  const labeledThemeAnalysis = labelRecordWithSchema(
-    themeAnalysis,
-    identifyThemeSchema
-  );
-
-  return [
-    ...themeStarterMessages,
-    new AIMessage({
-      content: "",
-      additional_kwargs: {
-        function_call: {
-          name: "identify_theme",
-          arguments: "",
-        },
-      },
-    }),
-    new FunctionMessage({
-      name: "identify_theme",
-      content: JSON.stringify(labeledThemeAnalysis),
-    }),
-  ];
+  const messages = directoryStarterMessages;
+  const listFilesTool = new ListFilesTool(walker);
+  for (const directory of Object.values(directories)) {
+    if (directory) {
+      const files = await walker.getFiles(directory);
+      const functionCallMessages = serializeFunctionCall(
+        listFilesTool,
+        JSON.stringify({ directory }),
+        JSON.stringify(files)
+      );
+      messages.push(...functionCallMessages);
+    }
+  }
+  return messages;
 }
 
 /**
@@ -90,8 +80,8 @@ export async function createProjectPage(
       objectiveDescription,
       objectiveFunctionName,
     },
-    temperature: 0.5,
-    modelName: "gpt-4",
+    temperature: 0.7,
+    modelName: "gpt-3.5-turbo-16k",
   });
 
   const starterMessages = await getStarterMessages(walker, repository);

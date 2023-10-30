@@ -1,3 +1,5 @@
+import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
+import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
 
 /**
@@ -25,4 +27,29 @@ export function labelRecordWithSchema<T extends ToolSchema>(
     }
   }
   return labeled;
+}
+
+/**
+ * Serialize a function call and its result into a pair of messages
+ */
+export function serializeFunctionCall(
+  tool: StructuredTool,
+  args: string,
+  result: string
+): [BaseMessage, BaseMessage] {
+  return [
+    new AIMessage({
+      content: "",
+      additional_kwargs: {
+        function_call: {
+          name: tool.name,
+          arguments: args,
+        },
+      },
+    }),
+    new FunctionMessage({
+      name: tool.name,
+      content: result,
+    }),
+  ];
 }
