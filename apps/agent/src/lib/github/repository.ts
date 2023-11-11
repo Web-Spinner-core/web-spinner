@@ -3,6 +3,7 @@ import { Octokit } from "octokit";
 export interface File {
   name: string;
   type: "file" | "dir" | "submodule" | "symlink";
+  path?: string;
 }
 
 /**
@@ -39,6 +40,37 @@ export class RepositoryWalker {
     } catch (err) {
       throw new Error(`Error! Could not get files for directory ${path}`);
     }
+  }
+
+  /**
+   * Finds the first file in a path, or throws an error if none are found
+   * Optionally matches on a file extension
+   */
+  async getFirstFile(
+    path: string,
+    extension?: string
+  ): Promise<File & { type: "file"; path: string }> {
+    const entries = await this.getFiles(path);
+
+    const files = entries.filter((entry) => entry.type === "file");
+    const file =
+      extension != null
+        ? files.find((entry) => entry.name.endsWith(extension))
+        : files[0];
+
+    if (!file) {
+      // Recurse into subdirectories
+      const dirs = entries.filter((entry) => entry.type === "dir");
+      if (dirs.length === 0) {
+        throw new Error(`Error! Could not find file in directory ${path}`);
+      } else {
+        return this.getFirstFile(`${path}/${dirs[0].name}`, extension);
+      }
+    }
+
+    file.path = `${path}/${file.name}`;
+
+    return file as File & { type: "file"; path: string };
   }
 
   /**

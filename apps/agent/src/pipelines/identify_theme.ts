@@ -10,7 +10,7 @@ import {
   objectiveSchema as identifyDirectoriesSchema,
 } from "./identify_directories";
 
-const prompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
+const systemPrompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
 create new pages, components, and styles. Your next task is to identify the theme and design language of the existing project. \
 Explore the repository and sample at least five pages and components to identify the theme and design language. Be thorough and \
 check out any relevant config or global CSS/SCSS files.
@@ -85,7 +85,7 @@ export async function identifyTheme(repository: Repository) {
 
   const explorer = await createExplorerAgentExecutor({
     walker,
-    prompt,
+    systemPrompt,
     canWrite: false,
     objective: { objectiveSchema, objectiveDescription },
     modelName: "gpt-4",

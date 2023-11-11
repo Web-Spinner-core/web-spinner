@@ -7,7 +7,9 @@ const parameterSchema = z.object({
   directory: z.string().describe("The directory to list files in"),
 });
 
-export class ListFilesTool extends StructuredTool<typeof parameterSchema> {
+export default class ListFilesTool extends StructuredTool<
+  typeof parameterSchema
+> {
   name = "list_files";
   description = "List files in a directory";
   schema = parameterSchema;

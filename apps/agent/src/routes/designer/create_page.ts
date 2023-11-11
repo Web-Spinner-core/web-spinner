@@ -3,7 +3,6 @@ import { Context, Next } from "koa";
 import { z } from "zod";
 import APIError from "~/lib/api_error";
 import { createProjectPage } from "~/pipelines/create_project_page";
-import { identifyTheme } from "~/pipelines/identify_theme";
 
 const bodySchema = z.object({
   repo: z.string(),

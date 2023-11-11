@@ -3,13 +3,14 @@ import { LLMChain } from "langchain/chains";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
   ChatPromptTemplate,
+  HumanMessagePromptTemplate,
   MessagesPlaceholder,
   SystemMessagePromptTemplate,
 } from "langchain/prompts";
 import { StructuredTool } from "langchain/tools";
 import { env } from "~/env";
 import { RepositoryWalker } from "~/lib/github/repository";
-import { ListFilesTool } from "../tools/list_files";
+import ListFilesTool from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
 import { ToolSchema } from "../tools/util";
@@ -17,7 +18,8 @@ import WriteFileTool from "../tools/write_file";
 
 export interface CreateExplorerAgentOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
-  prompt: string;
+  systemPrompt: string;
+  userPrompt?: string;
   canWrite: boolean;
   objective?: {
     objectiveSchema: T;
@@ -33,7 +35,8 @@ export interface CreateExplorerAgentOptions<T extends ToolSchema> {
  */
 export async function createExplorerAgentExecutor<T extends ToolSchema>({
   walker,
-  prompt,
+  systemPrompt,
+  userPrompt,
   canWrite,
   objective,
   temperature,
@@ -60,10 +63,18 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>({
 
   // Prompt
   const promptTemplate = ChatPromptTemplate.fromMessages([
-    SystemMessagePromptTemplate.fromTemplate(prompt),
+    SystemMessagePromptTemplate.fromTemplate(systemPrompt),
+    HumanMessagePromptTemplate.fromTemplate(userPrompt ?? "{input}"),
     new MessagesPlaceholder("chat_history"),
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
+
+  const model = new ChatOpenAI({
+    modelName: modelName ?? "gpt-3.5-turbo-16k",
+    openAIApiKey: env.OPENAI_API_KEY,
+    temperature: temperature ?? 0,
+  });
+  model.predictMessages;
 
   // Executors
   const chain = new LLMChain({
@@ -84,5 +95,6 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>({
     agent,
     tools,
     verbose: true,
+    maxIterations: 10,
   });
 }

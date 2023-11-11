@@ -3,11 +3,11 @@ import { BaseMessage } from "langchain/schema";
 import { z } from "zod";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
-import { ListFilesTool } from "~/tools/list_files";
+import ListFilesTool from "~/tools/list_files";
 import { serializeFunctionCall } from "~/tools/util";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
 
-const prompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
+const systemPrompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:
 1) Where new pages are created
 2) Where new components are created
@@ -62,7 +62,7 @@ export async function identifyDirectories(repository: Repository) {
 
   const explorer = await createExplorerAgentExecutor({
     walker,
-    prompt,
+    systemPrompt,
     canWrite: false,
     objective: { objectiveSchema, objectiveDescription },
   });
