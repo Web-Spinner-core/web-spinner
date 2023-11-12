@@ -130,7 +130,7 @@ export async function createProjectPage(
       objectiveFunctionName,
     },
     temperature: 0.7,
-    modelName: "gpt-3.5-turbo-16k",
+    modelName: "gpt-4-1106-preview",
   });
 
   const starterMessages = await getStarterMessages(walker, repository);
