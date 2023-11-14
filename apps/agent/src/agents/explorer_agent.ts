@@ -32,7 +32,6 @@ interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
 interface CreateExplorerAgentReadonlyOptions<T extends ToolSchema>
   extends CreateExplorerAgentBaseOptions<T> {
   canWrite: false;
-  writeOptions: undefined;
 }
 
 interface CreateExplorerAgentWritableOptions<T extends ToolSchema>
@@ -50,22 +49,25 @@ type CreateExplorerAgentOptions<T extends ToolSchema> =
 /**
  * Create an agent to solve a specific agent
  */
-export async function createExplorerAgentExecutor<T extends ToolSchema>({
-  walker,
-  systemPrompt,
-  userPrompt,
-  objective,
-  temperature,
-  modelName,
-  canWrite,
-  writeOptions,
-}: CreateExplorerAgentOptions<T>): Promise<AgentExecutor> {
+export async function createExplorerAgentExecutor<T extends ToolSchema>(
+  args: CreateExplorerAgentOptions<T>
+): Promise<AgentExecutor> {
+  const {
+    walker,
+    systemPrompt,
+    userPrompt,
+    objective,
+    temperature,
+    modelName,
+    canWrite,
+  } = args;
+
   // Repository exploration tools
   const listFilesTool = new ListFilesTool(walker);
   const tools: StructuredTool[] = [listFilesTool, new ReadFileTool(walker)];
   if (canWrite) {
     // Add write capabilities
-    tools.push(new WriteFileTool(writeOptions.accumulator));
+    tools.push(new WriteFileTool(args.writeOptions.accumulator));
   }
 
   if (objective) {
