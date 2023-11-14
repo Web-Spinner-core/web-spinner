@@ -13,6 +13,7 @@ import {
   getStarterMessages as getDirectoryStarterMessages,
   objectiveSchema as repositoryAnalysisSchema,
 } from "./identify_directories";
+import { createPullRequestTitle } from "./pull_request_title";
 
 const systemPrompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
 create new pages, components, and styles. Now, you are ready to create a new page. Modularize the code where it makes sense, by creating components \
@@ -153,10 +154,12 @@ export async function createProjectPage(
     repository
   );
 
+  const title = await createPullRequestTitle(description);
+
   await repositoryClient.createPullRequestFromFiles(
     "main",
     fileWrites,
-    "Web Spinner Changes",
+    `[Web Spinner] ${title}`,
     description
   );
 
