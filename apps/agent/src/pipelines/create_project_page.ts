@@ -1,16 +1,18 @@
 import { Repository } from "database";
+import { BaseMessage } from "langchain/schema";
 import { z } from "zod";
 import { getGithubInstallationClient } from "~/lib/github";
 import { RepositoryWalker } from "~/lib/github/repository";
+import GithubRepositoryClient from "~/lib/github/repository_client";
 import ListFilesTool from "~/tools/list_files";
 import ReadFileTool from "~/tools/read_file";
 import { serializeFunctionCall } from "~/tools/util";
+import { FileWrite } from "~/tools/write_file";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
 import {
   getStarterMessages as getDirectoryStarterMessages,
   objectiveSchema as repositoryAnalysisSchema,
 } from "./identify_directories";
-import { BaseMessage } from "langchain/schema";
 
 const systemPrompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
 create new pages, components, and styles. Now, you are ready to create a new page. Modularize the code where it makes sense, by creating components \
@@ -119,11 +121,17 @@ export async function createProjectPage(
   const [owner, repo] = repository.fullName.split("/");
   const walker = new RepositoryWalker(installationClient, owner, repo);
 
+  const fileWrites: FileWrite[] = [];
+  const accumulator = (file: FileWrite) => {
+    fileWrites.push(file);
+  };
+
   const explorer = await createExplorerAgentExecutor({
     walker,
     systemPrompt,
     userPrompt,
     canWrite: true,
+    writeOptions: { accumulator },
     objective: {
       objectiveSchema,
       objectiveDescription,
@@ -138,6 +146,19 @@ export async function createProjectPage(
     input: description,
     chat_history: starterMessages,
   });
+
+  // Create a pull request
+  const repositoryClient = new GithubRepositoryClient(
+    installationClient,
+    repository
+  );
+
+  await repositoryClient.createPullRequestFromFiles(
+    "main",
+    fileWrites,
+    "Web Spinner Changes",
+    description
+  );
 
   return result;
 }

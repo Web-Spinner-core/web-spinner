@@ -14,13 +14,12 @@ import ListFilesTool from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
 import { ToolSchema } from "../tools/util";
-import WriteFileTool from "../tools/write_file";
+import WriteFileTool, { FileWriteAccumulator } from "../tools/write_file";
 
-export interface CreateExplorerAgentOptions<T extends ToolSchema> {
+interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
   systemPrompt: string;
   userPrompt?: string;
-  canWrite: boolean;
   objective?: {
     objectiveSchema: T;
     objectiveDescription: string;
@@ -30,24 +29,43 @@ export interface CreateExplorerAgentOptions<T extends ToolSchema> {
   modelName?: string;
 }
 
-/***
+interface CreateExplorerAgentReadonlyOptions<T extends ToolSchema>
+  extends CreateExplorerAgentBaseOptions<T> {
+  canWrite: false;
+  writeOptions: undefined;
+}
+
+interface CreateExplorerAgentWritableOptions<T extends ToolSchema>
+  extends CreateExplorerAgentBaseOptions<T> {
+  canWrite: true;
+  writeOptions: {
+    accumulator: FileWriteAccumulator;
+  };
+}
+
+type CreateExplorerAgentOptions<T extends ToolSchema> =
+  | CreateExplorerAgentReadonlyOptions<T>
+  | CreateExplorerAgentWritableOptions<T>;
+
+/**
  * Create an agent to solve a specific agent
  */
 export async function createExplorerAgentExecutor<T extends ToolSchema>({
   walker,
   systemPrompt,
   userPrompt,
-  canWrite,
   objective,
   temperature,
   modelName,
+  canWrite,
+  writeOptions,
 }: CreateExplorerAgentOptions<T>): Promise<AgentExecutor> {
   // Repository exploration tools
   const listFilesTool = new ListFilesTool(walker);
   const tools: StructuredTool[] = [listFilesTool, new ReadFileTool(walker)];
   if (canWrite) {
     // Add write capabilities
-    tools.push(new WriteFileTool());
+    tools.push(new WriteFileTool(writeOptions.accumulator));
   }
 
   if (objective) {

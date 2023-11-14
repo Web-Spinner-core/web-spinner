@@ -4,6 +4,13 @@ import { v4 as uuid } from "uuid";
 import { z } from "zod";
 import { serializeToolError } from "~/lib/error";
 
+export interface FileWrite {
+  path: string;
+  content: string;
+}
+
+export type FileWriteAccumulator = (file: FileWrite) => void;
+
 const parameterSchema = z.object({
   path: z.string().describe("The path of the file to create and/or update"),
   content: z.string().describe("The content of the file"),
@@ -16,21 +23,18 @@ export default class WriteFileTool extends StructuredTool<
   description = "Write to a file. This will overwrite the file if it exists.";
   schema = parameterSchema;
 
-  constructor(toolParams?: ToolParams) {
+  constructor(
+    private readonly accumulator: FileWriteAccumulator,
+    toolParams?: ToolParams
+  ) {
     super(toolParams);
   }
 
   async _call({ path, content }: z.input<this["schema"]>): Promise<string> {
-    let result: any;
-    try {
-      const id = uuid();
-      writeFileSync(`../tmp/${id}.txt`, `Path: ${path}\n\n\n${content}`);
-      result = {
-        success: true,
-      };
-    } catch (err) {
-      result = serializeToolError(err);
-    }
-    return JSON.stringify(result);
+    // Call accumulator
+    this.accumulator({ path, content });
+    return JSON.stringify({
+      success: true,
+    });
   }
 }
