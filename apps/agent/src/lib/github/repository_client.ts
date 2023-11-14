@@ -1,7 +1,7 @@
 import { Repository } from "database";
 import { Octokit } from "octokit";
-import { z } from "zod";
 import { v4 as uuid } from "uuid";
+import { z } from "zod";
 import { FileWrite } from "~/tools/write_file";
 
 interface GitHubFileBlob {
@@ -17,8 +17,10 @@ const ghCreateBlobResponseSchema = z.object({
 const ghBranchResponseSchema = z.object({
   commit: z.object({
     sha: z.string(),
-    tree: z.object({
-      sha: z.string(),
+    commit: z.object({
+      tree: z.object({
+        sha: z.string(),
+      }),
     }),
   }),
 });
@@ -44,7 +46,7 @@ export default class GithubRepositoryClient {
    */
   async createBlob(content: string): Promise<string> {
     const { data } = await this.client.request(
-      `POST /repos/${this.owner}/${this.repo}/git/blobs`,
+      `POST /repos/{owner}/{repo}/git/blobs`,
       {
         owner: this.owner,
         repo: this.repo,
@@ -64,15 +66,15 @@ export default class GithubRepositoryClient {
     files: GitHubFileBlob[]
   ): Promise<string> {
     const { data } = await this.client.request(
-      `POST /repos/${this.owner}/${this.repo}/git/trees`,
+      `POST /repos/{owner}/{repo}/git/trees`,
       {
         owner: this.owner,
         repo: this.repo,
         base_tree: baseTreeSha,
         tree: files.map((file) => ({
           path: file.path,
-          mode: "100644",
-          type: "blob",
+          mode: "100644" as const,
+          type: "blob" as const,
           sha: file.blobSha,
         })),
       }
@@ -89,7 +91,7 @@ export default class GithubRepositoryClient {
     parentCommit: string
   ): Promise<string> {
     const { data } = await this.client.request(
-      `POST /repos/${this.owner}/${this.repo}/git/commits`,
+      `POST /repos/{owner}/{repo}/git/commits`,
       {
         owner: this.owner,
         repo: this.repo,
@@ -113,30 +115,28 @@ export default class GithubRepositoryClient {
     branchName: string,
     commitSha: string
   ): Promise<void> {
-    await this.client.request(
-      `POST /repos/${this.owner}/${this.repo}/git/refs`,
-      {
-        owner: this.owner,
-        repo: this.repo,
-        ref: `refs/heads/${branchName}`,
-        sha: commitSha,
-      }
-    );
+    await this.client.request(`POST /repos/{owner}/{repo}/git/refs`, {
+      owner: this.owner,
+      repo: this.repo,
+      ref: `refs/heads/${branchName}`,
+      sha: commitSha,
+    });
   }
 
   /**
    * Create a pull request on GitHub
    */
   private async createPullRequest(
+    baseBranch: string,
     branchName: string,
     title: string,
     body: string
   ): Promise<void> {
-    await this.client.request(`POST /repos/${this.owner}/${this.repo}/pulls`, {
+    await this.client.request(`POST /repos/{owner}/{repo}/pulls`, {
       owner: this.owner,
       repo: this.repo,
       head: branchName,
-      base: "master",
+      base: baseBranch,
       title,
       body,
     });
@@ -147,7 +147,12 @@ export default class GithubRepositoryClient {
    */
   private async getBranch(branch: string): Promise<GitHubBranch> {
     const { data } = await this.client.request(
-      `GET /repos/${this.owner}/${this.repo}/branches/${branch}`
+      `GET /repos/{owner}/{repo}/branches/{branch}`,
+      {
+        owner: this.owner,
+        repo: this.repo,
+        branch,
+      }
     );
     return ghBranchResponseSchema.parse(data);
   }
@@ -169,13 +174,13 @@ export default class GithubRepositoryClient {
       }))
     );
     const branch = await this.getBranch(baseBranch);
-    const baseTreeSha = branch.commit.tree.sha;
+    const baseTreeSha = branch.commit.commit.tree.sha;
     const baseCommit = branch.commit.sha;
 
     const tree = await this.createTree(baseTreeSha, fileBlobs);
     const commit = await this.createCommit(tree, title, baseCommit);
 
     await this.createBranch(branchName, commit);
-    await this.createPullRequest(branchName, title, body);
+    await this.createPullRequest(baseBranch, branchName, title, body);
   }
 }
