@@ -90,7 +90,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
   ]);
 
   const model = new ChatOpenAI({
-    modelName: modelName ?? "gpt-3.5-turbo-16k",
+    modelName: modelName ?? "gpt-4-1106-preview",
     openAIApiKey: env.OPENAI_API_KEY,
     temperature: temperature ?? 0,
   });
@@ -100,7 +100,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
   const chain = new LLMChain({
     prompt: promptTemplate,
     llm: new ChatOpenAI({
-      modelName: modelName ?? "gpt-3.5-turbo-16k",
+      modelName: modelName ?? "gpt-4-1106-preview",
       openAIApiKey: env.OPENAI_API_KEY,
       temperature: temperature ?? 0,
     }),
