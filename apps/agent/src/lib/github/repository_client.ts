@@ -9,12 +9,12 @@ interface GitHubFileBlob {
   blobSha: string;
 }
 
-const ghCreateBlobResponseSchema = z.object({
+const createBlobResponseSchema = z.object({
   url: z.string(),
   sha: z.string(),
 });
 
-const ghBranchResponseSchema = z.object({
+const branchResponseSchema = z.object({
   commit: z.object({
     sha: z.string(),
     commit: z.object({
@@ -25,7 +25,16 @@ const ghBranchResponseSchema = z.object({
   }),
 });
 
-type GitHubBranch = z.infer<typeof ghBranchResponseSchema>;
+const issueResponseSchema = z
+  .object({
+    id: z.number(),
+    node_id: z.string(),
+    title: z.string(),
+    body: z.string(),
+  })
+  .array();
+
+type GitHubBranch = z.infer<typeof branchResponseSchema>;
 
 /**
  * A client instantiated to work with a specific repository
@@ -54,7 +63,7 @@ export default class GithubRepositoryClient {
         encoding: "utf-8",
       }
     );
-    const { sha } = ghCreateBlobResponseSchema.parse(data);
+    const { sha } = createBlobResponseSchema.parse(data);
     return sha;
   }
 
@@ -154,7 +163,22 @@ export default class GithubRepositoryClient {
         branch,
       }
     );
-    return ghBranchResponseSchema.parse(data);
+    return branchResponseSchema.parse(data);
+  }
+
+  /**
+   * Get all open issues in the repository
+   */
+  async getIssues() {
+    const { data } = await this.client.request(
+      `GET /repos/{owner}/{repo}/issues`,
+      {
+        owner: this.owner,
+        repo: this.repo,
+        state: "open",
+      }
+    );
+    return issueResponseSchema.parse(data);
   }
 
   /**
