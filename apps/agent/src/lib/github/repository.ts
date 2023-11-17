@@ -44,18 +44,20 @@ export class RepositoryWalker {
 
   /**
    * Finds the first file in a path, or throws an error if none are found
-   * Optionally matches on a file extension
+   * Optionally matches based on a file name suffix (extension)
    */
   async getFirstFile(
     path: string,
-    extension?: string
+    matchers?: string[]
   ): Promise<File & { type: "file"; path: string }> {
     const entries = await this.getFiles(path);
 
     const files = entries.filter((entry) => entry.type === "file");
     const file =
-      extension != null
-        ? files.find((entry) => entry.name.endsWith(extension))
+      matchers != null
+        ? files.find((entry) =>
+            matchers.some((matcher) => entry.name.endsWith(matcher))
+          )
         : files[0];
 
     if (!file) {
@@ -64,7 +66,7 @@ export class RepositoryWalker {
       if (dirs.length === 0) {
         throw new Error(`Error! Could not find file in directory ${path}`);
       } else {
-        return this.getFirstFile(`${path}/${dirs[0].name}`, extension);
+        return this.getFirstFile(`${path}/${dirs[0].name}`, matchers);
       }
     }
 
