@@ -1,40 +1,19 @@
+import axios from "axios";
 import { Repository } from "database";
 import { Octokit } from "octokit";
 import { v4 as uuid } from "uuid";
 import { z } from "zod";
+import { env } from "~/env";
 import { FileWrite } from "~/tools/write_file";
+import {
+  extractHtmlImageUrls,
+  extractMarkdownImageUrls,
+} from "../util/extract_image_url";
 
 interface GitHubFileBlob {
   path: string;
   blobSha: string;
 }
-
-const createBlobResponseSchema = z.object({
-  url: z.string(),
-  sha: z.string(),
-});
-
-const branchResponseSchema = z.object({
-  commit: z.object({
-    sha: z.string(),
-    commit: z.object({
-      tree: z.object({
-        sha: z.string(),
-      }),
-    }),
-  }),
-});
-
-const issueResponseSchema = z
-  .object({
-    id: z.number(),
-    node_id: z.string(),
-    title: z.string(),
-    body: z.string(),
-  })
-  .array();
-
-type GitHubBranch = z.infer<typeof branchResponseSchema>;
 
 /**
  * A client instantiated to work with a specific repository
@@ -45,7 +24,7 @@ export default class GithubRepositoryClient {
 
   constructor(
     private readonly client: Octokit,
-    repository: Repository
+    private readonly repository: Repository
   ) {
     [this.owner, this.repo] = repository.fullName.split("/");
   }
@@ -63,7 +42,7 @@ export default class GithubRepositoryClient {
         encoding: "utf-8",
       }
     );
-    const { sha } = createBlobResponseSchema.parse(data);
+    const { sha } = data;
     return sha;
   }
 
@@ -154,7 +133,7 @@ export default class GithubRepositoryClient {
   /**
    * Get the SHA of the branch tree
    */
-  private async getBranch(branch: string): Promise<GitHubBranch> {
+  private async getBranch(branch: string) {
     const { data } = await this.client.request(
       `GET /repos/{owner}/{repo}/branches/{branch}`,
       {
@@ -163,7 +142,7 @@ export default class GithubRepositoryClient {
         branch,
       }
     );
-    return branchResponseSchema.parse(data);
+    return data;
   }
 
   /**
@@ -178,7 +157,39 @@ export default class GithubRepositoryClient {
         state: "open",
       }
     );
-    return issueResponseSchema.parse(data);
+    return data;
+  }
+
+  /**
+   * Render markdown to HTML
+   */
+  async renderMarkdown(markdown: string): Promise<string> {
+    const { data } = await this.client.request(`POST /markdown`, {
+      text: markdown,
+      mode: "gfm",
+      context: `${this.owner}/${this.repo}`,
+    });
+    return data;
+  }
+
+  /**
+   * Get the URLs of all images in the specified issue body
+   */
+  async getIssueImageUrls(issueNumber: number): Promise<string[]> {
+    const { data } = await this.client.request(
+      `GET /repos/{owner}/{repo}/issues/{issue_number}`,
+      {
+        owner: this.owner,
+        repo: this.repo,
+        issue_number: issueNumber,
+      }
+    );
+    const mdUrls = extractMarkdownImageUrls(data.body ?? "");
+    const renderedUrls = await Promise.all(
+      mdUrls.map((url) => this.renderMarkdown(`<img src="${url}">`))
+    );
+    const imageUrls = renderedUrls.flatMap(extractHtmlImageUrls);
+    return imageUrls;
   }
 
   /**

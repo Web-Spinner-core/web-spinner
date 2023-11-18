@@ -4,8 +4,10 @@ import { z } from "zod";
 import APIError from "~/lib/api_error";
 import { getGithubInstallationClient } from "~/lib/github";
 import GithubRepositoryClient from "~/lib/github/repository_client";
-import { identifyDirectories } from "~/pipelines/identify_directories";
-import { identifyTheme } from "~/pipelines/identify_theme";
+import {
+  extractHtmlImageUrls,
+  extractMarkdownImageUrls,
+} from "~/lib/util/extract_image_url";
 
 const bodySchema = z.object({
   repo: z.string(),
@@ -30,6 +32,11 @@ export default async function scanIssues(ctx: Context, next: Next) {
   const client = await getGithubInstallationClient(repository.installationId);
   const repositoryClient = new GithubRepositoryClient(client, repository);
   const issues = await repositoryClient.getIssues();
+  const issue = issues[0]!;
+
+  const body = issue.body;
+  const imageUrls = await repositoryClient.getIssueImageUrls(issue.number);
+  console.log(imageUrls);
 
   ctx.status = 200;
   ctx.body = issues;
