@@ -4,10 +4,7 @@ import { z } from "zod";
 import APIError from "~/lib/api_error";
 import { getGithubInstallationClient } from "~/lib/github";
 import GithubRepositoryClient from "~/lib/github/repository_client";
-import {
-  extractHtmlImageUrls,
-  extractMarkdownImageUrls,
-} from "~/lib/util/extract_image_url";
+import renderRequest from "~/pipelines/resolve_issue/render_request";
 
 const bodySchema = z.object({
   repo: z.string(),
@@ -34,11 +31,13 @@ export default async function scanIssues(ctx: Context, next: Next) {
   const issues = await repositoryClient.getIssues();
   const issue = issues[0]!;
 
-  const body = issue.body;
+  const body = issue.body!;
   const imageUrls = await repositoryClient.getIssueImageUrls(issue.number);
-  console.log(imageUrls);
+  const imageUrl = imageUrls[0]!;
+
+  const jsx = await renderRequest(body, imageUrl);
 
   ctx.status = 200;
-  ctx.body = issues;
+  ctx.body = jsx;
   return next();
 }
