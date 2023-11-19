@@ -1,6 +1,7 @@
 import {
   CreateBucketCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -36,6 +37,23 @@ export default class StorageClient {
         Bucket: bucketName,
       })
     );
+  }
+
+  /**
+   * Check if a file exists in the storage bucket
+   */
+  async fileExists(fileName: string, bucketName: string = Buckets.DEFAULT) {
+    try {
+      await this.client.send(
+        new HeadObjectCommand({
+          Bucket: bucketName,
+          Key: fileName,
+        })
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   /**
