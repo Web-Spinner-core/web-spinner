@@ -5,7 +5,6 @@ import APIError from "~/lib/api_error";
 import { getGithubInstallationClient } from "~/lib/github";
 import GithubRepositoryClient from "~/lib/github/repository_client";
 import { createPageWithVision } from "~/pipelines/create_page_with_vision";
-import renderStandalonePage from "~/pipelines/create_page_with_vision/render_standalone_page";
 
 const bodySchema = z.object({
   repo: z.string(),
@@ -36,7 +35,12 @@ export default async function scanIssues(ctx: Context, next: Next) {
   const imageUrls = await repositoryClient.getIssueImageUrls(issue.number);
   const imageUrl = imageUrls[0]!;
 
-  const result = await createPageWithVision(repository, body, imageUrl);
+  const result = await createPageWithVision(
+    repository,
+    body,
+    imageUrl,
+    issue.number
+  );
 
   ctx.status = 200;
   ctx.body = result;

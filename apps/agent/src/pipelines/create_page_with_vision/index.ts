@@ -25,7 +25,8 @@ const objectiveDescription = "Record the new files that were created";
 export async function createPageWithVision(
   repository: Repository,
   description: string,
-  imageUrl: string
+  imageUrl: string,
+  issueNum: number
 ) {
   const installationClient = getGithubInstallationClient(
     repository.installationId
@@ -64,20 +65,20 @@ export async function createPageWithVision(
     chat_history: starterMessages,
   });
 
-  // // Create a pull request
-  // const repositoryClient = new GithubRepositoryClient(
-  //   installationClient,
-  //   repository
-  // );
+  // Create a pull request
+  const repositoryClient = new GithubRepositoryClient(
+    installationClient,
+    repository
+  );
 
-  // const title = await createPullRequestTitle(description);
+  const title = await createPullRequestTitle(description);
 
-  // await repositoryClient.createPullRequestFromFiles(
-  //   "main",
-  //   fileWrites,
-  //   `[Web Spinner] ${title}`,
-  //   description
-  // );
+  await repositoryClient.createPullRequestFromFiles(
+    "main",
+    fileWrites,
+    `[Web Spinner] ${title}`,
+    `Resolves #${issueNum}\n\n## Summary\n${description}`
+  );
 
   return result;
 }
