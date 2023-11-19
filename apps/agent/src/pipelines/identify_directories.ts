@@ -6,6 +6,7 @@ import { RepositoryWalker } from "~/lib/github/repository";
 import ListFilesTool from "~/tools/list_files";
 import { serializeFunctionCall } from "~/tools/util";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
+import { Callbacks } from "langchain/callbacks";
 
 const systemPrompt = `You are an expert frontend web developer. You are analyzing the directory structure of a new repository that uses React and Next.js.
 You need to identify four important directories in the repository:
@@ -38,10 +39,11 @@ const objectiveDescription = "Identify important directories in the repository";
  * Get starter messages containing files in the root directory
  */
 export async function getStarterMessages(
-  walker: RepositoryWalker
+  walker: RepositoryWalker,
+  callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
-  const listFilesTool = new ListFilesTool(walker);
-  const seedFiles = await listFilesTool.call({ directory: "" });
+  const listFilesTool = new ListFilesTool(walker, { callbacks });
+  const seedFiles = await listFilesTool.call({ directory: "" }, { callbacks });
 
   return serializeFunctionCall(
     listFilesTool,

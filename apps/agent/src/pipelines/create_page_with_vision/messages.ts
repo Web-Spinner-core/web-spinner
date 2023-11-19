@@ -1,5 +1,5 @@
 import { Repository } from "database";
-import { BaseMessage } from "langchain/schema";
+import { BaseMessage, FunctionMessage } from "langchain/schema";
 import { RepositoryWalker } from "~/lib/github/repository";
 import ListFilesTool from "~/tools/list_files";
 import ReadFileTool from "~/tools/read_file";
@@ -8,6 +8,7 @@ import {
   getStarterMessages as getRootDirectoryMessages,
   objectiveSchema as repositoryAnalysisSchema,
 } from "../identify_directories";
+import { Callbacks } from "langchain/callbacks";
 
 export const systemPrompt = `You are an expert frontend web developer. You have already identified what directories you need to modify to \
 create new pages, components, and styles. Now, you are ready to create a new page.
@@ -22,9 +23,10 @@ export const userPrompt = `{input}`;
 
 async function serializeListFiles(
   walker: RepositoryWalker,
-  path: string
+  path: string,
+  callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
-  const listFilesTool = new ListFilesTool(walker);
+  const listFilesTool = new ListFilesTool(walker, { callbacks });
   const files = await walker.getFiles(path);
 
   return serializeFunctionCall(
@@ -40,12 +42,13 @@ async function serializeListFiles(
 async function serializeFileRead(
   walker: RepositoryWalker,
   parentPath: string,
-  matchers: string[]
+  matchers: string[],
+  callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
-  const readFileTool = new ReadFileTool(walker);
+  const readFileTool = new ReadFileTool(walker, { callbacks });
   const file = await walker.getFirstFile(parentPath, matchers);
   const path = file.path;
-  const fileContent = await walker.readFile(path);
+  const fileContent = await readFileTool.call({ path }, { callbacks });
 
   const sampleMessage = serializeFunctionCall(
     readFileTool,
@@ -62,9 +65,18 @@ async function serializeFileRead(
 export async function getStarterMessages(
   walker: RepositoryWalker,
   repository: Repository,
-  renderedTemplate: string
+  renderedTemplate: string,
+  callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
-  const directoryStarterMessages = await getRootDirectoryMessages(walker);
+  const renderedTemplateMessage = new FunctionMessage({
+    name: "renderTemplate",
+    content: renderedTemplate,
+  });
+
+  const directoryStarterMessages = await getRootDirectoryMessages(
+    walker,
+    callbacks
+  );
   const { pages, components } = repositoryAnalysisSchema.parse(
     repository.directoryAnalysis
   );
@@ -83,11 +95,18 @@ export async function getStarterMessages(
   ];
 
   const directoryMessages = await Promise.all(
-    dirs.map((dir) => serializeListFiles(walker, dir))
+    dirs.map((dir) => serializeListFiles(walker, dir, callbacks))
   );
   const fileMessages = await Promise.all(
-    files.map(({ path, matchers }) => serializeFileRead(walker, path, matchers))
+    files.map(({ path, matchers }) =>
+      serializeFileRead(walker, path, matchers, callbacks)
+    )
   );
 
-  return [directoryStarterMessages, directoryMessages, fileMessages].flat(2);
+  return [
+    renderedTemplateMessage,
+    directoryStarterMessages,
+    directoryMessages,
+    fileMessages,
+  ].flat(2);
 }

@@ -1,3 +1,4 @@
+import { Callbacks } from "langchain/callbacks";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { z } from "zod";
@@ -17,7 +18,8 @@ const objectiveSchema = z.object({
  * Create a pull request title from a description of requested changes
  */
 export async function createPullRequestTitle(
-  description: string
+  description: string,
+  callbacks?: Callbacks
 ): Promise<string> {
   const openai = new ChatOpenAI({
     modelName: "gpt-4-1106-preview",
@@ -40,6 +42,7 @@ export async function createPullRequestTitle(
         },
         type: "function",
       },
+      callbacks,
     }
   );
 

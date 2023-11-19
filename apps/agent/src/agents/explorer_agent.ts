@@ -15,6 +15,7 @@ import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
 import { ToolSchema } from "../tools/util";
 import WriteFileTool, { FileWriteAccumulator } from "../tools/write_file";
+import { Callbacks } from "langchain/callbacks";
 
 interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
@@ -27,6 +28,7 @@ interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   };
   temperature?: number;
   modelName?: string;
+  callbacks?: Callbacks;
 }
 
 interface CreateExplorerAgentReadonlyOptions<T extends ToolSchema>
@@ -60,14 +62,18 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     temperature,
     modelName,
     canWrite,
+    callbacks,
   } = args;
 
   // Repository exploration tools
-  const listFilesTool = new ListFilesTool(walker);
-  const tools: StructuredTool[] = [listFilesTool, new ReadFileTool(walker)];
+  const listFilesTool = new ListFilesTool(walker, { callbacks });
+  const tools: StructuredTool[] = [
+    listFilesTool,
+    new ReadFileTool(walker, { callbacks }),
+  ];
   if (canWrite) {
     // Add write capabilities
-    tools.push(new WriteFileTool(args.writeOptions.accumulator));
+    tools.push(new WriteFileTool(args.writeOptions.accumulator, { callbacks }));
   }
 
   if (objective) {
@@ -76,7 +82,8 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
       new SaveAnalysisTool(
         objective.objectiveSchema,
         objective.objectiveDescription,
-        objective.objectiveFunctionName
+        objective.objectiveFunctionName,
+        { callbacks }
       )
     );
   }
@@ -104,6 +111,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
       openAIApiKey: env.OPENAI_API_KEY,
       temperature: temperature ?? 0,
     }),
+    callbacks,
   });
   const agent = new OpenAIAgent({
     llmChain: chain,
@@ -116,5 +124,6 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     tools,
     verbose: true,
     maxIterations: 10,
+    callbacks,
   });
 }

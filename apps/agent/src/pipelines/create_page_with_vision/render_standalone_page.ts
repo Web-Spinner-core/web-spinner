@@ -1,3 +1,4 @@
+import { Callbacks } from "langchain/callbacks";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 
@@ -14,31 +15,35 @@ Respond ONLY with the contents of the JSX file.`;
  */
 export default async function renderStandalonePage(
   description: string,
-  imageUrl: string
+  imageUrl: string,
+  callbacks?: Callbacks
 ) {
   const client = new ChatOpenAI({
     modelName: "gpt-4-vision-preview",
     maxTokens: 4096,
     temperature: 0.7,
   });
-  const response = await client.call([
-    new SystemMessage(systemPrompt),
-    new HumanMessage({
-      content: [
-        {
-          type: "text",
-          text: description,
-        },
-        {
-          type: "image_url",
-          image_url: {
-            url: imageUrl,
-            detail: "high",
+  const response = await client.call(
+    [
+      new SystemMessage(systemPrompt),
+      new HumanMessage({
+        content: [
+          {
+            type: "text",
+            text: description,
           },
-        },
-      ],
-    }),
-  ]);
+          {
+            type: "image_url",
+            image_url: {
+              url: imageUrl,
+              detail: "high",
+            },
+          },
+        ],
+      }),
+    ],
+    { callbacks }
+  );
   if (Array.isArray(response.content)) {
     throw new Error(`Expected response content tot be a string`);
   }
