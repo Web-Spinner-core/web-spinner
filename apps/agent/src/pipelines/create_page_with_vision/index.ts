@@ -7,6 +7,7 @@ import { createExplorerAgentExecutor } from "../../agents/explorer_agent";
 import { createPullRequestTitle } from "../pull_request_title";
 import { getStarterMessages, systemPrompt, userPrompt } from "./messages";
 import { z } from "zod";
+import renderStandalonePage from "./render_standalone_page";
 
 export const objectiveSchema = z.object({
   files: z
@@ -19,11 +20,12 @@ const objectiveFunctionName = "record_files";
 const objectiveDescription = "Record the new files that were created";
 
 /**
- * Create a page using the project's existing theme and design language
+ * Create a page with vision support
  */
-export async function createProjectPage(
+export async function createPageWithVision(
   repository: Repository,
-  description: string
+  description: string,
+  imageUrl: string
 ) {
   const installationClient = getGithubInstallationClient(
     repository.installationId
@@ -48,29 +50,34 @@ export async function createProjectPage(
       objectiveFunctionName,
     },
     temperature: 0.7,
-    modelName: "gpt-4-vision-preview",
+    modelName: "gpt-4-1106-preview",
   });
 
-  const starterMessages = await getStarterMessages(walker, repository);
+  const renderedTemplate = await renderStandalonePage(description, imageUrl);
+  const starterMessages = await getStarterMessages(
+    walker,
+    repository,
+    renderedTemplate
+  );
   const result = await explorer.call({
     input: description,
     chat_history: starterMessages,
   });
 
-  // Create a pull request
-  const repositoryClient = new GithubRepositoryClient(
-    installationClient,
-    repository
-  );
+  // // Create a pull request
+  // const repositoryClient = new GithubRepositoryClient(
+  //   installationClient,
+  //   repository
+  // );
 
-  const title = await createPullRequestTitle(description);
+  // const title = await createPullRequestTitle(description);
 
-  await repositoryClient.createPullRequestFromFiles(
-    "main",
-    fileWrites,
-    `[Web Spinner] ${title}`,
-    description
-  );
+  // await repositoryClient.createPullRequestFromFiles(
+  //   "main",
+  //   fileWrites,
+  //   `[Web Spinner] ${title}`,
+  //   description
+  // );
 
   return result;
 }

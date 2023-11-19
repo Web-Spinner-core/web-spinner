@@ -10,9 +10,12 @@ Use ESM modules to import any necessary dependencies.
 Respond ONLY with the contents of the JSX file.`;
 
 /**
- * Generate React + Tailwind JSX from a request and an image
+ * Generate standalone React + Tailwind JSX from a request and an image
  */
-export default async function renderRequest(request: string, imageUrl: string) {
+export default async function renderStandalonePage(
+  description: string,
+  imageUrl: string
+) {
   const client = new ChatOpenAI({
     modelName: "gpt-4-vision-preview",
     maxTokens: 4096,
@@ -24,7 +27,7 @@ export default async function renderRequest(request: string, imageUrl: string) {
       content: [
         {
           type: "text",
-          text: request,
+          text: description,
         },
         {
           type: "image_url",

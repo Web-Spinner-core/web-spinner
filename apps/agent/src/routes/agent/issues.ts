@@ -4,7 +4,8 @@ import { z } from "zod";
 import APIError from "~/lib/api_error";
 import { getGithubInstallationClient } from "~/lib/github";
 import GithubRepositoryClient from "~/lib/github/repository_client";
-import renderRequest from "~/pipelines/resolve_issue/render_request";
+import { createPageWithVision } from "~/pipelines/create_page_with_vision";
+import renderStandalonePage from "~/pipelines/create_page_with_vision/render_standalone_page";
 
 const bodySchema = z.object({
   repo: z.string(),
@@ -35,9 +36,9 @@ export default async function scanIssues(ctx: Context, next: Next) {
   const imageUrls = await repositoryClient.getIssueImageUrls(issue.number);
   const imageUrl = imageUrls[0]!;
 
-  const jsx = await renderRequest(body, imageUrl);
+  const result = await createPageWithVision(repository, body, imageUrl);
 
   ctx.status = 200;
-  ctx.body = jsx;
+  ctx.body = result;
   return next();
 }

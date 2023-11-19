@@ -64,7 +64,9 @@ export class RepositoryWalker {
       // Recurse into subdirectories
       const dirs = entries.filter((entry) => entry.type === "dir");
       if (dirs.length === 0) {
-        throw new Error(`Error! Could not find file in directory ${path}`);
+        throw new Error(
+          `Error! Could not find file ${matchers} in directory ${path}`
+        );
       } else {
         return this.getFirstFile(`${path}/${dirs[0].name}`, matchers);
       }
