@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2";
 import { Repository } from "database";
 import { Octokit } from "octokit";
 import { FileWrite } from "~/tools/write_file";
@@ -20,7 +21,7 @@ export default class GithubRepositoryClient {
 
   constructor(
     private readonly client: Octokit,
-    private readonly repository: Repository
+    repository: Repository
   ) {
     [this.owner, this.repo] = repository.fullName.split("/");
   }
