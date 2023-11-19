@@ -63,8 +63,8 @@ importers:
         specifier: ^4.4.1
         version: 4.4.1
       langchain:
-        specifier: ^0.0.173
-        version: 0.0.173(@aws-sdk/client-s3@3.454.0)(axios@1.5.1)
+        specifier: ^0.0.192
+        version: 0.0.192(@aws-sdk/client-s3@3.454.0)(axios@1.5.1)
       octokit:
         specifier: ^3.1.1
         version: 3.1.1
@@ -231,8 +231,8 @@ packages:
     resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
     engines: {node: '>=0.10.0'}
 
-  /@anthropic-ai/sdk@0.6.8:
-    resolution: {integrity: sha512-z4gDFrBf+W2wOVvwA3CA+5bfKOxQhPeXQo7+ITWj3r3XPulIMEasVT0KrD41G+anr5Yc3d2PKvXKB6b1LSon5w==}
+  /@anthropic-ai/sdk@0.9.1:
+    resolution: {integrity: sha512-wa1meQ2WSfoY8Uor3EdrJq0jTiZJoKoSii2ZVWRY1oN4Tlr5s59pADg9T79FTbPe1/se5c3pBeZgJL63wmuoBA==}
     dependencies:
       '@types/node': 18.18.6
       '@types/node-fetch': 2.6.7
@@ -4662,8 +4662,8 @@ packages:
       - supports-color
     dev: false
 
-  /langchain@0.0.173(@aws-sdk/client-s3@3.454.0)(axios@1.5.1):
-    resolution: {integrity: sha512-J10B8bLuqbkYhQ0ECBm4ZRLZCFN5gHGSVcgZtRSwYikDJ046N2ILiGUI75kofDUZxzJqA8udYuSBiyWQfKVy4w==}
+  /langchain@0.0.192(@aws-sdk/client-s3@3.454.0)(axios@1.5.1):
+    resolution: {integrity: sha512-/QFWTx8wTXz2hkUZbZ+MiI1UNzmPZCMZg3ZXCJGFjDKFqnaPJG47SuVLu8AaefnyYlbxNhKcku++rUjDNzFQFw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@aws-crypto/sha256-js': ^5.0.0
@@ -4680,13 +4680,13 @@ packages:
       '@cloudflare/ai': ^1.0.12
       '@elastic/elasticsearch': ^8.4.0
       '@getmetal/metal-sdk': '*'
-      '@getzep/zep-js': ^0.8.0
-      '@gomomento/sdk': ^1.44.1
-      '@gomomento/sdk-core': ^1.44.1
-      '@gomomento/sdk-web': ^1.44.1
+      '@getzep/zep-js': ^0.9.0
+      '@gomomento/sdk': ^1.47.1
+      '@gomomento/sdk-core': ^1.47.1
+      '@gomomento/sdk-web': ^1.47.1
       '@google-ai/generativelanguage': ^0.2.1
       '@google-cloud/storage': ^6.10.1
-      '@huggingface/inference': ^1.5.1
+      '@huggingface/inference': ^2.6.4
       '@mozilla/readability': '*'
       '@notionhq/client': ^2.2.10
       '@opensearch-project/opensearch': '*'
@@ -4694,6 +4694,7 @@ packages:
       '@planetscale/database': ^1.8.0
       '@qdrant/js-client-rest': ^1.2.0
       '@raycast/api': ^1.55.2
+      '@rockset/client': ^0.9.1
       '@smithy/eventstream-codec': ^2.0.5
       '@smithy/protocol-http': ^3.0.6
       '@smithy/signature-v4': ^2.0.10
@@ -4720,6 +4721,7 @@ packages:
       closevector-node: 0.1.0-alpha.10
       closevector-web: 0.1.0-alpha.16
       cohere-ai: '>=6.0.0'
+      convex: ^1.3.1
       d3-dsv: ^2.0.0
       epub2: ^3.0.1
       faiss-node: ^0.5.1
@@ -4732,7 +4734,7 @@ packages:
       ignore: ^5.2.0
       ioredis: ^5.3.2
       jsdom: '*'
-      llmonitor: ^0.5.8
+      llmonitor: ^0.5.9
       lodash: ^4.17.21
       mammoth: '*'
       mongodb: ^5.2.0
@@ -4759,6 +4761,7 @@ packages:
       voy-search: 0.6.2
       weaviate-ts-client: ^1.4.0
       web-auth-library: ^1.0.3
+      ws: ^8.14.2
       youtube-transcript: ^1.0.6
       youtubei.js: ^5.8.0
     peerDependenciesMeta:
@@ -4818,6 +4821,8 @@ packages:
         optional: true
       '@raycast/api':
         optional: true
+      '@rockset/client':
+        optional: true
       '@smithy/eventstream-codec':
         optional: true
       '@smithy/protocol-http':
@@ -4869,6 +4874,8 @@ packages:
       closevector-web:
         optional: true
       cohere-ai:
+        optional: true
+      convex:
         optional: true
       d3-dsv:
         optional: true
@@ -4948,12 +4955,14 @@ packages:
         optional: true
       web-auth-library:
         optional: true
+      ws:
+        optional: true
       youtube-transcript:
         optional: true
       youtubei.js:
         optional: true
     dependencies:
-      '@anthropic-ai/sdk': 0.6.8
+      '@anthropic-ai/sdk': 0.9.1
       '@aws-sdk/client-s3': 3.454.0
       ansi-styles: 5.2.0
       axios: 1.5.1
@@ -4966,10 +4975,9 @@ packages:
       js-yaml: 4.1.0
       jsonpointer: 5.0.1
       langchainhub: 0.0.6
-      langsmith: 0.0.44
+      langsmith: 0.0.48
       ml-distance: 4.0.1
-      object-hash: 3.0.0
-      openai: 4.4.0
+      openai: 4.19.0
       openapi-types: 12.1.3
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -4985,8 +4993,8 @@ packages:
     resolution: {integrity: sha512-SW6105T+YP1cTe0yMf//7kyshCgvCTyFBMTgH2H3s9rTAR4e+78DA/BBrUL/Mt4Q5eMWui7iGuAYb3pgGsdQ9w==}
     dev: false
 
-  /langsmith@0.0.44:
-    resolution: {integrity: sha512-y0K3g6Lua7bvwxLB1Wn8kJR1LYp6cumRg8xX8TooLBmvK8srfv/tyCtlhZ+w1daOQmm1otVMKQ7CHJf83f9ryQ==}
+  /langsmith@0.0.48:
+    resolution: {integrity: sha512-s0hW8iZ90Q9XLTnDK0Pgee245URV3b1cXQjPDj5OKm1+KN7iSK1pKx+4CO7RcFLz58Ixe7Mt+mVcomYqUuryxQ==}
     hasBin: true
     dependencies:
       '@types/uuid': 9.0.6
@@ -5335,11 +5343,6 @@ packages:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
 
-  /object-hash@3.0.0:
-    resolution: {integrity: sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==}
-    engines: {node: '>= 6'}
-    dev: false
-
   /object-inspect@1.13.1:
     resolution: {integrity: sha512-5qoj1RUiKOMsCCNLV1CBiPYE10sziTsnmNxkAI/rZhiD63CF7IqdFGC/XzjWjpSgLf0LxXX3bDFIh0E18f6UhQ==}
     dev: false
@@ -5470,8 +5473,8 @@ packages:
       - encoding
     dev: false
 
-  /openai@4.4.0:
-    resolution: {integrity: sha512-JN0t628Kh95T0IrXl0HdBqnlJg+4Vq0Bnh55tio+dfCnyzHvMLiWyCM9m726MAJD2YkDU4/8RQB6rNbEq9ct2w==}
+  /openai@4.19.0:
+    resolution: {integrity: sha512-cJbl0noZyAaXVKBTMMq6X5BAvP1pm2rWYDBnZes99NL+Zh5/4NmlAwyuhTZEru5SqGGZIoiYKeMPXy4bm9DI0w==}
     hasBin: true
     dependencies:
       '@types/node': 18.18.6
@@ -5482,6 +5485,7 @@ packages:
       form-data-encoder: 1.7.2
       formdata-node: 4.4.1
       node-fetch: 2.7.0
+      web-streams-polyfill: 3.2.1
     transitivePeerDependencies:
       - encoding
     dev: false
