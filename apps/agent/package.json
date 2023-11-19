@@ -19,6 +19,7 @@
     "@octokit/rest": "^20.0.2",
     "@octokit/types": "^12.0.0",
     "@octokit/webhooks": "^12.0.3",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@t3-oss/env-core": "^0.7.1",
     "axios": "^1.5.1",
     "database": "workspace:*",
@@ -29,7 +30,6 @@
     "octokit": "^3.1.1",
     "openai": "^4.19.0",
     "smee-client": "^1.2.3",
-    "uuid": "^9.0.1",
     "zod": "^3.22.4",
     "zod-to-json-schema": "^3.21.4"
   },

@@ -1,9 +1,5 @@
-import axios from "axios";
 import { Repository } from "database";
 import { Octokit } from "octokit";
-import { v4 as uuid } from "uuid";
-import { z } from "zod";
-import { env } from "~/env";
 import { FileWrite } from "~/tools/write_file";
 import {
   extractHtmlImageUrls,
@@ -157,7 +153,7 @@ export default class GithubRepositoryClient {
         state: "open",
       }
     );
-    return data;
+    return data.filter((issue: any) => issue.pull_request === undefined);
   }
 
   /**
@@ -201,7 +197,7 @@ export default class GithubRepositoryClient {
     title: string,
     body: string
   ) {
-    const branchName = `web-spinner-${uuid()}`;
+    const branchName = `web-spinner-${createId()}`;
     const fileBlobs = await Promise.all(
       files.map(async (file) => ({
         path: file.path,

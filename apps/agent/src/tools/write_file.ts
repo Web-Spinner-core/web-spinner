@@ -1,8 +1,5 @@
-import { writeFileSync } from "fs";
 import { StructuredTool, ToolParams } from "langchain/tools";
-import { v4 as uuid } from "uuid";
 import { z } from "zod";
-import { serializeToolError } from "~/lib/error";
 
 export interface FileWrite {
   path: string;
