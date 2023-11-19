@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "~/env";
 
 export const Buckets = {
@@ -71,5 +72,24 @@ export default class StorageClient {
     if (!response?.Body) throw new Error("No response body");
 
     return response.Body.toString();
+  }
+
+  /**
+   * Generate a signed URL for a file in the storage bucket
+   */
+  async generateSignedUrl(
+    fileName: string,
+    bucketName: string = Buckets.DEFAULT,
+    ttlSeconds: number = 15 * 60
+  ): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+    });
+    const url = await getSignedUrl(this.client, command, {
+      expiresIn: ttlSeconds,
+    });
+
+    return url;
   }
 }
