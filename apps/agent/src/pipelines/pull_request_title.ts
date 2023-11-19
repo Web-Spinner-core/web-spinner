@@ -34,13 +34,17 @@ export async function createPullRequestTitle(
     [new SystemMessage(prompt), new HumanMessage(description)],
     {
       tools: [tool],
-      function_call: {
-        name: objectiveName,
+      tool_choice: {
+        function: {
+          name: objectiveName,
+        },
+        type: "function",
       },
     }
   );
 
-  const argumentsRaw = result.additional_kwargs.function_call?.arguments;
+  const toolCall = result.additional_kwargs.tool_calls![0];
+  const argumentsRaw = toolCall.function.arguments;
   const { title } = objectiveSchema.parse(JSON.parse(argumentsRaw ?? ""));
 
   return title;

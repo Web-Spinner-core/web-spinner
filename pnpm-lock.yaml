@@ -69,8 +69,8 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1
       openai:
-        specifier: ^4.12.4
-        version: 4.12.4
+        specifier: ^4.19.0
+        version: 4.19.0
       smee-client:
         specifier: ^1.2.3
         version: 1.2.3
@@ -5454,23 +5454,6 @@ packages:
 
   /only@0.0.2:
     resolution: {integrity: sha512-Fvw+Jemq5fjjyWz6CpKx6w9s7xxqo3+JCyM0WXWeCSOboZ8ABkyvP8ID4CZuChA/wxSx+XSJmdOm8rGVyJ1hdQ==}
-    dev: false
-
-  /openai@4.12.4:
-    resolution: {integrity: sha512-oPNVJkpgxDUKF6WGGdHEZh5m/kjmYxS2Y1q7YVFCkvKUGthb8OGYRGCFBRPq5CQJezifzABTZRlVYnXLd6L4vQ==}
-    hasBin: true
-    dependencies:
-      '@types/node': 18.18.6
-      '@types/node-fetch': 2.6.7
-      abort-controller: 3.0.0
-      agentkeepalive: 4.5.0
-      digest-fetch: 1.3.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0
-      web-streams-polyfill: 3.2.1
-    transitivePeerDependencies:
-      - encoding
     dev: false
 
   /openai@4.19.0:
