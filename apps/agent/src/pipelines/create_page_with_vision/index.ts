@@ -84,19 +84,23 @@ export async function createPageWithVision(
       { callbacks }
     );
 
-    // Create pull request
-    // const repositoryClient = new GithubRepositoryClient(
-    //   installationClient,
-    //   repository
-    // );
-    // const title = await createPullRequestTitle(description, callbacks);
+    if (fileWrites.length == 0) {
+      throw new Error("No files were created");
+    }
 
-    // await repositoryClient.createPullRequestFromFiles(
-    //   "main",
-    //   fileWrites,
-    //   `[Web Spinner] ${title}`,
-    //   `Resolves #${issueNum}\n\n## Summary\n${description}`
-    // );
+    // Create pull request
+    const repositoryClient = new GithubRepositoryClient(
+      installationClient,
+      repository
+    );
+    const title = await createPullRequestTitle(description, callbacks);
+
+    await repositoryClient.createPullRequestFromFiles(
+      "main",
+      fileWrites,
+      `[Web Spinner] ${title}`,
+      `Resolves #${issueNum}\n\n## Summary\n${description}`
+    );
 
     return result;
   } finally {
