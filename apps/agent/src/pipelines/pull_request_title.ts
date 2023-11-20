@@ -24,7 +24,7 @@ export async function createPullRequestTitle(
   const openai = new ChatOpenAI({
     modelName: "gpt-4-1106-preview",
     openAIApiKey: env.OPENAI_API_KEY,
-    temperature: 0.7,
+    temperature: 0,
   });
 
   const tool = new SaveAnalysisTool(
