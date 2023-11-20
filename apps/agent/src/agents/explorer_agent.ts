@@ -73,7 +73,11 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
   ];
   if (canWrite) {
     // Add write capabilities
-    tools.push(new WriteFileTool(args.writeOptions.accumulator, { callbacks }));
+    tools.push(
+      new WriteFileTool(args.writeOptions.accumulator, {
+        callbacks,
+      })
+    );
   }
 
   if (objective) {

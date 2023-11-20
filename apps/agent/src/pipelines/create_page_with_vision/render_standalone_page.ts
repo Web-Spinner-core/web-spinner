@@ -21,7 +21,7 @@ export default async function renderStandalonePage(
   const client = new ChatOpenAI({
     modelName: "gpt-4-vision-preview",
     maxTokens: 4096,
-    temperature: 0.7,
+    temperature: 0.1,
   });
   const response = await client.call(
     [
