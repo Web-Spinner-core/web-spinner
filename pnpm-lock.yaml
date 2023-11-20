@@ -66,8 +66,8 @@ importers:
         specifier: ^4.4.1
         version: 4.4.1
       langchain:
-        specifier: ^0.0.192
-        version: 0.0.192(@aws-sdk/client-s3@3.454.0)(axios@1.5.1)
+        specifier: ^0.0.193
+        version: 0.0.193(@aws-sdk/client-s3@3.454.0)(axios@1.5.1)
       octokit:
         specifier: ^3.1.1
         version: 3.1.1
@@ -4662,8 +4662,8 @@ packages:
       - supports-color
     dev: false
 
-  /langchain@0.0.192(@aws-sdk/client-s3@3.454.0)(axios@1.5.1):
-    resolution: {integrity: sha512-/QFWTx8wTXz2hkUZbZ+MiI1UNzmPZCMZg3ZXCJGFjDKFqnaPJG47SuVLu8AaefnyYlbxNhKcku++rUjDNzFQFw==}
+  /langchain@0.0.193(@aws-sdk/client-s3@3.454.0)(axios@1.5.1):
+    resolution: {integrity: sha512-vQyCzjhGJiYIuZPSRYOLLpFITaN7NcHAjwe2OSP7MfDQWSl75sbFIQZXcR4SVk4izMSr6N+ui5D/jeq3WMmgiQ==}
     engines: {node: '>=18'}
     peerDependencies:
       '@aws-crypto/sha256-js': ^5.0.0
