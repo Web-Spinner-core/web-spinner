@@ -16,6 +16,7 @@ import SaveAnalysisTool from "../tools/save_analysis";
 import { ToolSchema } from "../tools/util";
 import WriteFileTool, { FileWriteAccumulator } from "../tools/write_file";
 import { Callbacks } from "langchain/callbacks";
+import { createChatModel } from "~/lib/openai";
 
 interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
@@ -103,13 +104,11 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
 
-  const model = new ChatOpenAI({
+  const model = await createChatModel({
     modelName: modelName ?? "gpt-4-1106-preview",
-    openAIApiKey: env.OPENAI_API_KEY,
     temperature: temperature ?? 0,
-    cache: true,
     callbacks
-  });
+  })
 
   // Executors
   const chain = new LLMChain({

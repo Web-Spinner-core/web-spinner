@@ -1,6 +1,6 @@
 import { Callbacks } from "langchain/callbacks";
-import { ChatOpenAI } from "langchain/chat_models/openai";
 import { HumanMessage, SystemMessage } from "langchain/schema";
+import { createChatModel } from "~/lib/openai";
 
 const systemPrompt = `You are an expert frontend web developer, specializing in React and Tailwind.
 You will be provided with the description of an issue and a mockup describing the changes to make.
@@ -18,12 +18,13 @@ export default async function renderStandalonePage(
   imageUrl: string,
   callbacks?: Callbacks
 ) {
-  const client = new ChatOpenAI({
+  const model = await createChatModel({
     modelName: "gpt-4-vision-preview",
     maxTokens: 4096,
     temperature: 0.1,
-  });
-  const response = await client.call(
+    callbacks
+  })
+  const response = await model.call(
     [
       new SystemMessage(systemPrompt),
       new HumanMessage({

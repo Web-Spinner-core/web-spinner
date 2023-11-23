@@ -13,6 +13,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.454.0",
     "@aws-sdk/s3-request-presigner": "^3.454.0",
+    "@gomomento/sdk": "^1.51.1",
     "@koa/router": "^11.0.2",
     "@octokit/auth-app": "^6.0.1",
     "@octokit/core": "^5.0.1",

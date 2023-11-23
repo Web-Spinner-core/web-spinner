@@ -1,10 +1,30 @@
+import { Callbacks } from "langchain/callbacks";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { env } from "~/env";
+import { getCache } from "./cache";
+
+export interface CreateChatModelParams {
+  modelName: string;
+  maxTokens?: number;
+  temperature?: number;
+  callbacks?: Callbacks
+}
 
 /**
- * OpenAI chat model
+ * Create a chat model
  */
-export const chatOpenAi = new ChatOpenAI({
-  openAIApiKey: env.OPENAI_API_KEY,
-  modelName: "gpt-3.5-turbo",
-});
+export async function createChatModel({
+  modelName,
+  maxTokens,
+  temperature,
+  callbacks
+}: CreateChatModelParams) {
+  const cache = await getCache();
+
+  return new ChatOpenAI({
+    modelName,
+    maxTokens,
+    temperature,
+    cache,
+    callbacks
+  });
+}
