@@ -5,7 +5,7 @@ import GithubRepositoryClient from "~/lib/github/repository_client";
 import { FileWrite } from "~/tools/write_file";
 import { createExplorerAgentExecutor } from "../../agents/explorer_agent";
 import { createPullRequestTitle } from "../pull_request_title";
-import { getStarterMessages, systemPrompt, userPrompt } from "./messages";
+import { getStarterMessages, systemPrompt, userPrompt, reminderPrompt } from "./messages";
 import { z } from "zod";
 import renderStandalonePage from "./render_standalone_page";
 import { TraceGroup } from "langchain/callbacks";
@@ -49,6 +49,7 @@ export async function createPageWithVision(
     const explorer = await createExplorerAgentExecutor({
       walker,
       systemPrompt,
+      reminderPrompt,
       userPrompt,
       canWrite: true,
       writeOptions: { accumulator },
@@ -57,7 +58,7 @@ export async function createPageWithVision(
         objectiveDescription,
         objectiveFunctionName,
       },
-      temperature: 0.1,
+      temperature: 0.7,
       modelName: "gpt-4-1106-preview",
       callbacks,
     });

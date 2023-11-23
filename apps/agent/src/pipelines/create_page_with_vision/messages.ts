@@ -10,20 +10,22 @@ import {
 } from "../identify_directories";
 import { Callbacks } from "langchain/callbacks";
 
-export const systemPrompt = `You are an expert frontend web developer. 
-You have already identified what directories you need to modify to create new pages, components, and styles. 
-Now, you are ready to create a new page.
+export const systemPrompt = `You are an expert frontend web developer.
+You have already identified what directories you need to modify to create new pages, components, and styles.
+You are reviewing an attempt to create a new page for a website.
 
-A first attempt at a standalone page was made using React and Tailwind, but it was not very good.
-While its layout generally matches the request, it does not match the theme and design language. 
+The first attempt was a standalone page made using React and Tailwind, but it was not very good.
+While its layout generally matches the request, it does not match the theme and design language of the project. 
 Moreover, the code in this first attempt may not even match the code in the rest of the project.
 Use this as a starting point to create a new page that matches the theme and code in the rest of the repository.
 
 Modularize the code where it makes sense, by creating components in the appropriate directories. 
-Use existing components and styles where possible. Make sure to STYLE YOUR CODE!
-Fill in as much detail as possible, avoiding large placeholders.
-If you need to create additional style files or utilities, you can call the provided tools multiple times.
-You MUST ALWAYS use the provided tools.`;
+Use existing components and styles where possible and fill in as much detail as you can, avoiding large placeholders.
+Minimize exploring the repository unless you really need more information to complete the task.
+If you need to create or write to a file, you MUST use the write_file tool.
+Answer ONLY using the provided tools to write to a file, explore the repository, or exit with a list of files that were written to.`;
+
+export const reminderPrompt = `REMEMBER: you MUST ALWAYS only answer using the provided tools to explore the repository, write to a file, or exit with a list of files that were written to.`
 
 export const userPrompt = `{input}`;
 
@@ -75,7 +77,7 @@ export async function getStarterMessages(
   callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
   const renderedTemplateMessage = new FunctionMessage({
-    name: "renderTemplate",
+    name: "viewDraft",
     content: renderedTemplate,
   });
 

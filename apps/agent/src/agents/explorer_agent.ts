@@ -20,6 +20,7 @@ import { Callbacks } from "langchain/callbacks";
 interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
   systemPrompt: string;
+  reminderPrompt?: string;
   userPrompt?: string;
   objective?: {
     objectiveSchema: T;
@@ -57,6 +58,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
   const {
     walker,
     systemPrompt,
+    reminderPrompt,
     userPrompt,
     objective,
     temperature,
@@ -97,6 +99,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     SystemMessagePromptTemplate.fromTemplate(systemPrompt),
     HumanMessagePromptTemplate.fromTemplate(userPrompt ?? "{input}"),
     new MessagesPlaceholder("chat_history"),
+    ...(reminderPrompt ? [SystemMessagePromptTemplate.fromTemplate(reminderPrompt)] : []),
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
 
@@ -104,17 +107,14 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     modelName: modelName ?? "gpt-4-1106-preview",
     openAIApiKey: env.OPENAI_API_KEY,
     temperature: temperature ?? 0,
+    cache: true,
+    callbacks
   });
-  model.predictMessages;
 
   // Executors
   const chain = new LLMChain({
     prompt: promptTemplate,
-    llm: new ChatOpenAI({
-      modelName: modelName ?? "gpt-4-1106-preview",
-      openAIApiKey: env.OPENAI_API_KEY,
-      temperature: temperature ?? 0,
-    }),
+    llm: model,
     callbacks,
   });
   const agent = new OpenAIAgent({
@@ -129,5 +129,6 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     verbose: true,
     maxIterations: 10,
     callbacks,
+    returnIntermediateSteps: true
   });
 }
