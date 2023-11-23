@@ -19,9 +19,9 @@ While its layout generally matches the request, it does not match the theme and 
 Moreover, the code in this first attempt may not even match the code in the rest of the project.
 Use this as a starting point to create a new page that matches the theme and code in the rest of the repository.
 
-Modularize the code where it makes sense, by creating components in the appropriate directories. 
 Use existing components and styles where possible and fill in as much detail as you can, avoiding large placeholders.
-Minimize exploring the repository unless you really need more information to complete the task.
+If a component you need does not exist yet, opt to modularize your code and create a new component in the appropriate directories.
+Explore the repository to better understand the coding conventions for creating new pages and components.
 If you need to create or write to a file, you MUST use the write_file tool.
 Answer ONLY using the provided tools to write to a file, explore the repository, or exit with a list of files that were written to.`;
 
@@ -35,7 +35,7 @@ async function serializeListFiles(
   callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
   const listFilesTool = new ListFilesTool(walker, { callbacks });
-  const files = await walker.getFiles(path);
+  const files = await listFilesTool.call({ path }, callbacks);
 
   return serializeFunctionCall(
     listFilesTool,
