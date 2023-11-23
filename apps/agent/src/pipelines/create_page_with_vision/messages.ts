@@ -51,10 +51,11 @@ async function serializeFileRead(
   walker: RepositoryWalker,
   parentPath: string,
   matchers: string[],
+  antiMatchers: string[] = [],
   callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
   const readFileTool = new ReadFileTool(walker, { callbacks });
-  const file = await walker.getFirstFile(parentPath, matchers);
+  const file = await walker.getFirstFile(parentPath, matchers, antiMatchers);
   const path = file.path;
   const fileContent = await readFileTool.call({ path }, { callbacks });
 
@@ -92,6 +93,10 @@ export async function getStarterMessages(
   const dirs = [pages, components];
   const files = [
     {
+      path: "",
+      matchers: ["package.json"],
+    },
+    {
       // eslint config
       path: "",
       matchers: [".eslintrc.js", ".eslintrc.cjs", ".eslintrc.json"],
@@ -99,6 +104,7 @@ export async function getStarterMessages(
     {
       path: components,
       matchers: ["tsx"],
+      antiMatchers: ["icon"]
     },
   ];
 
@@ -106,8 +112,8 @@ export async function getStarterMessages(
     dirs.map((dir) => serializeListFiles(walker, dir, callbacks))
   );
   const fileMessages = await Promise.all(
-    files.map(({ path, matchers }) =>
-      serializeFileRead(walker, path, matchers, callbacks)
+    files.map(({ path, matchers, antiMatchers }) =>
+      serializeFileRead(walker, path, matchers, antiMatchers, callbacks)
     )
   );
 

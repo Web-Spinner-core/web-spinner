@@ -48,7 +48,8 @@ export class RepositoryWalker {
    */
   async getFirstFile(
     path: string,
-    matchers?: string[]
+    matchers?: string[],
+    antiMatchers?: string[]
   ): Promise<File & { type: "file"; path: string }> {
     const entries = await this.getFiles(path);
 
@@ -56,7 +57,16 @@ export class RepositoryWalker {
     const file =
       matchers != null
         ? files.find((entry) =>
-            matchers.some((matcher) => entry.name.endsWith(matcher))
+            matchers.some((matcher) => {
+              // If specified, antimatchers must not be present
+              if (antiMatchers) {
+                return (
+                  entry.name.endsWith(matcher) &&
+                  antiMatchers.every((antiMatcher) => !entry.name.includes(antiMatcher))
+                );
+              }
+              return entry.name.endsWith(matcher);
+            })
           )
         : files[0];
 
