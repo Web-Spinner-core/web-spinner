@@ -1,8 +1,7 @@
 import { Callbacks } from "langchain/callbacks";
-import { ChatOpenAI } from "langchain/chat_models/openai";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { z } from "zod";
-import { env } from "~/env";
+import { createChatModel } from "~/lib/openai";
 import SaveAnalysisTool from "~/tools/save_analysis";
 
 const prompt = `You are a senior engineer that upholds excellent coding standards. 
@@ -21,11 +20,10 @@ export async function createPullRequestTitle(
   description: string,
   callbacks?: Callbacks
 ): Promise<string> {
-  const openai = new ChatOpenAI({
+  const openai = await createChatModel({
     modelName: "gpt-4-1106-preview",
-    openAIApiKey: env.OPENAI_API_KEY,
     temperature: 0,
-  });
+  })
 
   const tool = new SaveAnalysisTool(
     objectiveSchema,
