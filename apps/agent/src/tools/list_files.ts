@@ -4,7 +4,7 @@ import { serializeToolError } from "~/lib/error";
 import { RepositoryWalker } from "~/lib/github/repository";
 
 const parameterSchema = z.object({
-  directory: z.string().describe("The directory to list files in"),
+  path: z.string().describe("The path to the directory to list files in"),
 });
 
 export default class ListFilesTool extends StructuredTool<
@@ -21,8 +21,8 @@ export default class ListFilesTool extends StructuredTool<
     super(toolParams);
   }
 
-  async _call({ directory }: z.input<this["schema"]>): Promise<string> {
-    let cleanedDirectory = directory.trim();
+  async _call({ path }: z.input<this["schema"]>): Promise<string> {
+    let cleanedDirectory = path.trim();
     if (cleanedDirectory.startsWith("/")) {
       cleanedDirectory = cleanedDirectory.slice(1);
     } else if (cleanedDirectory.startsWith("./")) {

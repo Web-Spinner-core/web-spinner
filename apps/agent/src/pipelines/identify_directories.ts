@@ -43,7 +43,7 @@ export async function getStarterMessages(
   callbacks?: Callbacks
 ): Promise<BaseMessage[]> {
   const listFilesTool = new ListFilesTool(walker, { callbacks });
-  const seedFiles = await listFilesTool.call({ directory: "" }, { callbacks });
+  const seedFiles = await listFilesTool.call({ path: "" }, { callbacks });
 
   return serializeFunctionCall(
     listFilesTool,
