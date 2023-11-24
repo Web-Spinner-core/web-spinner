@@ -102,6 +102,14 @@ export async function getStarterMessages(
       matchers: [".eslintrc.js", ".eslintrc.cjs", ".eslintrc.json"],
     },
     {
+      path: pages,
+      matchers: ["layout.tsx"],
+    },
+    {
+      path: pages,
+      matchers: ["page.tsx"]
+    },
+    {
       path: components,
       matchers: ["tsx"],
       antiMatchers: ["icon"]
