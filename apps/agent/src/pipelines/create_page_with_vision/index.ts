@@ -5,7 +5,12 @@ import GithubRepositoryClient from "~/lib/github/repository_client";
 import { FileWrite } from "~/tools/write_file";
 import { createExplorerAgentExecutor } from "../../agents/explorer_agent";
 import { createPullRequestTitle } from "../pull_request_title";
-import { getStarterMessages, systemPrompt, userPrompt, reminderPrompt } from "./messages";
+import {
+  getStarterMessages,
+  systemPrompt,
+  userPrompt,
+  reminderPrompt,
+} from "./messages";
 import { z } from "zod";
 import renderStandalonePage from "./render_standalone_page";
 import { TraceGroup } from "langchain/callbacks";
@@ -17,8 +22,9 @@ export const objectiveSchema = z.object({
     .describe("The paths to the files that were created"),
 });
 
-const objectiveFunctionName = "record_files";
-const objectiveDescription = "Record the new files that were created";
+const objectiveFunctionName = "finish_changes";
+const objectiveDescription =
+  "Mark all changes as complete and ready for review.";
 
 /**
  * Create a page with vision support
