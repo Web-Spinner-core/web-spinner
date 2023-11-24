@@ -17,6 +17,7 @@ import { ToolSchema } from "../tools/util";
 import WriteFileTool, { FileWriteAccumulator } from "../tools/write_file";
 import { Callbacks } from "langchain/callbacks";
 import { createChatModel } from "~/lib/openai";
+import UpdateFileTool from "~/tools/update_file";
 
 interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
@@ -81,6 +82,11 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
         callbacks,
       })
     );
+    tools.push(
+      new UpdateFileTool(args.writeOptions.accumulator, {
+        callbacks,
+      })
+    );
   }
 
   if (objective) {
@@ -100,15 +106,17 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     SystemMessagePromptTemplate.fromTemplate(systemPrompt),
     HumanMessagePromptTemplate.fromTemplate(userPrompt ?? "{input}"),
     new MessagesPlaceholder("chat_history"),
-    ...(reminderPrompt ? [SystemMessagePromptTemplate.fromTemplate(reminderPrompt)] : []),
+    ...(reminderPrompt
+      ? [SystemMessagePromptTemplate.fromTemplate(reminderPrompt)]
+      : []),
     new MessagesPlaceholder("agent_scratchpad"),
   ]);
 
   const model = await createChatModel({
     modelName: modelName ?? "gpt-4-1106-preview",
     temperature: temperature ?? 0,
-    callbacks
-  })
+    callbacks,
+  });
 
   // Executors
   const chain = new LLMChain({
@@ -128,6 +136,6 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     verbose: true,
     maxIterations: 10,
     callbacks,
-    returnIntermediateSteps: true
+    returnIntermediateSteps: true,
   });
 }

@@ -10,27 +10,27 @@ export interface FileWrite {
 
 export type FileWriteAccumulator = (file: FileWrite) => void;
 
-interface WriteFileToolParams extends ToolParams {
+interface UpdateFileToolParams extends ToolParams {
   debug?: boolean;
 }
 
 const DEBUG_DIR = "/home/user/web-spinner/tmp";
 
 const parameterSchema = z.object({
-  path: z.string().describe("The path of the file to write to"),
-  content: z.string().describe("The content to write"),
+  path: z.string().describe("The path of the file to update"),
+  content: z.string().describe("The new content to write"),
 });
 
-export default class WriteFileTool extends StructuredTool<
+export default class UpdateFileTool extends StructuredTool<
   typeof parameterSchema
 > {
-  name = "write_file";
-  description = "Write to a file.";
+  name = "update_file";
+  description = "Update an existing file.";
   schema = parameterSchema;
 
   constructor(
     private readonly accumulator: FileWriteAccumulator,
-    private readonly toolParams?: WriteFileToolParams
+    private readonly toolParams?: UpdateFileToolParams
   ) {
     super(toolParams);
   }
