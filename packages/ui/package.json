@@ -18,6 +18,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "config": "workspace:*",
     "lucide-react": "^0.293.0",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7"

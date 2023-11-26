@@ -251,6 +251,9 @@ importers:
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
+      config:
+        specifier: workspace:*
+        version: link:../config
       lucide-react:
         specifier: ^0.293.0
         version: 0.293.0(react@18.2.0)
