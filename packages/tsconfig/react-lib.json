@@ -3,8 +3,9 @@
   "display": "React Library",
   "extends": "./base.json",
   "compilerOptions": {
+    "plugins": [{ "name": "next" }],
     "target": "es5",
-    "lib": ["dom", "esnext"],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
