@@ -2,7 +2,8 @@
   "name": "ui",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
   "scripts": {
     "ui:add": "pnpm dlx shadcn-ui@latest add"
   },
