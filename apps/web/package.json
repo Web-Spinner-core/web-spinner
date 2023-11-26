@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tldraw/tldraw": "2.0.0-alpha.18",
     "next": "^13.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -17,9 +18,12 @@
     "@types/node": "^17.0.12",
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
+    "autoprefixer": "^10.4.16",
     "config": "workspace:*",
     "database": "workspace:*",
     "eslint": "^7.32.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
     "tsconfig": "workspace:*",
     "typescript": "^4.5.3"
   }
