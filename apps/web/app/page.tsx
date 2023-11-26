@@ -1,10 +1,11 @@
 "use client";
 import "@tldraw/tldraw/tldraw.css";
+import { Button } from "@ui/components";
+import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
-import { GitBranchIcon, GithubIcon } from "lucide-react";
 import NextJsIcon from "@ui/icons/nextjs";
-import { Tldraw } from "@tldraw/tldraw";
 import clsx from "clsx";
+import { GitBranchIcon, GithubIcon } from "lucide-react";
 
 const repo = "Web-Spinner-gramliu/web-spinner";
 const branch = "main";
@@ -24,7 +25,7 @@ export default async function IndexPage() {
       <section className="p-4 grid grid-cols-2 items-center justify-center">
         {/* Editor */}
         <div className="h-[70vh] w-[40vw] self-center justify-self-center bg-gray-100 rounded-md">
-          <Tldraw />
+          <Canvas />
         </div>
         {/* Output */}
         <div
@@ -36,6 +37,9 @@ export default async function IndexPage() {
           <p className="font-mono text-lg">Placeholder for rendered output</p>
         </div>
       </section>
+      <div className="flex flex-row items-center justify-center mt-10">
+        <Button className="w-32">✨ Generate</Button>
+      </div>
     </main>
   );
 }
