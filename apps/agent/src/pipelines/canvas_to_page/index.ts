@@ -34,7 +34,7 @@ When sent new wireframes, respond ONLY with the contents of the html file.`;
  */
 export default async function convertCanvasToPage(
   imageUrl: string,
-  selectionText: string
+  pageText: string
 ) {
   // Observability group
   const traceGroup = new TraceGroup("convert_canvas_to_page");
@@ -66,7 +66,7 @@ export default async function convertCanvasToPage(
             },
             {
               type: "text",
-              text: selectionText,
+              text: pageText,
             },
           ],
         }),

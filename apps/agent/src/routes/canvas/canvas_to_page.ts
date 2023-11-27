@@ -4,7 +4,7 @@ import convertCanvasToPage from "~/pipelines/canvas_to_page";
 
 const bodySchema = z.object({
   imageUrl: z.string(),
-  selectionText: z.string(),
+  pageText: z.string(),
 });
 
 /**
@@ -14,9 +14,9 @@ export default async function convertCanvasInputToPage(
   ctx: Context,
   next: Next
 ) {
-  const { imageUrl, selectionText } = bodySchema.parse(ctx.request.body);
+  const { imageUrl, pageText } = bodySchema.parse(ctx.request.body);
 
-  const result = await convertCanvasToPage(imageUrl, selectionText);
+  const result = await convertCanvasToPage(imageUrl, pageText);
 
   ctx.status = 200;
   ctx.body = result;
