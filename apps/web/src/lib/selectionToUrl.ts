@@ -12,7 +12,7 @@ function blobToBase64(blob: Blob): Promise<string> {
  * Get the current selection as a base64 encoded image data url
  */
 export async function getSelectionAsImageDataUrl(editor: Editor) {
-  const svg = await editor.getSvg(editor.getSelectedShapes());
+  const svg = await editor.getSvg([...editor.getCurrentPageShapeIds()]);
   if (!svg) throw new Error("Could not get SVG");
 
   const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);

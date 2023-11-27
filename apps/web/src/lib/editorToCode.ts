@@ -21,11 +21,11 @@ export async function convertEditorToCode(editor: Editor): Promise<string> {
  * Serialize the contents of the current selection
  */
 function getSelectionAsText(editor: Editor) {
-  const selectedShapeIds = editor.getSelectedShapeIds();
-  const selectedShapeDescendantIds =
-    editor.getShapeAndDescendantIds(selectedShapeIds);
+  const shapeIds = editor.getCurrentPageShapeIds();
+  const shapeDescendantIds =
+    editor.getShapeAndDescendantIds([...shapeIds]);
 
-  const texts = Array.from(selectedShapeDescendantIds)
+  const texts = Array.from(shapeDescendantIds)
     .map((id) => {
       const shape = editor.getShape(id);
       if (!shape) return null;
