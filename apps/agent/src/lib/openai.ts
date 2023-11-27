@@ -6,7 +6,8 @@ export interface CreateChatModelParams {
   modelName: string;
   maxTokens?: number;
   temperature?: number;
-  callbacks?: Callbacks
+  callbacks?: Callbacks;
+  cache?: boolean;
 }
 
 /**
@@ -16,9 +17,10 @@ export async function createChatModel({
   modelName,
   maxTokens,
   temperature,
-  callbacks
+  callbacks,
+  cache: shouldCache = true
 }: CreateChatModelParams) {
-  const cache = await getCache();
+  const cache = shouldCache ? await getCache() : undefined;
 
   return new ChatOpenAI({
     modelName,
