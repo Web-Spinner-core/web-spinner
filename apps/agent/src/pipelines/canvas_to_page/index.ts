@@ -1,4 +1,4 @@
-import { Callbacks } from "langchain/callbacks";
+import { TraceGroup } from "langchain/callbacks";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { createChatModel } from "~/lib/openai";
 
@@ -34,47 +34,55 @@ When sent new wireframes, respond ONLY with the contents of the html file.`;
  */
 export default async function convertCanvasToPage(
   imageUrl: string,
-  selectionText: string,
-  callbacks?: Callbacks
+  selectionText: string
 ) {
-  const model = await createChatModel({
-    modelName: "gpt-4-vision-preview",
-    maxTokens: 4096,
-    temperature: 0.1,
-    callbacks
-  })
-  const response = await model.call(
-    [
-      new SystemMessage(systemPrompt),
-      new HumanMessage({
-        content: [
-          {
-            type: "image_url",
-            image_url: {
-              url: imageUrl,
-              detail: "high"
-            }
-          },
-          {
-            type: "text",
-            text: "Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?"
-          },
-          {
-            type: "text",
-            text: selectionText
-          }
-        ],
-      }),
-    ],
-    { callbacks }
-  );
-  if (Array.isArray(response.content)) {
-    throw new Error(`Expected response content to be a string`);
-  }
-  const content = response.content;
-  const start = content.indexOf("<!DOCTYPE html>");
-  const end = content.lastIndexOf("</html>");
+  // Observability group
+  const traceGroup = new TraceGroup("convert_canvas_to_page");
+  const callbacks = await traceGroup.start();
 
-  const html = content.slice(start, end + "</html>".length).trim();
-  return html;
+  try {
+    const model = await createChatModel({
+      modelName: "gpt-4-vision-preview",
+      maxTokens: 4096,
+      temperature: 0.1,
+      callbacks,
+      cache: false
+    });
+    const response = await model.call(
+      [
+        new SystemMessage(systemPrompt),
+        new HumanMessage({
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: imageUrl,
+                detail: "high",
+              },
+            },
+            {
+              type: "text",
+              text: "Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?",
+            },
+            {
+              type: "text",
+              text: selectionText,
+            },
+          ],
+        }),
+      ],
+      { callbacks }
+    );
+    if (Array.isArray(response.content)) {
+      throw new Error(`Expected response content to be a string`);
+    }
+    const content = response.content;
+    const start = content.indexOf("<!DOCTYPE html>");
+    const end = content.lastIndexOf("</html>");
+
+    const html = content.slice(start, end + "</html>".length).trim();
+    return html;
+  } finally {
+    await traceGroup.end();
+  }
 }
