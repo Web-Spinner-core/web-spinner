@@ -1,6 +1,5 @@
-import { Editor } from "@tldraw/tldraw";
+import { Editor, getSvgAsImage } from "@tldraw/tldraw";
 import fetchCanvasToPageResponse from "./fetchCanvasToPageResponse";
-import { getSelectionAsImageDataUrl } from "./selectionToUrl";
 
 /**
  * Convert the editor selection to code
@@ -11,8 +10,8 @@ export async function convertEditorToCode(editor: Editor): Promise<string> {
     throw new Error("Page is empty. Draw something first");
   }
 
-  const imageUrl = await getSelectionAsImageDataUrl(editor);
-  const selectionText = getSelectionAsText(editor);
+  const imageUrl = await getCurrentPageImageDataUrl(editor);
+  const selectionText = getCurrentPageAsText(editor);
 
   return fetchCanvasToPageResponse(imageUrl, selectionText);
 }
@@ -20,7 +19,7 @@ export async function convertEditorToCode(editor: Editor): Promise<string> {
 /**
  * Serialize the contents of the current selection
  */
-function getSelectionAsText(editor: Editor) {
+function getCurrentPageAsText(editor: Editor) {
   const shapeIds = editor.getCurrentPageShapeIds();
   const shapeDescendantIds =
     editor.getShapeAndDescendantIds([...shapeIds]);
@@ -43,4 +42,34 @@ function getSelectionAsText(editor: Editor) {
     .filter((v) => v !== null && v !== "");
 
   return texts.join("\n");
+}
+
+/**
+ * Convert a binary blob to base64
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Get the current selection as a base64 encoded image data url
+ */
+export async function getCurrentPageImageDataUrl(editor: Editor) {
+  const svg = await editor.getSvg([...editor.getCurrentPageShapeIds()]);
+  if (!svg) throw new Error("Could not get SVG");
+
+  const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  const blob = await getSvgAsImage(svg, IS_SAFARI, {
+    type: "png",
+    quality: 1,
+    scale: 1,
+  });
+
+  if (!blob) throw new Error("Could not get blob");
+  return await blobToBase64(blob);
 }
