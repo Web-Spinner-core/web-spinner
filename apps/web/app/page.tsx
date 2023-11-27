@@ -89,7 +89,7 @@ export default function IndexPage() {
                     theme={nord}
                     showLineNumbers
                     customStyle={{
-                      fontFamily: "Roboto Mono",
+                      fontFamily: "var(--font-mono)",
                     }}
                   />
                 </TabsContent>
