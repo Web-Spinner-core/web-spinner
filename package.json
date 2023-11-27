@@ -5,6 +5,7 @@
     "seed": "tsx packages/database/src/seed.ts"
   },
   "scripts": {
+    "apps": "turbo dev --filter './apps/*'",
     "build": "turbo run build",
     "db:migrate:deploy": "turbo run db:migrate:deploy",
     "db:push": "turbo run db:push",

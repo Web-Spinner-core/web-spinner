@@ -13,7 +13,7 @@ if (env.NODE_ENV === "development") {
 }
 
 // Start server
-const port = env.PORT ?? 3000;
+const port = env.PORT ?? 3001;
 app.listen(port, () => {
   console.log(`Running on port ${port}`);
 });

@@ -1,24 +1,22 @@
 "use client";
 import { Editor, Tldraw } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback } from "react";
 import initialState from "./initial-state.json";
 
 interface CanvasProps {
   onPageChanged?: (newPageId: string, oldPageId: string) => void;
+  setEditor?: Dispatch<SetStateAction<Editor>>;
 }
 
 /**
  * Canvas wrapper for tldraw
  */
 export default function Canvas({
-  onPageChanged
+  onPageChanged,
+  setEditor
 }: CanvasProps) {
-  const [editor, setEditor] = useState<Editor>();
-
   const onEditorMount = useCallback((editor: Editor) => {
-    setEditor(editor);
-
     editor.on("change", (change) => {
       if (change.source !== "user") {
         return;
@@ -33,6 +31,10 @@ export default function Canvas({
         }
       }
     });
+
+    if (setEditor) {
+      setEditor(editor);
+    }
   }, []);
 
   return (
