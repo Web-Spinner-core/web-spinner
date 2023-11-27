@@ -1,7 +1,7 @@
 "use client";
 import { Editor } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
-import { Button } from "@ui/components";
+import { Button, Skeleton } from "@ui/components";
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import NextJsIcon from "@ui/icons/nextjs";
@@ -13,6 +13,21 @@ import { convertEditorToCode } from "~/lib/editorToCode";
 const repo = "Web-Spinner-gramliu/web-spinner";
 const branch = "main";
 const tech = "Next.js App Router";
+
+/**
+ * Loading placeholder for rendered output
+ */
+function SkeletonPlaceholder() {
+  return (
+    <div className="h-full w-full flex justify-center items-center space-x-4">
+      <Skeleton className="h-12 w-12 rounded-full bg-gray-300" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px] bg-gray-300" />
+        <Skeleton className="h-4 w-[200px] bg-gray-300" />
+      </div>
+    </div>
+  );
+}
 
 export default async function IndexPage() {
   const [editor, setEditor] = useState<Editor>();
@@ -41,7 +56,11 @@ export default async function IndexPage() {
             "flex items-center justify-center"
           )}
         >
-          <iframe className="h-full w-full" srcDoc={output} />
+          {loading ? (
+            <SkeletonPlaceholder />
+          ) : (
+            <iframe className="h-full w-full" srcDoc={output} />
+          )}
         </div>
       </section>
       <div className="flex flex-row items-center justify-center mt-10">
