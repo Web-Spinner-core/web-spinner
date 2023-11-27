@@ -17,6 +17,7 @@ import NextJsIcon from "@ui/icons/nextjs";
 import clsx from "clsx";
 import { GitBranchIcon, GithubIcon } from "lucide-react";
 import { useState } from "react";
+import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
 
 const repo = "Web-Spinner-gramliu/web-spinner";
@@ -81,7 +82,16 @@ export default function IndexPage() {
                   <iframe className="h-full w-full" srcDoc={standaloneCode} />
                 </TabsContent>
                 <TabsContent value="code_standalone" className="h-full">
-                  {standaloneCode}
+                  <CopyBlock
+                    codeBlock
+                    text={standaloneCode}
+                    language="html"
+                    theme={nord}
+                    showLineNumbers
+                    customStyle={{
+                      fontFamily: "Roboto Mono",
+                    }}
+                  />
                 </TabsContent>
               </>
             )}
