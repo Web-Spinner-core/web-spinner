@@ -6,9 +6,9 @@ import { getSelectionAsImageDataUrl } from "./selectionToUrl";
  * Convert the editor selection to code
  */
 export async function convertEditorToCode(editor: Editor): Promise<string> {
-  const selectedShapes = editor.getSelectedShapes();
-  if (selectedShapes.length === 0) {
-    throw new Error("First select something to make real.");
+  const shapes = editor.getCurrentPageShapeIds();
+  if (shapes.size === 0) {
+    throw new Error("Page is empty. Draw something first");
   }
 
   const imageUrl = await getSelectionAsImageDataUrl(editor);
