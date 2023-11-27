@@ -1,7 +1,7 @@
 "use client";
 import { Editor } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
-import { Button, Skeleton } from "@ui/components";
+import { Button, Skeleton, Toaster, useToast } from "@ui/components";
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import NextJsIcon from "@ui/icons/nextjs";
@@ -29,10 +29,11 @@ function SkeletonPlaceholder() {
   );
 }
 
-export default async function IndexPage() {
+export default function IndexPage() {
   const [editor, setEditor] = useState<Editor>();
   const [output, setOutput] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
+  const { toast } = useToast();
 
   return (
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-10">
@@ -75,10 +76,14 @@ export default async function IndexPage() {
                 const result = await convertEditorToCode(editor);
                 setOutput(result);
               } else {
-                console.error(
-                  "Tried to convert editor to code, but editor is not ready yet."
-                );
+                throw new Error("Editor is not ready yet!");
               }
+            } catch (err) {
+              toast({
+                title: "An error occured",
+                description: err.message,
+                variant: "destructive",
+              });
             } finally {
               setLoading(false);
             }
@@ -87,6 +92,7 @@ export default async function IndexPage() {
           ✨ Generate
         </Button>
       </div>
+      <Toaster />
     </main>
   );
 }
