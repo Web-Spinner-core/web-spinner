@@ -1,7 +1,16 @@
 "use client";
 import { Editor } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
-import { Button, Skeleton, Toaster, useToast } from "@ui/components";
+import {
+  Button,
+  Skeleton,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Toaster,
+  useToast,
+} from "@ui/components";
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import NextJsIcon from "@ui/icons/nextjs";
@@ -31,7 +40,7 @@ function SkeletonPlaceholder() {
 
 export default function IndexPage() {
   const [editor, setEditor] = useState<Editor>();
-  const [output, setOutput] = useState<string>();
+  const [standaloneCode, setStandaloneCode] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
 
@@ -53,15 +62,30 @@ export default function IndexPage() {
         {/* Output */}
         <div
           className={clsx(
-            "h-[70vh] w-[40vw] self-center justify-self-center bg-gray-100 rounded-md",
-            "flex items-center justify-center"
+            "h-[70vh] w-[40vw] justify-self-center bg-gray-100 rounded-md",
+            "flex items-start justify-center"
           )}
         >
-          {loading ? (
-            <SkeletonPlaceholder />
-          ) : (
-            <iframe className="h-full w-full" srcDoc={output} />
-          )}
+          <Tabs defaultValue="preview" className="w-full h-full">
+            <TabsList>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="code_standalone">
+                Code (Standalone)
+              </TabsTrigger>
+            </TabsList>
+            {loading ? (
+              <SkeletonPlaceholder />
+            ) : (
+              <>
+                <TabsContent value="preview" className="h-full">
+                  <iframe className="h-full w-full" srcDoc={standaloneCode} />
+                </TabsContent>
+                <TabsContent value="code_standalone" className="h-full">
+                  {standaloneCode}
+                </TabsContent>
+              </>
+            )}
+          </Tabs>
         </div>
       </section>
       <div className="flex flex-row items-center justify-center mt-10">
@@ -70,11 +94,11 @@ export default function IndexPage() {
           disabled={editor == null || loading}
           onClick={async () => {
             setLoading(true);
-            setOutput("");
+            setStandaloneCode("");
             try {
               if (editor) {
                 const result = await convertEditorToCode(editor);
-                setOutput(result);
+                setStandaloneCode(result);
               } else {
                 throw new Error("Editor is not ready yet!");
               }
