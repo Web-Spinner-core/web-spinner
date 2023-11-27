@@ -16,6 +16,7 @@ const tech = "Next.js App Router";
 
 export default async function IndexPage() {
   const [editor, setEditor] = useState<Editor>();
+  const [output, setOutput] = useState<string>();
 
   return (
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-10">
@@ -39,7 +40,7 @@ export default async function IndexPage() {
             "flex items-center justify-center"
           )}
         >
-          <p className="font-mono text-lg">Placeholder for rendered output</p>
+          <iframe className="h-full w-full" srcDoc={output} />
         </div>
       </section>
       <div className="flex flex-row items-center justify-center mt-10">
@@ -50,6 +51,7 @@ export default async function IndexPage() {
             if (editor) {
               const result = await convertEditorToCode(editor);
               console.log(result);
+              setOutput(result);
             } else {
               console.error("Tried to convert editor to code, but editor is not ready yet.")
             }
