@@ -14,7 +14,6 @@ import {
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import NextJsIcon from "@ui/icons/nextjs";
-import material from "@ui/themes/codeblocks/material";
 import clsx from "clsx";
 import { GitBranchIcon, GithubIcon } from "lucide-react";
 import { useState } from "react";
@@ -88,7 +87,7 @@ export default function IndexPage() {
                       codeBlock
                       text={standaloneCode}
                       language="html"
-                      theme={material}
+                      theme={nord}
                       showLineNumbers
                       customStyle={{
                         fontFamily: "var(--font-mono)",
