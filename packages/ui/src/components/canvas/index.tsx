@@ -1,11 +1,11 @@
 "use client";
-import { Editor, Tldraw } from "@tldraw/tldraw";
+import { Editor, TLPageId, Tldraw } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import initialState from "./initial-state.json";
 
 interface CanvasProps {
-  onPageChanged?: (newPageId: string, oldPageId: string) => void;
+  onPageChanged?: (newPageId: TLPageId, oldPageId: TLPageId) => void;
   setEditor?: Dispatch<SetStateAction<Editor>>;
 }
 

@@ -1,5 +1,5 @@
 "use client";
-import { Editor } from "@tldraw/tldraw";
+import { Editor, TLPageId } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
 import {
   Button,
@@ -16,7 +16,7 @@ import IconLabel from "@ui/components/icon-label";
 import NextJsIcon from "@ui/icons/nextjs";
 import clsx from "clsx";
 import { GitBranchIcon, GithubIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
 
@@ -45,6 +45,26 @@ export default function IndexPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
 
+  const [pageId, setPageId] = useState<TLPageId>();
+  const [page, setPage] = useState<string>("");
+
+  // Update page ID to trigger secondary effect
+  useEffect(() => {
+    if (editor != null) {
+      setPageId(editor.getCurrentPageId());
+    }
+  }, [editor]);
+
+  // Update page name in output pane
+  useEffect(() => {
+    if (pageId != null && editor != null) {
+      const page = editor.getPage(pageId);
+      if (page != null) {
+        setPage(page.name);
+      }
+    }
+  }, [pageId, editor]);
+
   return (
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-10">
       <h1 className="text-3xl font-bold">Web Spinner</h1>
@@ -58,7 +78,12 @@ export default function IndexPage() {
       <section className="p-4 grid grid-cols-2 items-center justify-center">
         {/* Editor */}
         <div className="h-[70vh] w-[40vw] self-center justify-self-center bg-gray-100 rounded-md">
-          <Canvas setEditor={setEditor} />
+          <Canvas
+            setEditor={setEditor}
+            onPageChanged={(newPageId) => {
+              setPageId(newPageId);
+            }}
+          />
         </div>
         {/* Output */}
         <div
@@ -71,11 +96,14 @@ export default function IndexPage() {
             defaultValue="preview"
             className="w-full h-full grid grid-rows-[auto_1fr]"
           >
-            <TabsList className="justify-start">
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-              <TabsTrigger value="code_standalone">
-                Code (Standalone)
-              </TabsTrigger>
+            <TabsList className="justify-between">
+              <div className="pl-4">{page}</div>
+              <div>
+                <TabsTrigger value="preview">Preview</TabsTrigger>
+                <TabsTrigger value="code_standalone">
+                  Code (Standalone)
+                </TabsTrigger>
+              </div>
             </TabsList>
             {loading ? (
               <SkeletonPlaceholder />
