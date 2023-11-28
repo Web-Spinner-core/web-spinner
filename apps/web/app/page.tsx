@@ -14,6 +14,7 @@ import {
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import NextJsIcon from "@ui/icons/nextjs";
+import material from "@ui/themes/codeblocks/material";
 import clsx from "clsx";
 import { GitBranchIcon, GithubIcon } from "lucide-react";
 import { useState } from "react";
@@ -82,16 +83,20 @@ export default function IndexPage() {
                   <iframe className="h-full w-full" srcDoc={standaloneCode} />
                 </TabsContent>
                 <TabsContent value="code_standalone" className="h-full">
-                  <CopyBlock
-                    codeBlock
-                    text={standaloneCode}
-                    language="html"
-                    theme={nord}
-                    showLineNumbers
-                    customStyle={{
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  />
+                  {standaloneCode?.length && (
+                    <CopyBlock
+                      codeBlock
+                      text={standaloneCode}
+                      language="html"
+                      theme={material}
+                      showLineNumbers
+                      customStyle={{
+                        fontFamily: "var(--font-mono)",
+                        overflowY: "auto",
+                        height: "100%",
+                      }}
+                    />
+                  )}
                 </TabsContent>
               </>
             )}
