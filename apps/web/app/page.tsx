@@ -67,8 +67,11 @@ export default function IndexPage() {
             "flex items-start justify-center"
           )}
         >
-          <Tabs defaultValue="preview" className="w-full h-full">
-            <TabsList>
+          <Tabs
+            defaultValue="preview"
+            className="w-full h-full grid grid-rows-[auto_1fr]"
+          >
+            <TabsList className="justify-start">
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="code_standalone">
                 Code (Standalone)
@@ -81,7 +84,10 @@ export default function IndexPage() {
                 <TabsContent value="preview" className="h-full">
                   <iframe className="h-full w-full" srcDoc={standaloneCode} />
                 </TabsContent>
-                <TabsContent value="code_standalone" className="h-full">
+                <TabsContent
+                  value="code_standalone"
+                  className="h-full overflow-x-auto overflow-y-auto"
+                >
                   {standaloneCode?.length && (
                     <CopyBlock
                       codeBlock
@@ -91,8 +97,8 @@ export default function IndexPage() {
                       showLineNumbers
                       customStyle={{
                         fontFamily: "var(--font-mono)",
+                        overflowX: "auto",
                         overflowY: "auto",
-                        height: "100%",
                       }}
                     />
                   )}
