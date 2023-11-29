@@ -18,6 +18,7 @@ export function generatePrefixedId(prefix: IDPrefix): string {
  */
 export const ID_PREFIXES = {
   REPOSITORY: "repo",
+  PAGE: "pg"
 } as const;
 
 type IDPrefix = (typeof ID_PREFIXES)[keyof typeof ID_PREFIXES];

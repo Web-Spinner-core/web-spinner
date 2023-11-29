@@ -21,4 +21,18 @@ model Repository {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  pages      Page[]
+}
+
+model Page {
+  id           String     @id @map("_id")
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+
+  name          String
+  codeHash      String?
+  screenshotUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
