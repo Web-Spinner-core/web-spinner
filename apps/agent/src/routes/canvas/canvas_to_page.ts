@@ -33,9 +33,26 @@ export default async function convertCanvasInputToPage(
 
   const repository = await prisma.repository.findUniqueOrThrow({
     where: { id: REPOSITORY_ID },
+    include: {
+      pages: true,
+    },
   });
 
-  const result = await convertCanvasToPage(imageUrl, pageText);
+  // Pull other page screenshot if it exists
+  let styleImageUrl: string | undefined;
+  if (repository.pages.length > 1) {
+    const stylePage = repository.pages.find((page) => page.name != pageName);
+    if (stylePage && stylePage.screenshotPath) {
+      const storageClient = new StorageClient();
+      styleImageUrl = await storageClient.generateSignedUrl(stylePage.screenshotPath);
+    }
+  }
+
+  const result = await convertCanvasToPage({
+    imageUrl,
+    pageText,
+    styleImageUrl,
+  });
 
   // Update prisma
   const page = await prisma.page.upsert({

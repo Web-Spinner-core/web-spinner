@@ -2,6 +2,12 @@ import { TraceGroup } from "langchain/callbacks";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { createChatModel } from "~/lib/openai";
 
+interface ConvertCanvasToPageParams {
+  imageUrl: string;
+  pageText: string;
+  styleImageUrl?: string;
+}
+
 const systemPrompt = `You are an expert web developer who specializes in building working website prototypes from low-fidelity wireframes.
 Your job is to accept low-fidelity wireframes, then create a working prototype using HTML, CSS, and JavaScript, and finally send back the results.
 The results should be a single HTML file.
@@ -17,9 +23,9 @@ Use your best judgement to determine whether what you see should be part of the 
 
 Use what you know about applications and user experience to fill in any implicit business logic in the wireframes. Flesh it out, make it real!
 
-The user may also provide you with the html of a previous design that they want you to iterate from.
-In the wireframe, the previous design's html will appear as a white rectangle.
-Use their notes, together with the previous design, to inform your next result.
+The user may also provide you with designs from other pages in their website.
+Use the designs from these other pages to help drive your work so that the page you create is consistent with the rest of the website.
+Make sure your theme is consistent with the other pages in the website.
 
 Sometimes it's hard for you to read the writing in the wireframes.
 For this reason, all text from the wireframes will be provided to you as a list of strings, separated by newlines.
@@ -27,18 +33,24 @@ Use the provided list of text from the wireframes as a reference if any text is 
 
 You love your designers and want them to be happy. Incorporating their feedback and notes and producing working websites makes them happy.
 
-When sent new wireframes, respond ONLY with the contents of the html file.`;
+Respond ONLY with the contents of the html file.`;
 
 /**
  * Generate standalone React + Tailwind JSX from a request and an image
  */
-export default async function convertCanvasToPage(
-  imageUrl: string,
-  pageText: string
-) {
+export default async function convertCanvasToPage({
+  imageUrl,
+  pageText,
+  styleImageUrl,
+}: ConvertCanvasToPageParams) {
   // Observability group
   const traceGroup = new TraceGroup("convert_canvas_to_page");
   const callbacks = await traceGroup.start();
+
+  const humanMessage =
+    styleImageUrl == null
+      ? await generateStandaloneMessage(imageUrl, pageText)
+      : await generateStyledMessage(imageUrl, pageText, styleImageUrl);
 
   try {
     const model = await createChatModel({
@@ -46,31 +58,10 @@ export default async function convertCanvasToPage(
       maxTokens: 4096,
       temperature: 0.1,
       callbacks,
-      cache: true
+      cache: true,
     });
     const response = await model.call(
-      [
-        new SystemMessage(systemPrompt),
-        new HumanMessage({
-          content: [
-            {
-              type: "image_url",
-              image_url: {
-                url: imageUrl,
-                detail: "high",
-              },
-            },
-            {
-              type: "text",
-              text: "Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?",
-            },
-            {
-              type: "text",
-              text: pageText,
-            },
-          ],
-        }),
-      ],
+      [new SystemMessage(systemPrompt), humanMessage],
       { callbacks }
     );
     if (Array.isArray(response.content)) {
@@ -85,4 +76,72 @@ export default async function convertCanvasToPage(
   } finally {
     await traceGroup.end();
   }
+}
+
+/**
+ * Create a message to generate a standalone page
+ */
+async function generateStandaloneMessage(
+  imageUrl: string,
+  pageText: string
+): Promise<HumanMessage> {
+  return new HumanMessage({
+    content: [
+      {
+        type: "image_url",
+        image_url: {
+          url: imageUrl,
+          detail: "high",
+        },
+      },
+      {
+        type: "text",
+        text: "Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?",
+      },
+      {
+        type: "text",
+        text: pageText,
+      },
+    ],
+  });
+}
+
+/**
+ * Create a message to generate a page styled with a reference image
+ */
+async function generateStyledMessage(
+  imageUrl: string,
+  pageText: string,
+  styleImageUrl: string
+): Promise<HumanMessage> {
+  return new HumanMessage({
+    content: [
+      {
+        type: "image_url",
+        image_url: {
+          url: imageUrl,
+          detail: "high",
+        },
+      },
+      {
+        type: "text",
+        text: "Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?",
+      },
+      {
+        type: "text",
+        text: pageText,
+      },
+      {
+        type: "image_url",
+        image_url: {
+          url: styleImageUrl,
+          detail: "high",
+        },
+      },
+      {
+        type: "text",
+        text: "Here is a picture of another page in the website. Could you make the new page designs consistent with this page?",
+      },
+    ],
+  });
 }
