@@ -65,19 +65,41 @@ export default function IndexPage() {
     }
   }, [pageId, editor]);
 
+  const sectionWidth = "w-[45vw]";
+
   return (
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-10">
-      <h1 className="text-3xl font-bold">Web Spinner</h1>
+      <h1 className="text-3xl font-bold mb-5">Web Spinner</h1>
       {/* Headers */}
-      <section className="p-4 grid grid-cols-2 grid-rows-2 grid-flow-col">
-        <IconLabel icon={<GithubIcon />} label={repo} />
-        <IconLabel icon={<GitBranchIcon />} label={branch} />
-        <IconLabel icon={<NextJsIcon />} label={tech} />
+      <section className="p-4 grid grid-cols-2 items-center justify-center">
+        <div
+          className={clsx(
+            sectionWidth,
+            "flex flex-col justify-self-center items-start gap-2"
+          )}
+        >
+          <IconLabel icon={<GithubIcon />} label={repo} />
+          <IconLabel icon={<GitBranchIcon />} label={branch} />
+        </div>
+        <div
+          className={clsx(
+            sectionWidth,
+            "flex flex-col justify-self-center items-start gap-2"
+          )}
+        >
+          <IconLabel icon={<NextJsIcon />} label={tech} />
+        </div>
       </section>
       {/* Panels */}
       <section className="p-4 grid grid-cols-2 items-center justify-center">
         {/* Editor */}
-        <div className="h-[70vh] w-[40vw] self-center justify-self-center bg-gray-100 rounded-md">
+        <div
+          className={clsx(
+            sectionWidth,
+            "h-[70vh]",
+            "self-center justify-self-center bg-gray-100 rounded-md"
+          )}
+        >
           <Canvas
             setEditor={setEditor}
             onPageChanged={(newPageId) => {
@@ -88,7 +110,9 @@ export default function IndexPage() {
         {/* Output */}
         <div
           className={clsx(
-            "h-[70vh] w-[40vw] justify-self-center bg-gray-100 rounded-md",
+            sectionWidth,
+            "h-[70vh]",
+            "justify-self-center bg-gray-100 rounded-md",
             "flex items-start justify-center"
           )}
         >
@@ -136,6 +160,7 @@ export default function IndexPage() {
           </Tabs>
         </div>
       </section>
+      {/* Button */}
       <div className="flex flex-row items-center justify-center mt-10">
         <Button
           className="w-32"
