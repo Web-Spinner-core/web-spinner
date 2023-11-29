@@ -61,7 +61,7 @@ export default class StorageClient {
    */
   async uploadFile(
     fileName: string,
-    content: string,
+    content: string | Buffer,
     bucketName: string = Buckets.DEFAULT
   ) {
     await this.client.send(

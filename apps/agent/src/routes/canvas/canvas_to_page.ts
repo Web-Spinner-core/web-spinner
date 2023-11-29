@@ -1,11 +1,24 @@
+import {
+  ID_PREFIXES,
+  Page,
+  Repository,
+  generatePrefixedId,
+  prisma,
+} from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
+import { captureRenderedHtml } from "~/lib/render/capture_html";
+import StorageClient from "~/lib/storage/client";
 import convertCanvasToPage from "~/pipelines/canvas_to_page";
 
 const bodySchema = z.object({
+  canvasPageId: z.string(),
+  pageName: z.string(),
   imageUrl: z.string(),
   pageText: z.string(),
 });
+
+const REPOSITORY_ID = "repo_ztfisxzlfeeitv4";
 
 /**
  * Scan issues in a repository and attempt to solve them
@@ -14,11 +27,62 @@ export default async function convertCanvasInputToPage(
   ctx: Context,
   next: Next
 ) {
-  const { imageUrl, pageText } = bodySchema.parse(ctx.request.body);
+  const { canvasPageId, pageName, imageUrl, pageText } = bodySchema.parse(
+    ctx.request.body
+  );
+
+  const repository = await prisma.repository.findUniqueOrThrow({
+    where: { id: REPOSITORY_ID },
+  });
 
   const result = await convertCanvasToPage(imageUrl, pageText);
+
+  // Update prisma
+  const page = await prisma.page.upsert({
+    where: {
+      repositoryId_canvasPageId: {
+        canvasPageId,
+        repositoryId: REPOSITORY_ID,
+      },
+    },
+    update: {
+      standaloneCode: result,
+    },
+    create: {
+      id: generatePrefixedId(ID_PREFIXES.PAGE),
+      canvasPageId,
+      repositoryId: REPOSITORY_ID,
+      name: pageName,
+      standaloneCode: result,
+    },
+  });
+
+  // Save async
+  if (!page.screenshotPath) {
+    void savePageScreenshot(result, repository, page).catch(console.error);
+  }
 
   ctx.status = 200;
   ctx.body = result;
   return next();
+}
+
+/**
+ * Save screenshot to AWS bucket and update prisma
+ */
+async function savePageScreenshot(
+  html: string,
+  repository: Repository,
+  page: Page
+) {
+  const screenshot = await captureRenderedHtml(html);
+  const fileName = `${repository.fullName}/${page.name}.png`;
+
+  const storageClient = new StorageClient();
+  storageClient.uploadFile(fileName, screenshot);
+
+  await prisma.page.update({
+    where: { id: page.id },
+    data: { screenshotPath: fileName },
+  });
 }
