@@ -31,9 +31,9 @@ model Page {
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id])
 
-  name          String
-  codeHash      String?
-  screenshotUrl String?
+  name           String
+  standaloneCode String?
+  screenshotUrl  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
