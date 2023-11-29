@@ -16,7 +16,7 @@ import IconLabel from "@ui/components/icon-label";
 import NextJsIcon from "@ui/icons/nextjs";
 import clsx from "clsx";
 import { GitBranchIcon, GithubIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
 
@@ -39,6 +39,26 @@ function SkeletonPlaceholder() {
   );
 }
 
+interface ReducerState {
+  [key: string]: string;
+}
+
+interface ReducerAction {
+  type: "add_page";
+  pageId: string;
+  code: string;
+}
+
+function reducer(state: ReducerState, action: ReducerAction): ReducerState {
+  if (action.type === "add_page") {
+    return {
+      ...state,
+      [action.pageId]: action.code,
+    };
+  }
+  return state;
+}
+
 export default function IndexPage() {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
@@ -47,6 +67,8 @@ export default function IndexPage() {
 
   const [pageId, setPageId] = useState<TLPageId>();
   const [page, setPage] = useState<string>("");
+
+  const [state, dispatch] = useReducer(reducer, {} as ReducerState);
 
   // Update page ID to trigger secondary effect
   useEffect(() => {
@@ -61,6 +83,7 @@ export default function IndexPage() {
       const page = editor.getPage(pageId);
       if (page != null) {
         setPage(page.name);
+        setStandaloneCode(state[pageId] ?? "");
       }
     }
   }, [pageId, editor]);
@@ -172,6 +195,7 @@ export default function IndexPage() {
               if (editor) {
                 const result = await convertEditorToCode(editor);
                 setStandaloneCode(result);
+                dispatch({ type: "add_page", pageId, code: result });
               } else {
                 throw new Error("Editor is not ready yet!");
               }
