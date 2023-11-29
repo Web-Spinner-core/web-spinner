@@ -1,4 +1,4 @@
-import { Editor, getSvgAsImage } from "@tldraw/tldraw";
+import { Editor, TLShapeId, getSvgAsImage } from "@tldraw/tldraw";
 import fetchCanvasToPageResponse from "./fetchCanvasToPageResponse";
 
 /**
@@ -10,19 +10,18 @@ export async function convertEditorToCode(editor: Editor): Promise<string> {
     throw new Error("Page is empty. Draw something first");
   }
 
-  const imageUrl = await getCurrentPageImageDataUrl(editor);
-  const selectionText = getCurrentPageAsText(editor);
+  const page = editor.getCurrentPage();
+  const imageUrl = await getCurrentPageImageDataUrl(editor, shapes);
+  const selectionText = getCurrentPageAsText(editor, shapes);
 
-  return fetchCanvasToPageResponse(imageUrl, selectionText);
+  return fetchCanvasToPageResponse(imageUrl, selectionText, page.id, page.name);
 }
 
 /**
  * Serialize the contents of the current selection
  */
-function getCurrentPageAsText(editor: Editor) {
-  const shapeIds = editor.getCurrentPageShapeIds();
-  const shapeDescendantIds =
-    editor.getShapeAndDescendantIds([...shapeIds]);
+function getCurrentPageAsText(editor: Editor, shapeIds: Set<TLShapeId>) {
+  const shapeDescendantIds = editor.getShapeAndDescendantIds([...shapeIds]);
 
   const texts = Array.from(shapeDescendantIds)
     .map((id) => {
@@ -58,8 +57,8 @@ function blobToBase64(blob: Blob): Promise<string> {
 /**
  * Get the current selection as a base64 encoded image data url
  */
-export async function getCurrentPageImageDataUrl(editor: Editor) {
-  const svg = await editor.getSvg([...editor.getCurrentPageShapeIds()]);
+export async function getCurrentPageImageDataUrl(editor: Editor, shapeIds: Set<TLShapeId>) {
+  const svg = await editor.getSvg([...shapeIds]);
   if (!svg) throw new Error("Could not get SVG");
 
   const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
