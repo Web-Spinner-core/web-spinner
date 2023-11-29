@@ -21,11 +21,13 @@ model Repository {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  pages      Page[]
+  pages     Page[]
 }
 
 model Page {
   id           String     @id @map("_id")
+  canvasPageId String
+  
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id])
 
