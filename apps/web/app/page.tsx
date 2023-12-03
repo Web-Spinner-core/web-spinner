@@ -14,9 +14,8 @@ import {
 } from "@ui/components";
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
-import NextJsIcon from "@ui/icons/nextjs";
 import clsx from "clsx";
-import { GitBranchIcon, GithubIcon } from "lucide-react";
+import { GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
@@ -108,7 +107,9 @@ export default function IndexPage() {
           <div className="flex flex-row gap-2">
             <Badge variant="secondary">{framework}</Badge>
             {options.map((option) => (
-              <Badge variant="outline" key={`option_${option}`}>{option}</Badge>
+              <Badge variant="outline" key={`option_${option}`}>
+                {option}
+              </Badge>
             ))}
           </div>
         </div>
@@ -218,7 +219,12 @@ export default function IndexPage() {
             }
           }}
         >
-          ✨ Generate
+          {loading ? (
+            <Loader2 className="animate-spin mr-2" />
+          ) : (
+            <span className="mr-2">✨</span>
+          )}{" "}
+          Generate
         </Button>
       </div>
       <Toaster />
