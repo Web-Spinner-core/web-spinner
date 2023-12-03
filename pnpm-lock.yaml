@@ -129,6 +129,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@t3-oss/env-nextjs':
+        specifier: ^0.7.1
+        version: 0.7.1(typescript@4.9.5)(zod@3.22.4)
       '@tldraw/tldraw':
         specifier: 2.0.0-canary.699502d8c479
         version: 2.0.0-canary.699502d8c479(@types/react-dom@18.2.14)(@types/react@18.2.31)(react-dom@18.2.0)(react@18.2.0)
@@ -3443,6 +3446,20 @@ packages:
         optional: true
     dependencies:
       typescript: 5.2.2
+      zod: 3.22.4
+    dev: false
+
+  /@t3-oss/env-nextjs@0.7.1(typescript@4.9.5)(zod@3.22.4):
+    resolution: {integrity: sha512-tQDbNLGCOvKGi+JoGuJ/CJInJI7/kLWJqtgGppAKS7ZFLdVOqZYR/uRjxlXOWPnxmUKF8VswOAsq7fXUpNZDhA==}
+    peerDependencies:
+      typescript: '>=4.7.2'
+      zod: ^3.0.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@t3-oss/env-core': 0.7.1(typescript@4.9.5)(zod@3.22.4)
+      typescript: 4.9.5
       zod: 3.22.4
     dev: false
 
