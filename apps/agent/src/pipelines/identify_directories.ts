@@ -1,8 +1,8 @@
 import { Repository, prisma } from "database";
 import { BaseMessage } from "langchain/schema";
 import { z } from "zod";
-import { getGithubInstallationClient } from "~/lib/github";
-import { RepositoryWalker } from "~/lib/github/repository";
+import { getGithubInstallationClient } from "@lib/github";
+import { RepositoryWalker } from "@lib/github/repository";
 import ListFilesTool from "~/tools/list_files";
 import { serializeFunctionCall } from "~/tools/util";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";

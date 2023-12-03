@@ -1,6 +1,6 @@
 import { Repository } from "database";
 import { BaseMessage, FunctionMessage } from "langchain/schema";
-import { RepositoryWalker } from "~/lib/github/repository";
+import { RepositoryWalker } from "@lib/github/repository";
 import ListFilesTool from "~/tools/list_files";
 import ReadFileTool from "~/tools/read_file";
 import { serializeFunctionCall } from "~/tools/util";

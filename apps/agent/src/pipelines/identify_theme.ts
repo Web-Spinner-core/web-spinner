@@ -1,8 +1,8 @@
 import { Repository, prisma } from "database";
 import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
 import { z } from "zod";
-import { getGithubInstallationClient } from "~/lib/github";
-import { RepositoryWalker } from "~/lib/github/repository";
+import { getGithubInstallationClient } from "@lib/github";
+import { RepositoryWalker } from "@lib/github/repository";
 import { labelRecordWithSchema } from "~/tools/util";
 import { createExplorerAgentExecutor } from "../agents/explorer_agent";
 import {

@@ -1,7 +1,7 @@
 import { Callbacks } from "langchain/callbacks";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { z } from "zod";
-import { createChatModel } from "~/lib/openai";
+import { createChatModel } from "@lib/openai";
 import SaveAnalysisTool from "~/tools/save_analysis";
 
 const prompt = `You are a senior engineer that upholds excellent coding standards. 

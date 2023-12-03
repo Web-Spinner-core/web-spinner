@@ -1,7 +1,7 @@
 import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
-import { serializeToolError } from "~/lib/error";
-import { RepositoryWalker } from "~/lib/github/repository";
+import { serializeToolError } from "@lib/model/tool_error";
+import { RepositoryWalker } from "@lib/github/repository";
 
 const parameterSchema = z.object({
   path: z.string().describe("The path of the file to read"),

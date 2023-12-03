@@ -1,7 +1,7 @@
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
-import { githubWebhooks } from "./lib/github";
-import { registerWebhookListeners } from "./lib/github/webhooks";
+import { githubWebhooks } from "@lib/github";
+import { registerWebhookListeners } from "@lib/github/webhooks";
 import router from "./routes";
 import errorHandler from "./routes/middleware/error_handler";
 

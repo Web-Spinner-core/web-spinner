@@ -1,7 +1,7 @@
 import { prisma } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
-import APIError from "~/lib/api_error";
+import APIError from "@lib/model/api_error";
 
 const bodySchema = z.object({
   repo: z.string(),

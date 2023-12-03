@@ -1,7 +1,7 @@
 import { type EmitterWebhookEventName } from "@octokit/webhooks";
 import { Context, Next } from "koa";
-import APIError from "~/lib/api_error";
-import { githubWebhooks } from "~/lib/github";
+import APIError from "@lib/model/api_error";
+import { githubWebhooks } from "@lib/github";
 
 /**
  * Handle an incoming webhook

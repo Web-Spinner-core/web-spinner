@@ -1,6 +1,6 @@
 import { Context, Next } from "koa";
 import { ZodError } from "zod";
-import APIError from "~/lib/api_error";
+import APIError from "@lib/model/api_error";
 
 /**
  * Global error handler

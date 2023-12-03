@@ -1,7 +1,7 @@
 import { Repository } from "database";
-import { getGithubInstallationClient } from "~/lib/github";
-import { RepositoryWalker } from "~/lib/github/repository";
-import GithubRepositoryClient from "~/lib/github/repository_client";
+import { getGithubInstallationClient } from "@lib/github";
+import { RepositoryWalker } from "@lib/github/repository";
+import GithubRepositoryClient from "@lib/github/repository_client";
 import { FileWrite } from "~/tools/write_file";
 import { createExplorerAgentExecutor } from "../../agents/explorer_agent";
 import { createPullRequestTitle } from "../pull_request_title";

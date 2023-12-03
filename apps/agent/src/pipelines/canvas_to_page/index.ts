@@ -1,6 +1,6 @@
 import { TraceGroup } from "langchain/callbacks";
 import { HumanMessage, SystemMessage } from "langchain/schema";
-import { createChatModel } from "~/lib/openai";
+import { createChatModel } from "@lib/openai";
 
 interface ConvertCanvasToPageParams {
   imageUrl: string;

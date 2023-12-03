@@ -1,5 +1,4 @@
 import { Context, Next } from "koa";
-import { getCache } from "~/lib/cache";
 
 /**
  * Debug endpoint

@@ -1,9 +1,9 @@
 import { prisma } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
-import APIError from "~/lib/api_error";
-import { getGithubInstallationClient } from "~/lib/github";
-import GithubRepositoryClient from "~/lib/github/repository_client";
+import APIError from "@lib/model/api_error";
+import { getGithubInstallationClient } from "@lib/github";
+import GithubRepositoryClient from "@lib/github/repository_client";
 import { createPageWithVision } from "~/pipelines/create_page_with_vision";
 
 const bodySchema = z.object({

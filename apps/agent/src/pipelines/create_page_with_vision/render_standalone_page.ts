@@ -1,6 +1,6 @@
 import { Callbacks } from "langchain/callbacks";
 import { HumanMessage, SystemMessage } from "langchain/schema";
-import { createChatModel } from "~/lib/openai";
+import { createChatModel } from "@lib/openai";
 
 const systemPrompt = `You are an expert frontend web developer, specializing in React and Tailwind.
 You will be provided with the description of an issue and a mockup describing the changes to make.

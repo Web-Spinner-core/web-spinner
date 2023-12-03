@@ -7,8 +7,8 @@ import {
 } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
-import { captureRenderedHtml } from "~/lib/render/capture_html";
-import StorageClient from "~/lib/storage/client";
+import { captureRenderedHtml } from "@lib/util/capture_html";
+import StorageClient from "@lib/storage/client";
 import convertCanvasToPage from "~/pipelines/canvas_to_page";
 
 const bodySchema = z.object({

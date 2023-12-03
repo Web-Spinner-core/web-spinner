@@ -1,6 +1,6 @@
 import { AgentExecutor, OpenAIAgent } from "langchain/agents";
+import { Callbacks } from "langchain/callbacks";
 import { LLMChain } from "langchain/chains";
-import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
   ChatPromptTemplate,
   HumanMessagePromptTemplate,
@@ -8,16 +8,14 @@ import {
   SystemMessagePromptTemplate,
 } from "langchain/prompts";
 import { StructuredTool } from "langchain/tools";
-import { env } from "~/env";
-import { RepositoryWalker } from "~/lib/github/repository";
+import { RepositoryWalker } from "@lib/github/repository";
+import { createChatModel } from "@lib/openai";
+import UpdateFileTool from "~/tools/update_file";
 import ListFilesTool from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
 import SaveAnalysisTool from "../tools/save_analysis";
 import { ToolSchema } from "../tools/util";
 import WriteFileTool, { FileWriteAccumulator } from "../tools/write_file";
-import { Callbacks } from "langchain/callbacks";
-import { createChatModel } from "~/lib/openai";
-import UpdateFileTool from "~/tools/update_file";
 
 interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
