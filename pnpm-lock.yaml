@@ -86,9 +86,6 @@ importers:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
-      zod-to-json-schema:
-        specifier: ^3.21.4
-        version: 3.21.4(zod@3.22.4)
     devDependencies:
       '@types/koa':
         specifier: ^2.13.10
@@ -102,9 +99,6 @@ importers:
       '@types/node':
         specifier: ^17.0.12
         version: 17.0.45
-      '@types/uuid':
-        specifier: ^9.0.6
-        version: 9.0.6
       config:
         specifier: workspace:*
         version: link:../../packages/config
@@ -261,9 +255,85 @@ importers:
       tsup:
         specifier: ^5.11.13
         version: 5.12.9(typescript@4.9.5)
-      tsx:
-        specifier: ^3.7.1
-        version: 3.14.0
+      typescript:
+        specifier: ^4.5.5
+        version: 4.9.5
+
+  packages/lib:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.454.0
+        version: 3.454.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.454.0
+        version: 3.454.0
+      '@gomomento/sdk':
+        specifier: ^1.51.1
+        version: 1.51.1
+      '@octokit/auth-app':
+        specifier: ^6.0.1
+        version: 6.0.1
+      '@octokit/core':
+        specifier: ^5.0.1
+        version: 5.0.1
+      '@octokit/rest':
+        specifier: ^20.0.2
+        version: 20.0.2
+      '@octokit/types':
+        specifier: ^12.0.0
+        version: 12.0.0
+      '@octokit/webhooks':
+        specifier: ^12.0.3
+        version: 12.0.3
+      '@paralleldrive/cuid2':
+        specifier: ^2.2.2
+        version: 2.2.2
+      '@t3-oss/env-core':
+        specifier: ^0.7.1
+        version: 0.7.1(typescript@4.9.5)(zod@3.22.4)
+      axios:
+        specifier: ^1.5.1
+        version: 1.5.1
+      database:
+        specifier: workspace:*
+        version: link:../database
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.3.1
+      langchain:
+        specifier: ^0.0.193
+        version: 0.0.193(@aws-sdk/client-s3@3.454.0)(@gomomento/sdk@1.51.1)(axios@1.5.1)(puppeteer@21.5.2)
+      octokit:
+        specifier: ^3.1.1
+        version: 3.1.1
+      openai:
+        specifier: ^4.19.0
+        version: 4.19.0
+      puppeteer:
+        specifier: ^21.5.2
+        version: 21.5.2(typescript@4.9.5)
+      smee-client:
+        specifier: ^1.2.3
+        version: 1.2.3
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@types/node':
+        specifier: ^17.0.12
+        version: 17.0.45
+      config:
+        specifier: workspace:*
+        version: link:../config
+      eslint:
+        specifier: ^8.12.0
+        version: 8.52.0
+      prettier:
+        specifier: ^3.0.3
+        version: 3.0.3
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
       typescript:
         specifier: ^4.5.5
         version: 4.9.5
@@ -3911,6 +3981,7 @@ packages:
 
   /@types/uuid@9.0.6:
     resolution: {integrity: sha512-BT2Krtx4xaO6iwzwMFUYvWBWkV2pr37zD68Vmp1CDV196MzczBRxuEpD6Pr395HAgebC/co7hOphs53r8V7jew==}
+    dev: false
 
   /@types/yauzl@2.10.3:
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -4025,12 +4096,12 @@ packages:
       acorn: 7.4.1
     dev: true
 
-  /acorn-jsx@5.3.2(acorn@8.10.0):
+  /acorn-jsx@5.3.2(acorn@8.11.2):
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
       acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
-      acorn: 8.10.0
+      acorn: 8.11.2
 
   /acorn-walk@8.2.0:
     resolution: {integrity: sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==}
@@ -4047,12 +4118,12 @@ packages:
     resolution: {integrity: sha512-F0SAmZ8iUtS//m8DmCTA0jlh6TDKkHQyK6xc6V4KDTyZKA9dnvX9/3sRTVQrWm79glUAZbnmmNcdYwUIHWVybw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: true
 
   /acorn@8.11.2:
     resolution: {integrity: sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==}
     engines: {node: '>=0.4.0'}
     hasBin: true
-    dev: false
 
   /agent-base@6.0.2:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
@@ -4722,6 +4793,22 @@ packages:
   /core-js@3.33.3:
     resolution: {integrity: sha512-lo0kOocUlLKmm6kv/FswQL8zbkH7mVsLJ/FULClOhv8WRVmKLVcs6XPNQAzstfeJTCHMyButEwG+z1kHxHoDZw==}
     requiresBuild: true
+    dev: false
+
+  /cosmiconfig@8.3.6(typescript@4.9.5):
+    resolution: {integrity: sha512-kcZ6+W5QzcJ3P1Mt+83OUv/oHFqZHIx8DuxG6eZ5RGMERoLqp4BuGjhHLYGK+Kf5XVkQvqBSmAy/nGWN3qDgEA==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      typescript: '>=4.9.5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      import-fresh: 3.3.0
+      js-yaml: 4.1.0
+      parse-json: 5.2.0
+      path-type: 4.0.0
+      typescript: 4.9.5
     dev: false
 
   /cosmiconfig@8.3.6(typescript@5.2.2):
@@ -5770,8 +5857,8 @@ packages:
     resolution: {integrity: sha512-oruZaFkjorTpF32kDSI5/75ViwGeZginGGy2NoOSg3Q9bnwlnmDm4HLnkl0RE3n+njDXR037aY1+x58Z/zFdwQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
-      acorn: 8.10.0
-      acorn-jsx: 5.3.2(acorn@8.10.0)
+      acorn: 8.11.2
+      acorn-jsx: 5.3.2(acorn@8.11.2)
       eslint-visitor-keys: 3.4.3
 
   /esprima@4.0.1:
@@ -7196,9 +7283,9 @@ packages:
       openapi-types: 12.1.3
       p-queue: 6.6.2
       p-retry: 4.6.2
-      puppeteer: 21.5.2(typescript@5.2.2)
+      puppeteer: 21.5.2(typescript@4.9.5)
       uuid: 9.0.1
-      yaml: 2.3.3
+      yaml: 2.3.4
       zod: 3.22.4
       zod-to-json-schema: 3.21.4(zod@3.22.4)
     transitivePeerDependencies:
@@ -8216,6 +8303,22 @@ packages:
       - bufferutil
       - encoding
       - supports-color
+      - utf-8-validate
+    dev: false
+
+  /puppeteer@21.5.2(typescript@4.9.5):
+    resolution: {integrity: sha512-BaAGJOq8Fl6/cck6obmwaNLksuY0Bg/lIahCLhJPGXBFUD2mCffypa4A592MaWnDcye7eaHmSK9yot0pxctY8A==}
+    engines: {node: '>=16.13.2'}
+    requiresBuild: true
+    dependencies:
+      '@puppeteer/browsers': 1.8.0
+      cosmiconfig: 8.3.6(typescript@4.9.5)
+      puppeteer-core: 21.5.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - typescript
       - utf-8-validate
     dev: false
 
@@ -9644,11 +9747,6 @@ packages:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
     dev: true
-
-  /yaml@2.3.3:
-    resolution: {integrity: sha512-zw0VAJxgeZ6+++/su5AFoqBbZbrEakwu+X0M5HmcwUiBL7AzcuPKjj5we4xfQLp78LkEMpD0cOnUhmgOVy3KdQ==}
-    engines: {node: '>= 14'}
-    dev: false
 
   /yaml@2.3.4:
     resolution: {integrity: sha512-8aAvwVUSHpfEqTQ4w/KMlf3HcRdt50E5ODIQJBw1fQ5RL34xabzxtUlzTXVqc4rkZsPbvrXKWnABCD7kWSmocA==}
