@@ -108,7 +108,7 @@ export default function IndexPage() {
           <div className="flex flex-row gap-2">
             <Badge variant="secondary">{framework}</Badge>
             {options.map((option) => (
-              <Badge variant="outline">{option}</Badge>
+              <Badge variant="outline" key={`option_${option}`}>{option}</Badge>
             ))}
           </div>
         </div>
