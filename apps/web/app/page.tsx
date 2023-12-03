@@ -2,6 +2,7 @@
 import { Editor, TLPageId } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
 import {
+  Badge,
   Button,
   Skeleton,
   Tabs,
@@ -23,6 +24,8 @@ import { convertEditorToCode } from "~/lib/editorToCode";
 const repo = "Web-Spinner-gramliu/web-spinner";
 const branch = "main";
 const tech = "Next.js App Router";
+const framework = "Next.js";
+const options = ["App Router"];
 
 /**
  * Loading placeholder for rendered output
@@ -94,7 +97,7 @@ export default function IndexPage() {
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-10">
       <h1 className="text-3xl font-bold mb-5">Web Spinner</h1>
       {/* Headers */}
-      <section className="p-4 grid grid-cols-2 items-center justify-center">
+      <section className="p-4 grid grid-cols-2 items-start justify-center">
         <div
           className={clsx(
             sectionWidth,
@@ -102,7 +105,12 @@ export default function IndexPage() {
           )}
         >
           <IconLabel icon={<GithubIcon />} label={repo} />
-          <IconLabel icon={<GitBranchIcon />} label={branch} />
+          <div className="flex flex-row gap-2">
+            <Badge variant="secondary">{framework}</Badge>
+            {options.map((option) => (
+              <Badge variant="outline">{option}</Badge>
+            ))}
+          </div>
         </div>
         <div
           className={clsx(
@@ -110,7 +118,7 @@ export default function IndexPage() {
             "flex flex-col justify-self-center items-start gap-2"
           )}
         >
-          <IconLabel icon={<NextJsIcon />} label={tech} />
+          <IconLabel icon={<GitBranchIcon />} label={branch} />
         </div>
       </section>
       {/* Panels */}
