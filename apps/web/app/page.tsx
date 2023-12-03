@@ -94,7 +94,7 @@ export default function IndexPage() {
   const sectionWidth = "w-[45vw]";
 
   return (
-    <main className="h-full w-full flex flex-col p-5 pl-10 pt-10">
+    <main className="h-full w-full flex flex-col p-5 pl-10 pt-5">
       <h1 className="text-3xl font-bold mb-5">Web Spinner</h1>
       {/* Headers */}
       <section className="p-4 grid grid-cols-2 items-start justify-center">
@@ -192,7 +192,7 @@ export default function IndexPage() {
         </div>
       </section>
       {/* Button */}
-      <div className="flex flex-row items-center justify-center mt-10">
+      <div className="flex flex-row items-center justify-center mt-3">
         <Button
           className="w-32"
           disabled={editor == null || loading}
