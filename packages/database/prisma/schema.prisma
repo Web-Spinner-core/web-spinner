@@ -45,6 +45,7 @@ model Page {
 model Project {
   id String @id @map("_id")
 
+  userId       String
   repositoryId String     @unique
   repository   Repository @relation(fields: [repositoryId], references: [id])
   branch       String
