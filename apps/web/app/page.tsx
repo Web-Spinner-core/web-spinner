@@ -4,6 +4,14 @@ import "@tldraw/tldraw/tldraw.css";
 import {
   Badge,
   Button,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Skeleton,
   Tabs,
   TabsContent,
@@ -15,14 +23,35 @@ import {
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import clsx from "clsx";
-import { GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronsUpDownIcon,
+  GitBranchIcon,
+  GithubIcon,
+  Loader2,
+} from "lucide-react";
+import Image from "next/image";
 import { useEffect, useReducer, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
+import SpiderWebIcon from "./icon.png";
 
-const repo = "Web-Spinner-gramliu/web-spinner";
+const projects = [
+  {
+    label: "My Journal",
+    value: "my_journal",
+  },
+  {
+    label: "Portfolio Website",
+    value: "portfolio_website",
+  },
+  {
+    label: "Sandbox",
+    value: "sandbox",
+  },
+];
+const repo = "gramliu/custom-journal";
 const branch = "main";
-const tech = "Next.js App Router";
 const framework = "Next.js";
 const options = ["App Router"];
 
@@ -70,6 +99,9 @@ export default function IndexPage() {
   const [pageId, setPageId] = useState<TLPageId>();
   const [page, setPage] = useState<string>("");
 
+  const [projectSelectionOpen, setProjectSelectionOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(projects[0].value);
+
   const [state, dispatch] = useReducer(reducer, {} as ReducerState);
 
   // Update page ID to trigger secondary effect
@@ -94,7 +126,51 @@ export default function IndexPage() {
 
   return (
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-5">
-      <h1 className="text-3xl font-bold mb-5">Web Spinner</h1>
+      <header className="flex flex-row gap-4 mb-5 items-center z-100 relative">
+        <Image
+          src={SpiderWebIcon}
+          alt="spiderweb icon"
+          height={48}
+          width={48}
+        />
+        <h1 className="text-2xl font-bold">
+          {projects.find((project) => project.value === selectedProject).label}
+        </h1>
+        <Popover
+          open={projectSelectionOpen}
+          onOpenChange={setProjectSelectionOpen}
+        >
+          <PopoverTrigger>
+            <ChevronsUpDownIcon />
+          </PopoverTrigger>
+          <PopoverContent>
+            <Command>
+              <CommandInput placeholder="Search for project" />
+              <CommandEmpty>No projects found</CommandEmpty>
+              <CommandGroup>
+                {projects.map(({ value, label }) => (
+                  <CommandItem
+                    key={value}
+                    value={value}
+                    onSelect={(value) => {
+                      setSelectedProject(value);
+                      setProjectSelectionOpen(false);
+                    }}
+                  >
+                    <CheckIcon
+                      className={clsx(
+                        "mr-2",
+                        selectedProject === value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </header>
       {/* Headers */}
       <section className="p-4 grid grid-cols-2 items-start justify-center">
         <div
