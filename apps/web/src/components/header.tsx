@@ -1,8 +1,19 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@ui/components";
-import HomeIcon from "./home-icon";
 import { useUser } from "@clerk/nextjs";
-import React from "react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@ui/components";
+import { User } from "lucide-react";
+import HomeIcon from "./home-icon";
 
 function getInitials(firstName: string, lastName: string) {
   return firstName.charAt(0) + lastName.charAt(0);
@@ -13,7 +24,7 @@ interface Props {
 }
 
 /**
- * Header component showed at the top of the layout
+ * Header component showed at the top of  the layout
  */
 export default function Header({ children }: Props) {
   const { user } = useUser();
@@ -25,12 +36,29 @@ export default function Header({ children }: Props) {
         {children}
       </div>
       <div className="flex flex-row">
-        <Avatar>
-          <AvatarImage src={user?.imageUrl} alt={user?.fullName} />
-          <AvatarFallback>
-            {user != null ? getInitials(user.firstName, user.lastName) : ""}
-          </AvatarFallback>
-        </Avatar>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="cursor-pointer">
+              <AvatarImage src={user?.imageUrl} alt={user?.fullName} />
+              <AvatarFallback>
+                {user != null ? getInitials(user.firstName, user.lastName) : ""}
+              </AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 mr-5">
+            <DropdownMenuLabel>
+              {user?.fullName ?? "My Profile"}
+            </DropdownMenuLabel>
+            <DropdownMenuLabel className="font-light pt-0">{user?.primaryEmailAddress.emailAddress ?? ""}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
