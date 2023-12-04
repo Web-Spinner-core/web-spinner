@@ -22,6 +22,7 @@ model Repository {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   pages     Page[]
+  project   Project?
 }
 
 model Page {
@@ -33,10 +34,21 @@ model Page {
 
   name           String
   standaloneCode String?
-  screenshotPath  String?
+  screenshotPath String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([repositoryId, canvasPageId])
+}
+
+model Project {
+  id String @id @map("_id")
+
+  repositoryId String     @unique
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+  branch       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

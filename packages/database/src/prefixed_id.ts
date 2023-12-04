@@ -17,6 +17,7 @@ export function generatePrefixedId(prefix: IDPrefix): string {
  * Mapping of ID prefixes
  */
 export const ID_PREFIXES = {
+  PROJECT: "proj",
   REPOSITORY: "repo",
   PAGE: "pg"
 } as const;
