@@ -73,6 +73,7 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "spin-bezier": "spin 3s cubic-bezier(0.6, -0.8, 0.42, 1) infinite",
       },
     },
   },
