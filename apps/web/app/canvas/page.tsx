@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
-import HomeIcon from "~/components/home-icon";
+import Header from "~/components/header";
 import { convertEditorToCode } from "~/lib/editorToCode";
 
 const projects = [
@@ -110,8 +110,7 @@ export default function IndexPage() {
 
   return (
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-5">
-      <header className="flex flex-row gap-4 mb-5 items-center z-100 relative">
-        <HomeIcon />
+      <Header>
         <h1 className="text-2xl font-bold">
           {projects.find((project) => project.value === selectedProject).label}
         </h1>
@@ -149,7 +148,7 @@ export default function IndexPage() {
             </Command>
           </PopoverContent>
         </Popover>
-      </header>
+      </Header>
       {/* Project info */}
       <section className="p-4 grid grid-cols-2 items-start justify-center">
         <div
