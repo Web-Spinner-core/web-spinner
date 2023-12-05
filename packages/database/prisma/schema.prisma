@@ -1,6 +1,5 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -46,6 +45,8 @@ model Project {
   id String @id @map("_id")
 
   userId       String
+  name         String
+  
   repositoryId String     @unique
   repository   Repository @relation(fields: [repositoryId], references: [id])
   branch       String

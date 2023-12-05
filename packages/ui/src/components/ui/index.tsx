@@ -6,6 +6,7 @@ export * from "./dialog";
 export * from "./dropdown-menu";
 export * from "./popover";
 export * from "./skeleton";
+export * from "./table";
 export * from "./tabs";
 export * from "./toast";
 export * from "./toaster";

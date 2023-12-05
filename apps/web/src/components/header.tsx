@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@ui/components";
 import { User } from "lucide-react";
 import HomeIcon from "./home-icon";
@@ -49,7 +49,9 @@ export default function Header({ children }: Props) {
             <DropdownMenuLabel>
               {user?.fullName ?? "My Profile"}
             </DropdownMenuLabel>
-            <DropdownMenuLabel className="font-light pt-0">{user?.primaryEmailAddress.emailAddress ?? ""}</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-light pt-0">
+              {user?.primaryEmailAddress.emailAddress ?? ""}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
