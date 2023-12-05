@@ -1,38 +1,26 @@
 "use client";
 import { Editor, TLPageId } from "@tldraw/tldraw";
-import "@tldraw/tldraw/tldraw.css";
 import {
   Badge,
   Button,
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   SkeletonPlaceholder,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
   Toaster,
-  useToast,
+  useToast
 } from "@ui/components";
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import clsx from "clsx";
 import {
-  CheckIcon,
-  ChevronsUpDownIcon,
   GitBranchIcon,
   GithubIcon,
-  Loader2,
+  Loader2
 } from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
-import Header from "~/components/header";
 import { convertEditorToCode } from "~/lib/editorToCode";
 
 const projects = [
@@ -74,7 +62,13 @@ function reducer(state: ReducerState, action: ReducerAction): ReducerState {
   return state;
 }
 
-export default function IndexPage() {
+interface Props {
+  params: {
+    projectId: string;
+  };
+}
+
+export default function CanvasPage({ params: { projectId } }: Props) {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -82,9 +76,6 @@ export default function IndexPage() {
 
   const [pageId, setPageId] = useState<TLPageId>();
   const [page, setPage] = useState<string>("");
-
-  const [projectSelectionOpen, setProjectSelectionOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(projects[0].value);
 
   const [state, dispatch] = useReducer(reducer, {} as ReducerState);
 
@@ -109,46 +100,7 @@ export default function IndexPage() {
   const sectionWidth = "w-[45vw]";
 
   return (
-    <main className="h-full w-full flex flex-col p-5 pl-10 pt-5">
-      <Header>
-        <h1 className="text-2xl font-bold">
-          {projects.find((project) => project.value === selectedProject).label}
-        </h1>
-        <Popover
-          open={projectSelectionOpen}
-          onOpenChange={setProjectSelectionOpen}
-        >
-          <PopoverTrigger>
-            <ChevronsUpDownIcon />
-          </PopoverTrigger>
-          <PopoverContent>
-            <Command>
-              <CommandInput placeholder="Search for project" />
-              <CommandEmpty>No projects found</CommandEmpty>
-              <CommandGroup>
-                {projects.map(({ value, label }) => (
-                  <CommandItem
-                    key={value}
-                    value={value}
-                    onSelect={(value) => {
-                      setSelectedProject(value);
-                      setProjectSelectionOpen(false);
-                    }}
-                  >
-                    <CheckIcon
-                      className={clsx(
-                        "mr-2",
-                        selectedProject === value ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </Header>
+    <>
       {/* Project info */}
       <section className="p-4 grid grid-cols-2 items-start justify-center">
         <div
@@ -282,6 +234,6 @@ export default function IndexPage() {
         </Button>
       </div>
       <Toaster />
-    </main>
+    </>
   );
 }

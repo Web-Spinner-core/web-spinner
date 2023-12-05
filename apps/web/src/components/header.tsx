@@ -4,6 +4,11 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -11,22 +16,28 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@ui/components";
-import { User } from "lucide-react";
+import { CheckIcon, ChevronsUpDownIcon, User } from "lucide-react";
 import HomeIcon from "./home-icon";
+import clsx from "clsx";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function getInitials(firstName: string, lastName: string) {
   return firstName.charAt(0) + lastName.charAt(0);
 }
 
-interface Props {
+interface HeaderProps {
   children?: JSX.Element | JSX.Element[];
 }
 
 /**
  * Header component showed at the top of  the layout
  */
-export default function Header({ children }: Props) {
+export default function Header({ children }: HeaderProps) {
   const { user } = useUser();
 
   return (
@@ -63,5 +74,71 @@ export default function Header({ children }: Props) {
         </DropdownMenu>
       </div>
     </header>
+  );
+}
+
+interface TitledHeaderProps extends HeaderProps {
+  title: string;
+  options?: {
+    value: string;
+    label: string;
+  }[];
+  optionsPlaceholder?: string;
+  selectedOption?: string;
+}
+
+/**
+ * Header component with a title and potential options
+ */
+export function TitledHeader({
+  title,
+  options,
+  optionsPlaceholder,
+  selectedOption,
+}: TitledHeaderProps) {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const router = useRouter();
+
+  return (
+    <div className="flex flex-row gap-4 items-center">
+      <HomeIcon />
+      <h1 className="text-2xl font-bold">{title}</h1>
+      {options && (
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger>
+            <ChevronsUpDownIcon />
+          </PopoverTrigger>
+          <PopoverContent>
+            <Command>
+              <CommandInput placeholder="Search for project" />
+              <CommandEmpty>
+                {optionsPlaceholder ?? "No options found"}
+              </CommandEmpty>
+              <CommandGroup>
+                {options.map(({ value, label }) => (
+                  <CommandItem
+                    key={value}
+                    value={value}
+                    onSelect={(value) => {
+                      setPopoverOpen(false);
+                      router.push(`/projects/${value}/canvas`);
+                    }}
+                  >
+                    <CheckIcon
+                      className={clsx(
+                        "mr-2",
+                        selectedOption === value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
+    </div>
   );
 }
