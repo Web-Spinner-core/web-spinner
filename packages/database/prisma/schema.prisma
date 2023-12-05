@@ -1,5 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -44,12 +44,15 @@ model Page {
 model Project {
   id String @id @map("_id")
 
-  userId       String
-  name         String
-  
+  userId String
+  name   String
+
   repositoryId String     @unique
   repository   Repository @relation(fields: [repositoryId], references: [id])
   branch       String
+
+  framework        String
+  frameworkOptions String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

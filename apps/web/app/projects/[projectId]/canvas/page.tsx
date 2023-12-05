@@ -9,38 +9,16 @@ import {
   TabsList,
   TabsTrigger,
   Toaster,
-  useToast
+  useToast,
 } from "@ui/components";
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import clsx from "clsx";
-import {
-  GitBranchIcon,
-  GithubIcon,
-  Loader2
-} from "lucide-react";
+import { Project, Repository } from "database";
+import { GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
-
-const projects = [
-  {
-    label: "My Journal",
-    value: "my_journal",
-  },
-  {
-    label: "Portfolio Website",
-    value: "portfolio_website",
-  },
-  {
-    label: "Sandbox",
-    value: "sandbox",
-  },
-];
-const repo = "gramliu/custom-journal";
-const branch = "main";
-const framework = "Next.js";
-const options = ["App Router"];
 
 interface ReducerState {
   [key: string]: string;
@@ -63,12 +41,12 @@ function reducer(state: ReducerState, action: ReducerAction): ReducerState {
 }
 
 interface Props {
-  params: {
-    projectId: string;
+  project: Project & {
+    repository: Repository;
   };
 }
 
-export default function CanvasPage({ params: { projectId } }: Props) {
+export default function CanvasPage({ project }: Props) {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -109,10 +87,13 @@ export default function CanvasPage({ params: { projectId } }: Props) {
             "flex flex-col justify-self-center items-start gap-2"
           )}
         >
-          <IconLabel icon={<GithubIcon />} label={repo} />
+          <IconLabel
+            icon={<GithubIcon />}
+            label={project.repository.fullName}
+          />
           <div className="flex flex-row gap-2">
-            <Badge variant="secondary">{framework}</Badge>
-            {options.map((option) => (
+            <Badge variant="secondary">{project.framework}</Badge>
+            {project.frameworkOptions.map((option) => (
               <Badge variant="outline" key={`option_${option}`}>
                 {option}
               </Badge>
@@ -125,7 +106,7 @@ export default function CanvasPage({ params: { projectId } }: Props) {
             "flex flex-col justify-self-center items-start gap-2"
           )}
         >
-          <IconLabel icon={<GitBranchIcon />} label={branch} />
+          <IconLabel icon={<GitBranchIcon />} label={project.branch} />
         </div>
       </section>
       {/* Panels */}

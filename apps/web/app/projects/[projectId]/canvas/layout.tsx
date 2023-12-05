@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs";
 import { prisma } from "database";
 import { TitledHeader } from "~/components/header";
+import CanvasPage from "./page";
 
 interface Props {
   params: {
@@ -10,7 +11,6 @@ interface Props {
 }
 
 export default async function CanvasLayout({
-  children,
   params: { projectId },
 }: Props) {
   const { userId } = auth();
@@ -19,6 +19,9 @@ export default async function CanvasLayout({
     prisma.project.findUnique({
       where: {
         id: projectId,
+      },
+      include: {
+        repository: true,
       },
     }),
     prisma.project.findMany({
@@ -43,7 +46,7 @@ export default async function CanvasLayout({
         optionsPlaceholder="No projects found"
         selectedOption={currentProject.id}
       />
-      {children}
+      <CanvasPage project={currentProject} />
     </main>
   );
 }
