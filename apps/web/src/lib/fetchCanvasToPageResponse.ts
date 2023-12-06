@@ -11,13 +11,15 @@ export default async function fetchCanvasToPageResponse(
   imageUrl: string,
   pageText: string,
   pageId: TLPageId,
-  pageName: string
+  pageName: string,
+  projectId: string
 ): Promise<string> {
   const result = await axios.post("http://localhost:3001/canvas/page", {
     imageUrl,
     pageText,
     canvasPageId: pageId,
     pageName,
+    projectId
   });
 
   return z.string().parse(result.data);

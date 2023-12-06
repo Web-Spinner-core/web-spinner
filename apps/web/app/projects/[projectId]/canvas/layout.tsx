@@ -10,12 +10,10 @@ interface Props {
   children: React.ReactNode;
 }
 
-export default async function CanvasLayout({
-  params: { projectId },
-}: Props) {
+export default async function CanvasLayout({ params: { projectId } }: Props) {
   const { userId } = auth();
 
-  const [currentProject, projects] = await Promise.all([
+  const [currentProject, projects, pages] = await Promise.all([
     prisma.project.findUnique({
       where: {
         id: projectId,
@@ -27,6 +25,11 @@ export default async function CanvasLayout({
     prisma.project.findMany({
       where: {
         userId,
+      },
+    }),
+    prisma.page.findMany({
+      where: {
+        projectId,
       },
     }),
   ]);
@@ -46,7 +49,7 @@ export default async function CanvasLayout({
         optionsPlaceholder="No projects found"
         selectedOption={currentProject.id}
       />
-      <CanvasPage project={currentProject} />
+      <CanvasPage project={currentProject} pages={pages} />
     </main>
   );
 }

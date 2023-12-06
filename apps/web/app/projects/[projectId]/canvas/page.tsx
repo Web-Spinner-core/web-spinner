@@ -14,7 +14,7 @@ import {
 import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import clsx from "clsx";
-import { Project, Repository } from "database";
+import { Page, Project, Repository } from "database";
 import { GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
@@ -44,9 +44,10 @@ interface Props {
   project: Project & {
     repository: Repository;
   };
+  pages: Page[];
 }
 
-export default function CanvasPage({ project }: Props) {
+export default function CanvasPage({ project, pages }: Props) {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -55,7 +56,12 @@ export default function CanvasPage({ project }: Props) {
   const [pageId, setPageId] = useState<TLPageId>();
   const [page, setPage] = useState<string>("");
 
-  const [state, dispatch] = useReducer(reducer, {} as ReducerState);
+  const [state, dispatch] = useReducer(
+    reducer,
+    Object.fromEntries(
+      pages.map((page) => [page.canvasPageId, page.standaloneCode])
+    ) as ReducerState
+  );
 
   // Update page ID to trigger secondary effect
   useEffect(() => {
@@ -189,7 +195,7 @@ export default function CanvasPage({ project }: Props) {
             setStandaloneCode("");
             try {
               if (editor) {
-                const result = await convertEditorToCode(editor);
+                const result = await convertEditorToCode(editor, project.id);
                 setStandaloneCode(result);
                 dispatch({ type: "add_page", pageId, code: result });
               } else {

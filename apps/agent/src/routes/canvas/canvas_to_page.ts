@@ -1,6 +1,7 @@
 import {
   ID_PREFIXES,
   Page,
+  Project,
   Repository,
   generatePrefixedId,
   prisma,
@@ -16,9 +17,8 @@ const bodySchema = z.object({
   pageName: z.string(),
   imageUrl: z.string(),
   pageText: z.string(),
+  projectId: z.string(),
 });
-
-const REPOSITORY_ID = "repo_ztfisxzlfeeitv4";
 
 /**
  * Scan issues in a repository and attempt to solve them
@@ -27,12 +27,12 @@ export default async function convertCanvasInputToPage(
   ctx: Context,
   next: Next
 ) {
-  const { canvasPageId, pageName, imageUrl, pageText } = bodySchema.parse(
+  const { projectId, canvasPageId, pageName, imageUrl, pageText } = bodySchema.parse(
     ctx.request.body
   );
 
-  const repository = await prisma.repository.findUniqueOrThrow({
-    where: { id: REPOSITORY_ID },
+  const project = await prisma.project.findUniqueOrThrow({
+    where: { id: projectId },
     include: {
       pages: true,
     },
@@ -40,8 +40,8 @@ export default async function convertCanvasInputToPage(
 
   // Pull other page screenshot if it exists
   let styleImageUrl: string | undefined;
-  if (repository.pages.length > 1) {
-    const stylePage = repository.pages.find((page) => page.name != pageName);
+  if (project.pages.length > 1) {
+    const stylePage = project.pages.find((page) => page.name != pageName);
     if (stylePage && stylePage.screenshotPath) {
       const storageClient = new StorageClient();
       styleImageUrl = await storageClient.generateSignedUrl(stylePage.screenshotPath);
@@ -57,9 +57,9 @@ export default async function convertCanvasInputToPage(
   // Update prisma
   const page = await prisma.page.upsert({
     where: {
-      repositoryId_canvasPageId: {
+      projectId_canvasPageId: {
         canvasPageId,
-        repositoryId: REPOSITORY_ID,
+        projectId,
       },
     },
     update: {
@@ -68,7 +68,7 @@ export default async function convertCanvasInputToPage(
     create: {
       id: generatePrefixedId(ID_PREFIXES.PAGE),
       canvasPageId,
-      repositoryId: REPOSITORY_ID,
+      projectId,
       name: pageName,
       standaloneCode: result,
     },
@@ -76,7 +76,7 @@ export default async function convertCanvasInputToPage(
 
   // Save async
   if (!page.screenshotPath) {
-    void savePageScreenshot(result, repository, page).catch(console.error);
+    void savePageScreenshot(result, project, page).catch(console.error);
   }
 
   ctx.status = 200;
@@ -89,11 +89,11 @@ export default async function convertCanvasInputToPage(
  */
 async function savePageScreenshot(
   html: string,
-  repository: Repository,
+  project: Project,
   page: Page
 ) {
   const screenshot = await captureRenderedHtml(html);
-  const fileName = `${repository.fullName}/${page.name}.png`;
+  const fileName = `${project.id}/${page.id}.png`;
 
   const storageClient = new StorageClient();
   storageClient.uploadFile(fileName, screenshot);

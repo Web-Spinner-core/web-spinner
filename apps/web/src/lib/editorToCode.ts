@@ -4,7 +4,7 @@ import fetchCanvasToPageResponse from "./fetchCanvasToPageResponse";
 /**
  * Convert the editor selection to code
  */
-export async function convertEditorToCode(editor: Editor): Promise<string> {
+export async function convertEditorToCode(editor: Editor, projectId: string): Promise<string> {
   const shapes = editor.getCurrentPageShapeIds();
   if (shapes.size === 0) {
     throw new Error("Page is empty. Draw something first");
@@ -14,7 +14,7 @@ export async function convertEditorToCode(editor: Editor): Promise<string> {
   const imageUrl = await getCurrentPageImageDataUrl(editor, shapes);
   const selectionText = getCurrentPageAsText(editor, shapes);
 
-  return fetchCanvasToPageResponse(imageUrl, selectionText, page.id, page.name);
+  return fetchCanvasToPageResponse(imageUrl, selectionText, page.id, page.name, projectId);
 }
 
 /**
