@@ -21,6 +21,7 @@ interface CreateAgentOptions {
   callbacks?: Callbacks;
   tools: StructuredTool[];
   returnIntermediateSteps?: boolean;
+  shouldCache?: boolean;
 }
 
 /**
@@ -37,6 +38,7 @@ export async function createAgentExecutor(args: CreateAgentOptions) {
     callbacks,
     tools,
     returnIntermediateSteps = false,
+    shouldCache,
   } = args;
 
   // Prompt
@@ -55,6 +57,7 @@ export async function createAgentExecutor(args: CreateAgentOptions) {
     modelName: modelName ?? "gpt-4-1106-preview",
     temperature: temperature ?? 0,
     callbacks,
+    cache: shouldCache,
   });
 
   // Executors

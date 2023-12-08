@@ -15,6 +15,7 @@ interface CreatePlanAgentOptions {
   temperature?: number;
   modelName?: string;
   callbacks?: Callbacks;
+  shouldCache?: boolean;
 }
 
 const objectiveName = "save_plan";
@@ -46,6 +47,7 @@ export async function createPlanAgentExecutor(
     temperature,
     modelName,
     callbacks,
+    shouldCache,
   } = args;
 
   const toolParams = { callbacks };
@@ -60,7 +62,7 @@ export async function createPlanAgentExecutor(
   ];
   const listAllFilesTool = new ListAllFilesTool(walker, toolParams);
 
-  const files = await listAllFilesTool.call("");
+  const files = await listAllFilesTool.call({}, toolParams);
   const prior = serializeFunctionCall(listAllFilesTool, "", files);
 
   return createAgentExecutor({
@@ -71,6 +73,7 @@ export async function createPlanAgentExecutor(
     callbacks,
     tools,
     prior,
+    shouldCache,
     returnIntermediateSteps: true,
   });
 }

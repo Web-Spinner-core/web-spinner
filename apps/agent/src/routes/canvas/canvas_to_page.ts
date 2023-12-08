@@ -21,7 +21,7 @@ const bodySchema = z.object({
 });
 
 /**
- * Scan issues in a repository and attempt to solve them
+ * Convert a canvas drawing into a standalone page
  */
 export default async function convertCanvasInputToPage(
   ctx: Context,

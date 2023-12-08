@@ -4,8 +4,9 @@ import { Page, Project, Repository } from "database";
 import { z } from "zod";
 import { createPlanAgentExecutor } from "~/agents/plan_agent";
 import { FileWrite } from "~/tools/write_file";
-import { systemPrompt, userPrompt } from "./messages";
+import { planSystemPrompt, userPrompt } from "./messages";
 import { TraceGroup } from "langchain/callbacks";
+import { writeFileSync } from "fs";
 
 export const objectiveSchema = z.object({
   files: z
@@ -31,26 +32,37 @@ export async function createMultiFromStandalonePage(page: PopulatedPage) {
   const traceGroup = new TraceGroup("create_multi_from_standalone");
   const callbacks = await traceGroup.start();
 
-  const repository = page.project.repository;
-  const installationClient = getGithubInstallationClient(
-    repository.installationId
-  );
-  const [owner, repo] = repository.fullName.split("/");
-  const walker = new RepositoryWalker(installationClient, owner, repo);
+  try {
+    const repository = page.project.repository;
+    const installationClient = getGithubInstallationClient(
+      repository.installationId
+    );
+    const [owner, repo] = repository.fullName.split("/");
+    const walker = new RepositoryWalker(installationClient, owner, repo);
 
-  const fileWrites: FileWrite[] = [];
-  const accumulator = (file: FileWrite) => {
-    fileWrites.push(file);
-  };
+    const fileWrites: FileWrite[] = [];
+    const accumulator = (file: FileWrite) => {
+      fileWrites.push(file);
+    };
 
-  const planAgent = await createPlanAgentExecutor({
-    walker,
-    systemPrompt,
-    userPrompt,
-    temperature: 0.7,
-    modelName: "gpt-4-1106-preview",
-    callbacks,
-  });
+    const planAgent = await createPlanAgentExecutor({
+      walker,
+      systemPrompt: planSystemPrompt,
+      userPrompt,
+      temperature: 0.7,
+      modelName: "gpt-4-1106-preview",
+      callbacks,
+    });
+    const { output, intermediateSteps } = await planAgent.call(
+      {
+        input: page.standaloneCode,
+        chat_history: [],
+      },
+      { callbacks }
+    );
 
-  return result;
+    return "";
+  } finally {
+    await traceGroup.end();
+  }
 }

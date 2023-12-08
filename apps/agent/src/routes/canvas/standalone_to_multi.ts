@@ -3,16 +3,16 @@ import {
 } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
-import { createPlanAgentExecutor } from "~/agents/plan_agent";
+import { createMultiFromStandalonePage } from "~/pipelines/standalone_to_multi";
 
 const bodySchema = z.object({
   pageId: z.string(),
 });
 
 /**
- * Scan issues in a repository and attempt to solve them
+ * Convert a standalone draft page into a multi-file page
  */
-export default async function convertCanvasInputToPage(
+export default async function convertStandaloneToMulti(
   ctx: Context,
   next: Next
 ) {
@@ -30,6 +30,8 @@ export default async function convertCanvasInputToPage(
       },
     },
   });
+
+  const result = await createMultiFromStandalonePage(page);
 
   ctx.status = 200;
   ctx.body = result;

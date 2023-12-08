@@ -1,10 +1,11 @@
 import Router from "@koa/router";
-import handleIncomingWebhook from "./webhooks";
-import scanRepository from "./code_scanner/repository";
-import createPage from "./designer/create_page";
 import scanIssues from "./agent/issues";
-import debug from "./debug";
 import convertCanvasInputToPage from "./canvas/canvas_to_page";
+import convertStandaloneToMulti from "./canvas/standalone_to_multi";
+import scanRepository from "./code_scanner/repository";
+import debug from "./debug";
+import createPage from "./designer/create_page";
+import handleIncomingWebhook from "./webhooks";
 
 const router = new Router();
 router.post("/webhooks", handleIncomingWebhook);
@@ -13,5 +14,6 @@ router.post("/designer/page", createPage);
 router.post("/agent/issues", scanIssues);
 router.post("/debug", debug);
 router.post("/canvas/page", convertCanvasInputToPage);
+router.post("/canvas/multi", convertStandaloneToMulti);
 
 export default router;
