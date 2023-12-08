@@ -1,16 +1,9 @@
 import {
-  ID_PREFIXES,
-  Page,
-  Project,
-  Repository,
-  generatePrefixedId,
-  prisma,
+  prisma
 } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
-import { captureRenderedHtml } from "@lib/util/capture_html";
-import StorageClient from "@lib/storage/client";
-import convertCanvasToPage from "~/pipelines/canvas_to_page";
+import { createPlanAgentExecutor } from "~/agents/plan_agent";
 
 const bodySchema = z.object({
   pageId: z.string(),
@@ -37,7 +30,6 @@ export default async function convertCanvasInputToPage(
       },
     },
   });
-
 
   ctx.status = 200;
   ctx.body = result;

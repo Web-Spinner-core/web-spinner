@@ -2,8 +2,10 @@ import { getGithubInstallationClient } from "@lib/github";
 import { RepositoryWalker } from "@lib/github/repository";
 import { Page, Project, Repository } from "database";
 import { z } from "zod";
+import { createPlanAgentExecutor } from "~/agents/plan_agent";
 import { FileWrite } from "~/tools/write_file";
-import { getStarterMessages } from "./messages";
+import { systemPrompt, userPrompt } from "./messages";
+import { TraceGroup } from "langchain/callbacks";
 
 export const objectiveSchema = z.object({
   files: z
@@ -24,9 +26,11 @@ type PopulatedPage = Page & {
 /**
  * Create a diff for multi-file changes from a standalone
  */
-export async function createMultiFromStandalonePage(
-  page: PopulatedPage,
-) {
+export async function createMultiFromStandalonePage(page: PopulatedPage) {
+  // Observability group
+  const traceGroup = new TraceGroup("create_multi_from_standalone");
+  const callbacks = await traceGroup.start();
+
   const repository = page.project.repository;
   const installationClient = getGithubInstallationClient(
     repository.installationId
@@ -39,7 +43,14 @@ export async function createMultiFromStandalonePage(
     fileWrites.push(file);
   };
 
-  const starterMessages = await getStarterMessages(walker);
+  const planAgent = await createPlanAgentExecutor({
+    walker,
+    systemPrompt,
+    userPrompt,
+    temperature: 0.7,
+    modelName: "gpt-4-1106-preview",
+    callbacks,
+  });
 
   return result;
 }

@@ -13,9 +13,10 @@ import { createChatModel } from "@lib/openai";
 import UpdateFileTool from "~/tools/update_file";
 import ListFilesTool from "../tools/list_files";
 import ReadFileTool from "../tools/read_file";
-import SaveAnalysisTool from "../tools/save_analysis";
+import ObjectiveTool from "../tools/objective_tool";
 import { ToolSchema } from "../tools/util";
 import WriteFileTool, { FileWriteAccumulator } from "../tools/write_file";
+import { createAgentExecutor } from "./base";
 
 interface CreateExplorerAgentBaseOptions<T extends ToolSchema> {
   walker: RepositoryWalker;
@@ -90,7 +91,7 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
   if (objective) {
     // Declare objective function
     tools.push(
-      new SaveAnalysisTool(
+      new ObjectiveTool(
         objective.objectiveSchema,
         objective.objectiveDescription,
         objective.objectiveFunctionName,
@@ -99,41 +100,14 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     );
   }
 
-  // Prompt
-  const promptTemplate = ChatPromptTemplate.fromMessages([
-    SystemMessagePromptTemplate.fromTemplate(systemPrompt),
-    HumanMessagePromptTemplate.fromTemplate(userPrompt ?? "{input}"),
-    new MessagesPlaceholder("chat_history"),
-    ...(reminderPrompt
-      ? [SystemMessagePromptTemplate.fromTemplate(reminderPrompt)]
-      : []),
-    new MessagesPlaceholder("agent_scratchpad"),
-  ]);
-
-  const model = await createChatModel({
-    modelName: modelName ?? "gpt-4-1106-preview",
-    temperature: temperature ?? 0,
+  return createAgentExecutor({
+    systemPrompt,
+    userPrompt,
+    reminderPrompt,
+    temperature,
+    modelName,
     callbacks,
-  });
-
-  // Executors
-  const chain = new LLMChain({
-    prompt: promptTemplate,
-    llm: model,
-    callbacks,
-  });
-  const agent = new OpenAIAgent({
-    llmChain: chain,
-    allowedTools: tools.map((tool) => tool.name),
     tools,
-  });
-
-  return new AgentExecutor({
-    agent,
-    tools,
-    verbose: true,
-    maxIterations: 10,
-    callbacks,
     returnIntermediateSteps: true,
   });
 }
