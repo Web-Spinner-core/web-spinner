@@ -4,7 +4,7 @@ import WriteFileTool from "./write_file";
 
 const parameterSchema = z.object({
   name: z.string().describe("The name of the React component to create"),
-  content: z.string().describe("The contents of the React file to write"),
+  content: z.string().describe("The contents of the React file to write. Make sure to specify in the code if you are using a client or server component."),
 });
 
 export default class CreateComponentTool extends StructuredTool<

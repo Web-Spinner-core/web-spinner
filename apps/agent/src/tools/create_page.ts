@@ -4,8 +4,8 @@ import WriteFileTool from "./write_file";
 
 const parameterSchema = z.object({
   http_path: z.string().describe("The path to the page to create. Use square brackets to indicate dynamic segments, e.g. \"/users/[id]\""),
-  layout_content: z.string().describe("The contents of the layout file to write"),
-  page_content: z.string().describe("The contents of the page file to write")
+  layout_content: z.string().describe("The contents of the layout file to write. Make sure to specify in the code if you are using a client or server component."),
+  page_content: z.string().describe("The contents of the page file to write. Make sure to specify in the code if you are using a client or server component.")
 });
 
 export default class CreateComponentTool extends StructuredTool<
