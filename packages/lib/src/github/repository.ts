@@ -43,6 +43,24 @@ export class RepositoryWalker {
   }
 
   /**
+   * Get all files in a directory, recursively
+   */
+  async getAllFiles(path: string): Promise<string> {
+    const entries = await this.getFiles(path);
+
+    const files = entries.filter((entry) => entry.type === "file").map((entry) => `${path}/${entry.name}`);
+    const dirs = entries.filter((entry) => entry.type === "dir");
+
+    const subFiles = await Promise.all(
+      dirs.map(async (dir) => {
+        return this.getAllFiles(`${path}/${dir.name}`);
+      })
+    );
+
+    return [...files, ...subFiles.flat()].join("\n");
+  }
+
+  /**
    * Finds the first file in a path, or throws an error if none are found
    * Optionally matches based on a file name suffix (extension)
    */

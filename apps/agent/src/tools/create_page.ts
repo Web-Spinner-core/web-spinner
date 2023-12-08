@@ -1,4 +1,4 @@
-import { StructuredTool } from "langchain/tools";
+import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
 import WriteFileTool from "./write_file";
 
@@ -15,8 +15,8 @@ export default class CreateComponentTool extends StructuredTool<
   description = "Create a new page using Next.js App Router";
   schema = parameterSchema;
 
-  constructor(private readonly fileWriter: WriteFileTool) {
-    super();
+  constructor(private readonly fileWriter: WriteFileTool, toolParams?: ToolParams) {
+    super(toolParams);
   }
 
   async _call({ http_path, layout_content, page_content }: z.input<this["schema"]>): Promise<string> {
