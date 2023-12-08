@@ -2,7 +2,7 @@ import { Callbacks } from "langchain/callbacks";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { z } from "zod";
 import { createChatModel } from "@lib/openai";
-import SaveAnalysisTool from "~/tools/save_analysis";
+import ObjectiveTool from "~/tools/objective_tool";
 
 const prompt = `You are a senior engineer that upholds excellent coding standards. 
 You will be provided with a description of changes to make. 
@@ -25,7 +25,7 @@ export async function createPullRequestTitle(
     temperature: 0,
   })
 
-  const tool = new SaveAnalysisTool(
+  const tool = new ObjectiveTool(
     objectiveSchema,
     "Submit the pull request title",
     objectiveName

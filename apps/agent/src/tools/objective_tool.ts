@@ -2,11 +2,14 @@ import { StructuredTool, ToolParams } from "langchain/tools";
 import { z } from "zod";
 import { ToolSchema } from "./util";
 
-export default class SaveAnalysisTool<
+/**
+ * A tool that can be used to save the result of an arbitrary objective
+ */
+export default class ObjectiveTool<
   T extends ToolSchema,
 > extends StructuredTool<T> {
-  name = "save_analysis";
-  description = "Save the analysis of a repository";
+  name = "save_objective";
+  description = "Save the result of an arbitrary objective";
 
   // Initialize with placeholder schema to satisfy abstract implementation
   schema = z.object({
