@@ -41,7 +41,7 @@ export default class CreatePageTool extends StructuredTool<
   }: z.input<this["schema"]>): Promise<string> {
     const basePath = `src/app${http_path}`;
     const layoutPath = `${basePath}/layout.tsx`;
-    const pagePath = `${basePath}/index.tsx`;
+    const pagePath = `${basePath}/page.tsx`;
     await Promise.all([
       this.fileWriter.writeFile({
         path: layoutPath,
