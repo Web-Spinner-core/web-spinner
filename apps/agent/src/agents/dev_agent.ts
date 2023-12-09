@@ -10,6 +10,7 @@ import WriteFileTool from "~/tools/write_file";
 import { createAgentExecutor } from "./base";
 import CreateComponentTool from "~/tools/create_component";
 import CreatePageTool from "~/tools/create_page";
+import ReadFileTool from "~/tools/read_file";
 
 interface CreateDevAgentOptions {
   walker: RepositoryWalker;
@@ -50,6 +51,7 @@ export async function createDevAgentExecutor(
   const tools = [
     new CreateComponentTool(writeFileTool, toolParams),
     new CreatePageTool(writeFileTool, toolParams),
+    new ReadFileTool(walker, toolParams),
     new ObjectiveTool(
       objectiveSchema,
       objectiveDescription,
