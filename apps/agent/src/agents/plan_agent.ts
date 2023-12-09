@@ -11,6 +11,7 @@ import { serializeFunctionCall } from "~/tools/util";
 interface CreatePlanAgentOptions {
   walker: RepositoryWalker;
   systemPrompt: string;
+  
   userPrompt?: string;
   temperature?: number;
   modelName?: string;
@@ -60,8 +61,8 @@ export async function createPlanAgentExecutor(
       toolParams
     ),
   ];
+  
   const listAllFilesTool = new ListAllFilesTool(walker, toolParams);
-
   const files = await listAllFilesTool.call({}, toolParams);
   const prior = serializeFunctionCall(listAllFilesTool, "", files);
 

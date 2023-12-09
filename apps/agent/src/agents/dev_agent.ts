@@ -1,14 +1,15 @@
+import { FileWrite } from "@lib/github";
 import { RepositoryWalker } from "@lib/github/repository";
 import { AgentExecutor } from "langchain/agents";
 import { Callbacks } from "langchain/callbacks";
 import { z } from "zod";
-import ObjectiveTool from "~/tools/objective_tool";
-import ReadFileTool from "~/tools/read_file";
-import { createAgentExecutor } from "./base";
 import ListAllFilesTool from "~/tools/list_all_files";
+import ObjectiveTool from "~/tools/objective_tool";
 import { serializeFunctionCall } from "~/tools/util";
 import WriteFileTool from "~/tools/write_file";
-import { FileWrite } from "@lib/github";
+import { createAgentExecutor } from "./base";
+import CreateComponentTool from "~/tools/create_component";
+import CreatePageTool from "~/tools/create_page";
 
 interface CreateDevAgentOptions {
   walker: RepositoryWalker;
@@ -19,6 +20,7 @@ interface CreateDevAgentOptions {
   temperature?: number;
   modelName?: string;
   callbacks?: Callbacks;
+  shouldCache?: boolean;
 }
 
 const objectiveName = "save_and_exit";
@@ -39,11 +41,15 @@ export async function createDevAgentExecutor(
     temperature,
     modelName,
     callbacks,
+    shouldCache
   } = args;
 
   const toolParams = { callbacks };
+
+  const writeFileTool = new WriteFileTool(writeAccumulator, toolParams)
   const tools = [
-    new WriteFileTool(writeAccumulator, toolParams),
+    new CreateComponentTool(writeFileTool, toolParams),
+    new CreatePageTool(writeFileTool, toolParams),
     new ObjectiveTool(
       objectiveSchema,
       objectiveDescription,
@@ -51,6 +57,10 @@ export async function createDevAgentExecutor(
       toolParams
     ),
   ];
+
+  const listAllFilesTool = new ListAllFilesTool(walker, toolParams);
+  const files = await listAllFilesTool.call({}, toolParams);
+  const prior = serializeFunctionCall(listAllFilesTool, "", files);
 
   return createAgentExecutor({
     userPrompt,
@@ -60,6 +70,6 @@ export async function createDevAgentExecutor(
     callbacks,
     tools,
     prior,
-    returnIntermediateSteps: true,
+    shouldCache
   });
 }
