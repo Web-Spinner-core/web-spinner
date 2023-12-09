@@ -20,7 +20,7 @@ export default class CreateComponentTool extends StructuredTool<
 
   async _call({ name, content }: z.input<this["schema"]>): Promise<string> {
     const path = `src/components/${name}.tsx`;
-    await this.fileWriter.call({
+    await this.fileWriter.writeFile({
       path,
       content,
     });

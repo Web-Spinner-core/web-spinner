@@ -35,6 +35,10 @@ export default class WriteFileTool extends StructuredTool<
     super(toolParams);
   }
 
+  writeFile({ path, content }: FileWrite) {
+    this.accumulator({ path, content });
+  }
+
   async _call({ path, content }: z.input<this["schema"]>): Promise<string> {
     if (this.toolParams?.debug) {
       // Dump to tmp directory
