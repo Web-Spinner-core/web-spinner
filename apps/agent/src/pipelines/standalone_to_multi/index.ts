@@ -1,12 +1,14 @@
 import { getGithubInstallationClient } from "@lib/github";
 import { RepositoryWalker } from "@lib/github/repository";
+import GithubRepositoryClient from "@lib/github/repository_client";
 import { Page, Project, Repository } from "database";
+import { TraceGroup } from "langchain/callbacks";
+import { BaseMessage } from "langchain/schema";
 import { z } from "zod";
+import { createDevAgentExecutor } from "~/agents/dev_agent";
 import { createPlanAgentExecutor } from "~/agents/plan_agent";
 import { FileWrite } from "~/tools/write_file";
-import { planSystemPrompt, userPrompt } from "./messages";
-import { TraceGroup } from "langchain/callbacks";
-import { writeFileSync } from "fs";
+import { devSystemPrompt, planSystemPrompt, userPrompt } from "./messages";
 
 export const objectiveSchema = z.object({
   files: z
@@ -23,6 +25,13 @@ type PopulatedPage = Page & {
     repository: Repository;
   };
 };
+
+interface IntermediateStep {
+  action: {
+    messageLog: BaseMessage[];
+  };
+  observation: string;
+}
 
 /**
  * Create a diff for multi-file changes from a standalone
@@ -53,15 +62,48 @@ export async function createMultiFromStandalonePage(page: PopulatedPage) {
       modelName: "gpt-4-1106-preview",
       callbacks,
     });
-    const { output, intermediateSteps } = await planAgent.call(
+    const { intermediateSteps } = await planAgent.call(
       {
         input: page.standaloneCode,
         chat_history: [],
       },
       { callbacks }
     );
+    const messages = (intermediateSteps as IntermediateStep[]).flatMap(
+      (step) => step.action.messageLog
+    );
 
-    return "";
+    const devAgent = await createDevAgentExecutor({
+      walker,
+      systemPrompt: devSystemPrompt,
+      userPrompt,
+      temperature: 0.7,
+      modelName: "gpt-4-1106-preview",
+      callbacks,
+      writeAccumulator: accumulator,
+    });
+    await devAgent.call(
+      {
+        input: page.standaloneCode,
+        chat_history: messages,
+      },
+      { callbacks }
+    );
+
+    // Create pull request
+    const repositoryClient = new GithubRepositoryClient(
+      installationClient,
+      repository
+    );
+
+    await repositoryClient.createPullRequestFromFiles(
+      "main",
+      fileWrites,
+      `Create page: ${page.name}`,
+      `Web Spinner created this PR`
+    );
+
+    return true;
   } finally {
     await traceGroup.end();
   }

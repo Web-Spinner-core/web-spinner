@@ -30,10 +30,9 @@ export default async function convertStandaloneToMulti(
       },
     },
   });
-
-  const result = await createMultiFromStandalonePage(page);
+  await createMultiFromStandalonePage(page);
 
   ctx.status = 200;
-  ctx.body = result;
+  ctx.body = true;
   return next();
 }
