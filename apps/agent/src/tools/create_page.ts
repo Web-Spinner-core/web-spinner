@@ -10,8 +10,9 @@ const parameterSchema = z.object({
     ),
   layout_content: z
     .string()
+    .optional()
     .describe(
-      "The contents of the layout file to write. Make sure to specify in the code if you are using a client or server component."
+      "The contents of the layout file to write for this route, if necessary. Make sure to specify in the code if you are using a client or server component."
     ),
   page_content: z
     .string()
@@ -29,7 +30,7 @@ export default class CreatePageTool extends StructuredTool<
 
   constructor(
     private readonly fileWriter: WriteFileTool,
-    private readonly toolParams?: ToolParams
+    toolParams?: ToolParams
   ) {
     super(toolParams);
   }
@@ -42,16 +43,23 @@ export default class CreatePageTool extends StructuredTool<
     const basePath = `src/app${http_path}`;
     const layoutPath = `${basePath}/layout.tsx`;
     const pagePath = `${basePath}/page.tsx`;
-    await Promise.all([
-      this.fileWriter.writeFile({
-        path: layoutPath,
-        content: layout_content,
-      }),
+
+    // Write files
+    const promises = [
       this.fileWriter.writeFile({
         path: pagePath,
         content: page_content,
-      }),
-    ]);
+      })
+    ]
+    if (layout_content) {
+      promises.push(
+        this.fileWriter.writeFile({
+          path: layoutPath,
+          content: layout_content,
+        })
+      );
+    }
+    await Promise.all(promises);
     return JSON.stringify({ layoutPath, pagePath }, null, 2);
   }
 }
