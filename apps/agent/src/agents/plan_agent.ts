@@ -7,11 +7,12 @@ import ReadFileTool from "~/tools/read_file";
 import { createAgentExecutor } from "./base";
 import ListAllFilesTool from "~/tools/list_all_files";
 import { serializeFunctionCall } from "~/tools/util";
+import { BaseMessage } from "langchain/schema";
 
 interface CreatePlanAgentOptions {
   walker: RepositoryWalker;
   systemPrompt: string;
-  
+
   userPrompt?: string;
   temperature?: number;
   modelName?: string;
@@ -52,8 +53,10 @@ export async function createPlanAgentExecutor(
   } = args;
 
   const toolParams = { callbacks };
+
+  const readFileTool = new ReadFileTool(walker, toolParams);
   const tools = [
-    new ReadFileTool(walker, toolParams),
+    readFileTool,
     new ObjectiveTool(
       objectiveSchema,
       objectiveDescription,
@@ -61,10 +64,8 @@ export async function createPlanAgentExecutor(
       toolParams
     ),
   ];
-  
-  const listAllFilesTool = new ListAllFilesTool(walker, toolParams);
-  const files = await listAllFilesTool.call({}, toolParams);
-  const prior = serializeFunctionCall(listAllFilesTool, "", files);
+
+  const prior = await getPrior(walker, toolParams);
 
   return createAgentExecutor({
     userPrompt,
@@ -77,4 +78,41 @@ export async function createPlanAgentExecutor(
     shouldCache,
     returnIntermediateSteps: true,
   });
+}
+
+/**
+ * Get the prior messages
+ */
+async function getPrior(
+  walker: RepositoryWalker,
+  toolParams: { callbacks?: Callbacks }
+): Promise<BaseMessage[]> {
+  const listAllFilesTool = new ListAllFilesTool(walker, toolParams);
+  const readFileTool = new ReadFileTool(walker, toolParams);
+
+  const files = await listAllFilesTool.call({}, toolParams);
+  const listAllFilesMessages = serializeFunctionCall(
+    listAllFilesTool,
+    "",
+    files
+  );
+  const seedFiles: string[] = [
+    // "src/app/layout.tsx",
+    // "src/app/loading.tsx",
+    // "src/app/page.tsx",
+    // "src/app/account/page.tsx",
+  ];
+  const fileContents = await Promise.all(
+    seedFiles.map(async (path) => {
+      const content = await readFileTool.call({ path }, toolParams);
+      return serializeFunctionCall(
+        readFileTool,
+        JSON.stringify({ path }),
+        content
+      );
+    })
+  );
+  const fileMessages = fileContents.flat();
+  const prior = [...listAllFilesMessages, ...fileMessages];
+  return prior;
 }
