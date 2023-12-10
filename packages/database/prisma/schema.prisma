@@ -34,6 +34,9 @@ model Page {
   standaloneCode String?
   screenshotPath String?
 
+  // The number that identifies a PR with these page's changes
+  prNum Int?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -6,6 +6,7 @@ import scanRepository from "./code_scanner/repository";
 import debug from "./debug";
 import createPage from "./designer/create_page";
 import handleIncomingWebhook from "./webhooks";
+import getPullRequestDiffs from "./repository";
 
 const router = new Router();
 router.post("/webhooks", handleIncomingWebhook);
@@ -15,5 +16,6 @@ router.post("/agent/issues", scanIssues);
 router.post("/debug", debug);
 router.post("/canvas/page", convertCanvasInputToPage);
 router.post("/canvas/multi", convertStandaloneToMulti);
+router.post("/diffs", getPullRequestDiffs);
 
 export default router;

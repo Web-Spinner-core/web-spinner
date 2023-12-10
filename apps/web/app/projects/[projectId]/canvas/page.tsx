@@ -152,6 +152,7 @@ export default function CanvasPage({ project, pages }: Props) {
                 <TabsTrigger value="code_standalone">
                   Code (Standalone)
                 </TabsTrigger>
+                <TabsTrigger value="code_changes">Code (Changes)</TabsTrigger>
               </div>
             </TabsList>
             {loading ? (
@@ -179,6 +180,12 @@ export default function CanvasPage({ project, pages }: Props) {
                       }}
                     />
                   )}
+                </TabsContent>
+                <TabsContent
+                  value="code_changes"
+                  className="h-full overflow-x-auto overflow-y-auto"
+                >
+                  <SkeletonPlaceholder />
                 </TabsContent>
               </>
             )}

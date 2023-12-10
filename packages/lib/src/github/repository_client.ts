@@ -1,6 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { Repository } from "database";
-import { Octokit } from "octokit";
+import { Octokit } from "@octokit/rest";
 import {
   extractHtmlImageUrls,
   extractMarkdownImageUrls,
@@ -29,6 +29,8 @@ export default class GithubRepositoryClient {
   ) {
     [this.owner, this.repo] = repository.fullName.split("/");
   }
+
+  // TODO: Replace octokit request calls with typed methods
 
   /**
    * Create a blob on GitHub and return the SHA of the blob
@@ -218,5 +220,19 @@ export default class GithubRepositoryClient {
 
     await this.createBranch(branchName, commit);
     await this.createPullRequest(baseBranch, branchName, title, body);
+  }
+
+  /**
+   * Get the files changed in the specified pull request
+   * @throws {Error} if the pull request does not have a test merge commit ready yet
+   */
+  async getPullRequestDiffs(pullRequestNumber: number) {
+    // Get the SHA of the merge commit
+    const { data } = await this.client.pulls.listFiles({
+      owner: this.owner,
+      repo: this.repo,
+      pull_number: pullRequestNumber,
+    });
+    return data;
   }
 }

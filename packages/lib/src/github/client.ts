@@ -1,6 +1,6 @@
 import { createAppAuth } from "@octokit/auth-app";
 import { Webhooks } from "@octokit/webhooks";
-import { Octokit } from "octokit";
+import { Octokit } from "@octokit/rest";
 import { env } from "@lib/env";
 
 /**
