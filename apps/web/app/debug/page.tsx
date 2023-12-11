@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useRef } from "react";
-import "highlight.js/styles/github.css";
-import { Diff2HtmlUI } from "diff2html/lib-esm/ui/js/diff2html-ui";
+import FileDiffView from "@ui/components/file-diff";
 import "diff2html/bundles/css/diff2html.min.css";
+import "highlight.js/styles/github.css";
 
 const gitDiff = `--- a.tsx
 +++ a.tsx
@@ -47,22 +46,9 @@ const gitDiff = `--- a.tsx
 +}`;
 
 export default function DebugPage() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const diff2html = new Diff2HtmlUI(ref.current, gitDiff, {
-      drawFileList: true,
-      fileContentToggle: false,
-      stickyFileHeaders: false,
-    });
-    diff2html.draw();
-    diff2html.highlightCode();
-  }, [ref.current]);
-
   return (
     <main>
-      <div ref={ref} />
+      <FileDiffView diff={gitDiff} />
     </main>
   );
 }

@@ -32,6 +32,8 @@
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "config": "workspace:*",
+    "diff2html": "^3.4.45",
+    "highlight.js": "^11.9.0",
     "lucide-react": "^0.293.0",
     "react": "^18.2.0",
     "tailwind-merge": "^2.0.0",

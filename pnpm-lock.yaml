@@ -393,6 +393,12 @@ importers:
       config:
         specifier: workspace:*
         version: link:../config
+      diff2html:
+        specifier: ^3.4.45
+        version: 3.4.45
+      highlight.js:
+        specifier: ^11.9.0
+        version: 11.9.0
       lucide-react:
         specifier: ^0.293.0
         version: 0.293.0(react@18.2.0)
