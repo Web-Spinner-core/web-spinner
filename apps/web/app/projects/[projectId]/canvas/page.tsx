@@ -1,4 +1,6 @@
 "use client";
+import "highlight.js/styles/github.css";
+
 import { Editor, TLPageId } from "@tldraw/tldraw";
 import {
   Badge,
@@ -15,10 +17,13 @@ import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import clsx from "clsx";
 import { Page, Project, Repository } from "database";
+import "diff2html/bundles/css/diff2html.min.css";
+import { Diff2HtmlUI } from "diff2html/lib-esm/ui/js/diff2html-ui";
 import { GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
+import { GitDiff } from "./layout";
 
 interface ReducerState {
   [key: string]: string;
@@ -40,16 +45,45 @@ function reducer(state: ReducerState, action: ReducerAction): ReducerState {
   return state;
 }
 
-interface Props {
+interface CanvasPageProps {
   project: Project & {
     repository: Repository;
   };
   pages: Page[];
+  diffs: {
+    [key: string]: GitDiff;
+  };
 }
 
-export default function CanvasPage({ project, pages }: Props) {
+interface RenderedFileDiffProps {
+  diff: string;
+}
+
+/**
+ * A component for rendering a single Git file diff
+ */
+function RenderedFileDiff({ diff }: RenderedFileDiffProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const diff2html = new Diff2HtmlUI(ref.current, diff, {
+      drawFileList: false,
+      fileContentToggle: false,
+      stickyFileHeaders: false,
+    });
+    diff2html.draw();
+    diff2html.highlightCode();
+  }, [ref.current]);
+
+  return <div ref={ref} />;
+}
+
+export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
+  const [diffSet, setDiffSet] = useState<GitDiff>();
+  const [selectedFileDiff, setSelectedFileDiff] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
 
@@ -63,7 +97,7 @@ export default function CanvasPage({ project, pages }: Props) {
     ) as ReducerState
   );
 
-  // Update page ID to trigger secondary effect
+  // Update page ID to trigger secondary effects
   useEffect(() => {
     if (editor != null) {
       setPageId(editor.getCurrentPageId());
@@ -77,6 +111,13 @@ export default function CanvasPage({ project, pages }: Props) {
       if (page != null) {
         setPage(page.name);
         setStandaloneCode(state[pageId] ?? "");
+        setDiffSet(diffs[pageId]);
+
+        const diff = diffs[pageId]?.fileDiffs?.[0];
+        if (diff) {
+          const { filename, patch } = diff;
+          setSelectedFileDiff(`--- ${filename}\n+++ ${filename}\n${patch}`);
+        }
       }
     }
   }, [pageId, editor]);
@@ -185,7 +226,11 @@ export default function CanvasPage({ project, pages }: Props) {
                   value="code_changes"
                   className="h-full overflow-x-auto overflow-y-auto"
                 >
-                  <SkeletonPlaceholder />
+                  {selectedFileDiff == null ? (
+                    <div className="p-4">No changes available</div>
+                  ) : (
+                    <RenderedFileDiff diff={selectedFileDiff} />
+                  )}
                 </TabsContent>
               </>
             )}

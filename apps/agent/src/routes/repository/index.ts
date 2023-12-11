@@ -4,7 +4,7 @@ import { prisma } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
 
-const bodySchema = z.object({
+const paramsSchema = z.object({
   pageId: z.string(),
 });
 
@@ -12,7 +12,7 @@ const bodySchema = z.object({
  * Get diffs associated with a page
  */
 export default async function getPullRequestDiffs(ctx: Context, next: Next) {
-  const { pageId } = bodySchema.parse(ctx.request.body);
+  const { pageId } = paramsSchema.parse(ctx.params);
   const page = await prisma.page.findUniqueOrThrow({
     where: { id: pageId },
     include: {
@@ -25,7 +25,7 @@ export default async function getPullRequestDiffs(ctx: Context, next: Next) {
   });
 
   if (!page.prNum) {
-    throw new Error("Page does not have a pull request yet!");
+    throw new Error(`Page ${pageId} does not have a pull request yet!`);
   }
 
   const installationClient = getGithubInstallationClient(
