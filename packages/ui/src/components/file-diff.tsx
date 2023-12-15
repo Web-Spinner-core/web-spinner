@@ -46,7 +46,7 @@ export default function FileDiffView({ diff: gitDiff, filename }: Props) {
           <Fragment key={block.newStartLine}>
             <tr className="bg-white">
               <td className="sticky left-0 bg-white">
-                <div className="w-24 sticky left-0 border-r border-gray-300 pr-3 whitespace-pre">
+                <div className="w-16 sticky left-0 border-r border-gray-300 pr-3 whitespace-pre">
                   &nbsp;
                 </div>
               </td>
@@ -61,7 +61,7 @@ export default function FileDiffView({ diff: gitDiff, filename }: Props) {
                 )}
               >
                 <td className="text-right text-gray-500 select-none sticky left-0">
-                  <div className="w-24 sticky left-0 border-r border-gray-300 pr-3 bg-diff-insert">
+                  <div className="w-16 sticky left-0 border-r border-gray-300 pr-3 bg-diff-insert">
                     <div>{line.oldNumber}</div>
                     <div>{line.newNumber}</div>
                   </div>

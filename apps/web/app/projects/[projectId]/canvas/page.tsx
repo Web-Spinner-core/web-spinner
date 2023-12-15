@@ -12,17 +12,16 @@ import {
   useToast,
 } from "@ui/components";
 import Canvas from "@ui/components/canvas";
+import CodeBlock from "@ui/components/code-block";
+import FileDiffView from "@ui/components/file-diff";
 import IconLabel from "@ui/components/icon-label";
+import ComboBox from "@ui/components/ui/combobox";
 import clsx from "clsx";
 import { Page, Project, Repository } from "database";
 import { FileDiffIcon, GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
-import { useEffect, useReducer, useRef, useState } from "react";
-import { CopyBlock, nord } from "react-code-blocks";
+import { useEffect, useReducer, useState } from "react";
 import { convertEditorToCode } from "~/lib/editorToCode";
 import { FileDiff, GitDiff } from "./layout";
-import FileDiffView from "@ui/components/file-diff";
-import ComboBox from "@ui/components/ui/combobox";
-import { number } from "zod";
 
 interface ReducerState {
   [key: string]: string;
@@ -206,18 +205,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                   className="h-full overflow-x-auto overflow-y-auto"
                 >
                   {standaloneCode?.length && (
-                    <CopyBlock
-                      codeBlock
-                      text={standaloneCode}
-                      language="html"
-                      theme={nord}
-                      showLineNumbers
-                      customStyle={{
-                        fontFamily: "var(--font-mono)",
-                        overflowX: "auto",
-                        overflowY: "auto",
-                      }}
-                    />
+                    <CodeBlock text={standaloneCode} />
                   )}
                 </TabsContent>
                 <TabsContent
@@ -233,7 +221,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                       <div className="w-full flex justify-between items-center mb-2 align-middle px-1 pl-3">
                         <div className="flex flex-row gap-2 font-medium text-sm">
                           <span className="flex flex-row text-muted-foreground">
-                            <FileDiffIcon className="h-5"/>
+                            <FileDiffIcon className="h-5" />
                             {diffStats.changes}
                           </span>
                           <span className="text-insert-foreground">
