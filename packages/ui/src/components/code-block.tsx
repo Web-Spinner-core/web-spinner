@@ -23,8 +23,8 @@ export default function CodeBlock({ text }: Props) {
   }, [text]);
 
   return (
-    <div className="relative">
-      <div className="absolute top-0 right-0 pr-2 pt-2 w-full flex items-end justify-end">
+    <>
+      <div className="sticky top-0 right-0 pr-4 pt-4 w-full flex items-end justify-end">
         <CopyToClipboard text={text}>
           {copyTransitioning ? (
             <CheckIcon className="cursor-pointer h-4" />
@@ -41,28 +41,26 @@ export default function CodeBlock({ text }: Props) {
           )}
         </CopyToClipboard>
       </div>
-      <code className="overflow-x-auto overflow-y-auto max-h-[70vh]">
-        <table className="font-mono border-collapse w-full">
-          <tbody>
-            {code?.map((line, idx) => (
-              <tr key={idx} className="bg-gray-50">
-                <td className="text-right text-gray-500 select-none sticky left-0">
-                  <div className="w-16 sticky left-0 border-r border-gray-300 pr-3">
-                    <div>{idx + 1}</div>
-                  </div>
-                </td>
-                <td className="pl-3 flex gap-2 whitespace-pre">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: line,
-                    }}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </code>
-    </div>
+      <table className="font-mono border-collapse w-full mt-[-2rem]">
+        <tbody>
+          {code?.map((line, idx) => (
+            <tr key={idx} className="bg-gray-50">
+              <td className="text-right text-gray-500 select-none sticky left-0">
+                <div className="w-16 sticky left-0 border-r border-gray-300 pr-3">
+                  <div>{idx + 1}</div>
+                </div>
+              </td>
+              <td className="pl-3 flex gap-2 whitespace-pre">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: line,
+                  }}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
