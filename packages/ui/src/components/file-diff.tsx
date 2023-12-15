@@ -2,12 +2,11 @@
 import hljs from "highlight.js";
 import "highlight.js/styles/github.css";
 
-import "diff2html/bundles/css/diff2html.min.css";
-import { Diff2HtmlUI } from "diff2html/lib-esm/ui/js/diff2html-ui";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { parse } from "diff2html";
-import { DiffFile, LineType } from "diff2html/lib-esm/types";
 import { clsx } from "clsx";
+import { parse } from "diff2html";
+import "diff2html/bundles/css/diff2html.min.css";
+import { DiffFile, LineType } from "diff2html/lib-esm/types";
+import { Fragment, useEffect, useState } from "react";
 
 interface Props {
   diff: string;
@@ -47,7 +46,7 @@ export default function FileDiffView({ diff: gitDiff, filename }: Props) {
           <Fragment key={block.newStartLine}>
             <tr className="bg-white">
               <td className="sticky left-0 bg-white">
-                <div className="w-24 sticky left-0 z-10 border-r border-gray-300 pr-3 whitespace-pre">
+                <div className="w-24 sticky left-0 border-r border-gray-300 pr-3 whitespace-pre">
                   &nbsp;
                 </div>
               </td>
@@ -62,7 +61,7 @@ export default function FileDiffView({ diff: gitDiff, filename }: Props) {
                 )}
               >
                 <td className="text-right text-gray-500 select-none sticky left-0">
-                  <div className="w-24 sticky left-0 z-10 border-r border-gray-300 pr-3 bg-diff-insert">
+                  <div className="w-24 sticky left-0 border-r border-gray-300 pr-3 bg-diff-insert">
                     <div>{line.oldNumber}</div>
                     <div>{line.newNumber}</div>
                   </div>

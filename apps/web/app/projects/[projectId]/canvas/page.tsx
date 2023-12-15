@@ -21,6 +21,7 @@ import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
 import { FileDiff, GitDiff } from "./layout";
 import FileDiffView from "@ui/components/file-diff";
+import ComboBox from "@ui/components/ui/combobox";
 
 interface ReducerState {
   [key: string]: string;
@@ -55,7 +56,10 @@ interface CanvasPageProps {
 export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
-  const [diffSet, setDiffSet] = useState<GitDiff>();
+
+  const [diffOptions, setDiffOptions] =
+    useState<{ value: string; label: string }[]>();
+  const [fileDiffMap, setFileDiffMap] = useState<Record<string, FileDiff>>();
   const [selectedFileDiff, setSelectedFileDiff] = useState<FileDiff>();
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
@@ -84,7 +88,17 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
       if (page != null) {
         setPage(page.name);
         setStandaloneCode(state[pageId] ?? "");
-        setDiffSet(diffs[pageId]);
+        const diffMap = diffs[pageId]?.fileDiffs?.reduce(
+          (acc, diff) => ({ ...acc, [diff.sha]: diff }),
+          {}
+        );
+        setFileDiffMap(diffMap);
+        setDiffOptions(
+          diffs[pageId]?.fileDiffs?.map((diff) => ({
+            value: diff.sha,
+            label: diff.filename,
+          })) ?? []
+        );
 
         const diff = diffs[pageId]?.fileDiffs?.[0];
         setSelectedFileDiff(diff);
@@ -200,10 +214,22 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                   {selectedFileDiff == null ? (
                     <div className="p-4">No changes available</div>
                   ) : (
-                    <FileDiffView
-                      diff={selectedFileDiff.patch}
-                      filename={selectedFileDiff.filename}
-                    />
+                    <div>
+                      <div className="w-full flex items-end">
+                        <ComboBox
+                          options={diffOptions}
+                          placeholder="Select file"
+                          selectedOption={selectedFileDiff.sha}
+                          onOptionSelected={option => {
+                            setSelectedFileDiff(fileDiffMap[option]);
+                          }}
+                        />
+                      </div>
+                      <FileDiffView
+                        diff={selectedFileDiff.patch}
+                        filename={selectedFileDiff.filename}
+                      />
+                    </div>
                   )}
                 </TabsContent>
               </>

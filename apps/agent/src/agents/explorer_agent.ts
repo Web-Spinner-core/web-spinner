@@ -109,5 +109,6 @@ export async function createExplorerAgentExecutor<T extends ToolSchema>(
     callbacks,
     tools,
     returnIntermediateSteps: true,
+    shouldCache: false
   });
 }

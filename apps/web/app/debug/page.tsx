@@ -1,5 +1,6 @@
 "use client";
 import FileDiffView from "@ui/components/file-diff";
+import ComboBox from "@ui/components/ui/combobox";
 import "diff2html/bundles/css/diff2html.min.css";
 import "highlight.js/styles/github.css";
 
@@ -45,9 +46,15 @@ const gitDiff = `--- a.tsx
 +  );
 +}`;
 
+const diffOptions = [
+  { label: "a.tsx", value: "a.tsx" },
+  { label: "b.tsx", value: "b.tsx" },
+];
+
 export default function DebugPage() {
   return (
     <main>
+      <ComboBox options={diffOptions} placeholder="Select file" />
       <FileDiffView diff={gitDiff} />
     </main>
   );
