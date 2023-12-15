@@ -26,6 +26,7 @@ export interface GitDiff {
   fileDiffs: FileDiff[];
   additions: number;
   deletions: number;
+  prLink: string;
 }
 
 const diffSchema = z
@@ -90,6 +91,7 @@ export default async function CanvasLayout({ params: { projectId } }: Props) {
             fileDiffs,
             additions,
             deletions,
+            prLink: `https://github.com/${currentProject.repository.fullName}/pull/${page.prNum}`
           },
         ];
       } catch (error) {

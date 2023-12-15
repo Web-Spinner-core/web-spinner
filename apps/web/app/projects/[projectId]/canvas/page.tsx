@@ -22,6 +22,7 @@ import { FileDiffIcon, GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 import { convertEditorToCode } from "~/lib/editorToCode";
 import { FileDiff, GitDiff } from "./layout";
+import Link from "next/link";
 
 interface ReducerState {
   [key: string]: string;
@@ -65,7 +66,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
 
   const [diffOptions, setDiffOptions] =
     useState<{ value: string; label: string }[]>();
-  const [diffStats, setDiffStats] = useState<DiffStats>();
+  const [selectedDiff, setSelectedDiff] = useState<GitDiff>();
   const [fileDiffMap, setFileDiffMap] = useState<Record<string, FileDiff>>();
   const [selectedFileDiff, setSelectedFileDiff] = useState<FileDiff>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -94,16 +95,12 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
       const page = editor.getPage(pageId);
       if (page != null) {
         setPage(page.name);
+        setSelectedDiff(diffs[pageId]);
         setStandaloneCode(state[pageId] ?? "");
         const diffMap = diffs[pageId]?.fileDiffs?.reduce(
           (acc, diff) => ({ ...acc, [diff.sha]: diff }),
           {}
         );
-        setDiffStats({
-          additions: diffs[pageId]?.additions ?? 0,
-          deletions: diffs[pageId]?.deletions ?? 0,
-          changes: diffs[pageId]?.fileDiffs?.length ?? 0,
-        });
         setFileDiffMap(diffMap);
         setDiffOptions(
           diffs[pageId]?.fileDiffs?.map((diff) => ({
@@ -190,7 +187,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                 <TabsTrigger value="code_standalone">
                   Code (Standalone)
                 </TabsTrigger>
-                <TabsTrigger value="code_changes">Code (Changes)</TabsTrigger>
+                <TabsTrigger value="code_changes">Code (PR)</TabsTrigger>
               </div>
             </TabsList>
             {loading ? (
@@ -219,18 +216,31 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                   ) : (
                     <div>
                       <div className="w-full flex justify-between items-center mb-2 align-middle px-1 pl-3">
-                        <div className="flex flex-row gap-2 font-medium text-sm">
-                          <span className="flex flex-row text-muted-foreground">
-                            <FileDiffIcon className="h-5" />
-                            {diffStats.changes}
-                          </span>
-                          <span className="text-insert-foreground">
-                            +{diffStats.additions}
-                          </span>
-                          <span className="text-delete-foreground">
-                            -{diffStats.deletions}
-                          </span>
+                        <div className="flex flex-row gap-10 items-center">
+                          <div className="flex flex-row gap-2 font-medium text-sm">
+                            <span className="flex flex-row text-muted-foreground">
+                              <FileDiffIcon className="h-5" />
+                              {selectedDiff?.fileDiffs.length ?? 0}
+                            </span>
+                            <span className="text-insert-foreground">
+                              +{selectedDiff?.additions ?? 0}
+                            </span>
+                            <span className="text-delete-foreground">
+                              -{selectedDiff?.deletions ?? 0}
+                            </span>
+                          </div>
+                          <Link
+                            href={selectedDiff?.prLink ?? ""}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <Button className="text-sm flex flex-row gap-2">
+                              <GithubIcon />
+                              View PR
+                            </Button>
+                          </Link>
                         </div>
+
                         <ComboBox
                           options={diffOptions}
                           placeholder="Select file"
