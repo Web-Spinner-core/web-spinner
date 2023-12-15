@@ -15,13 +15,14 @@ import Canvas from "@ui/components/canvas";
 import IconLabel from "@ui/components/icon-label";
 import clsx from "clsx";
 import { Page, Project, Repository } from "database";
-import { GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
+import { FileDiffIcon, GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { CopyBlock, nord } from "react-code-blocks";
 import { convertEditorToCode } from "~/lib/editorToCode";
 import { FileDiff, GitDiff } from "./layout";
 import FileDiffView from "@ui/components/file-diff";
 import ComboBox from "@ui/components/ui/combobox";
+import { number } from "zod";
 
 interface ReducerState {
   [key: string]: string;
@@ -53,12 +54,19 @@ interface CanvasPageProps {
   };
 }
 
+interface DiffStats {
+  additions: number;
+  deletions: number;
+  changes: number;
+}
+
 export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
 
   const [diffOptions, setDiffOptions] =
     useState<{ value: string; label: string }[]>();
+  const [diffStats, setDiffStats] = useState<DiffStats>();
   const [fileDiffMap, setFileDiffMap] = useState<Record<string, FileDiff>>();
   const [selectedFileDiff, setSelectedFileDiff] = useState<FileDiff>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -92,6 +100,11 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
           (acc, diff) => ({ ...acc, [diff.sha]: diff }),
           {}
         );
+        setDiffStats({
+          additions: diffs[pageId]?.additions ?? 0,
+          deletions: diffs[pageId]?.deletions ?? 0,
+          changes: diffs[pageId]?.fileDiffs?.length ?? 0,
+        });
         setFileDiffMap(diffMap);
         setDiffOptions(
           diffs[pageId]?.fileDiffs?.map((diff) => ({
@@ -172,7 +185,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
             className="w-full h-full grid grid-rows-[auto_1fr]"
           >
             <TabsList className="justify-between">
-              <div className="pl-4">{page}</div>
+              <div className="pl-2">{page}</div>
               <div>
                 <TabsTrigger value="preview">Preview</TabsTrigger>
                 <TabsTrigger value="code_standalone">
@@ -212,15 +225,29 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                   className="h-full overflow-x-auto overflow-y-auto"
                 >
                   {selectedFileDiff == null ? (
-                    <div className="p-4">No changes available</div>
+                    <div className="p-4">
+                      No changes available. Have you processed this page yet?
+                    </div>
                   ) : (
                     <div>
-                      <div className="w-full flex items-end">
+                      <div className="w-full flex justify-between items-center mb-2 align-middle px-1 pl-3">
+                        <div className="flex flex-row gap-2 font-medium text-sm">
+                          <span className="flex flex-row text-muted-foreground">
+                            <FileDiffIcon className="h-5"/>
+                            {diffStats.changes}
+                          </span>
+                          <span className="text-insert-foreground">
+                            +{diffStats.additions}
+                          </span>
+                          <span className="text-delete-foreground">
+                            -{diffStats.deletions}
+                          </span>
+                        </div>
                         <ComboBox
                           options={diffOptions}
                           placeholder="Select file"
                           selectedOption={selectedFileDiff.sha}
-                          onOptionSelected={option => {
+                          onOptionSelected={(option) => {
                             setSelectedFileDiff(fileDiffMap[option]);
                           }}
                         />

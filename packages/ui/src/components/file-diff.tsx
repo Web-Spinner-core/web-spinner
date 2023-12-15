@@ -56,8 +56,8 @@ export default function FileDiffView({ diff: gitDiff, filename }: Props) {
               <tr
                 key={line.newNumber}
                 className={clsx(
-                  line.type === LineType.INSERT && "bg-diff-insert",
-                  line.type === LineType.DELETE && "bg-diff-delete"
+                  line.type === LineType.INSERT && "bg-insert-background",
+                  line.type === LineType.DELETE && "bg-delete-background"
                 )}
               >
                 <td className="text-right text-gray-500 select-none sticky left-0">

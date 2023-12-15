@@ -51,10 +51,14 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        diff: {
-          insert: "#DFD",
-          delete: "#FEE8E9",
+        insert: {
+          foreground: "#1A7F37",
+          background: "#DDFFDD"
         },
+        delete: {
+          foreground: "#D1242F",
+          background: "#FEE8E9"
+        }
       },
       borderRadius: {
         lg: `var(--radius)`,

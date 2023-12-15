@@ -11,7 +11,7 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandItem,
-} from "cmdk";
+} from "@ui/components/ui";
 import { ChevronsUpDown, Check } from "lucide-react";
 import React, { useState } from "react";
 import { cn } from "@ui/lib/utils";
@@ -54,14 +54,14 @@ export default function ComboBox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[500px] p-2 z-10 bg-white cursor-pointer">
+      <PopoverContent className="w-[500px] p-2 z-10 cursor-pointer drop-shadow">
         <Command>
           <CommandInput placeholder={placeholder ?? "Search..."} />
           <CommandEmpty>No option found.</CommandEmpty>
           <CommandGroup>
             {options.map((option) => (
               <CommandItem
-                className="flex flex-row gap-2 py-1 align-middle"
+                className="cursor-pointer"
                 key={option.value}
                 value={option.value}
                 onSelect={(currentValue) => {
@@ -74,7 +74,7 @@ export default function ComboBox({
               >
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4 align-middle justify-center items-center",
+                    "mr-2 h-4 w-4",
                     value === option.value ? "opacity-100" : "opacity-0"
                   )}
                 />
