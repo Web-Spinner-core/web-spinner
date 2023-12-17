@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs";
 import { SkeletonPlaceholder, Toaster } from "@ui/components";
 import { prisma } from "database";
 import { Suspense } from "react";
-import Header, { TitledHeader } from "~/components/header";
+import { TitledHeader } from "~/components/header";
 import ProjectsTable from "~/components/projects-table";
 
 export default async function IndexPage() {

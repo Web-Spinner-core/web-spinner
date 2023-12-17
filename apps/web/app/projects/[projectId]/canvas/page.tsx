@@ -18,11 +18,18 @@ import IconLabel from "@ui/components/icon-label";
 import ComboBox from "@ui/components/ui/combobox";
 import clsx from "clsx";
 import { Page, Project, Repository } from "database";
-import { FileDiffIcon, GitBranchIcon, GithubIcon, Loader2 } from "lucide-react";
+import {
+  FileDiffIcon,
+  GitBranchIcon,
+  GithubIcon,
+  Loader2,
+  RefreshCwIcon,
+} from "lucide-react";
 import { useEffect, useReducer, useState } from "react";
 import { convertEditorToCode } from "~/lib/editorToCode";
 import { FileDiff, GitDiff } from "./layout";
 import Link from "next/link";
+import LoadingButton from "@ui/components/loading-button";
 
 interface ReducerState {
   [key: string]: string;
@@ -52,12 +59,6 @@ interface CanvasPageProps {
   diffs: {
     [key: string]: GitDiff;
   };
-}
-
-interface DiffStats {
-  additions: number;
-  deletions: number;
-  changes: number;
 }
 
 export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
@@ -210,8 +211,13 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                   className="h-full overflow-x-auto overflow-y-auto"
                 >
                   {selectedFileDiff == null ? (
-                    <div className="p-4">
-                      No changes available. Have you processed this page yet?
+                    <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
+                      <span>Satisfied with the design?</span>
+                      <LoadingButton
+                        icon="🪄"
+                        text="Create PR"
+                        loading={false}
+                      />
                     </div>
                   ) : (
                     <div>
@@ -229,16 +235,22 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                               -{selectedDiff?.deletions ?? 0}
                             </span>
                           </div>
-                          <Link
-                            href={selectedDiff?.prLink ?? ""}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <Button className="text-sm flex flex-row gap-2">
-                              <GithubIcon />
-                              View PR
+                          <div className="flex flex-row gap-2">
+                            <Link
+                              href={selectedDiff?.prLink ?? ""}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <Button className="text-sm flex flex-row gap-2 bg-slate-900 hover:bg-slate-800 drop-shadow">
+                                <GithubIcon />
+                                View PR
+                              </Button>
+                            </Link>
+                            <Button className="text-sm flex flex-row gap-2 bg-slate-900 hover:bg-slate-800 drop-shadow">
+                              <RefreshCwIcon />
+                              Rebuild
                             </Button>
-                          </Link>
+                          </div>
                         </div>
 
                         <ComboBox
@@ -264,9 +276,11 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
       </section>
       {/* Button */}
       <div className="flex flex-row items-center justify-center mt-3">
-        <Button
+        <LoadingButton
           className="w-32"
-          disabled={editor == null || loading}
+          text="Generate"
+          icon="✨"
+          loading={editor == null || loading}
           onClick={async () => {
             setLoading(true);
             setStandaloneCode("");
@@ -288,14 +302,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
               setLoading(false);
             }
           }}
-        >
-          {loading ? (
-            <Loader2 className="animate-spin mr-2" />
-          ) : (
-            <span className="mr-2">✨</span>
-          )}{" "}
-          Generate
-        </Button>
+        />
       </div>
       <Toaster />
     </>
