@@ -116,21 +116,26 @@ export default class GithubRepositoryClient {
 
   /**
    * Create a pull request on GitHub
+   * Returns the number that uniquely identifies this pull request
    */
   private async createPullRequest(
     baseBranch: string,
     branchName: string,
     title: string,
     body: string
-  ): Promise<void> {
-    await this.client.request(`POST /repos/{owner}/{repo}/pulls`, {
-      owner: this.owner,
-      repo: this.repo,
-      head: branchName,
-      base: baseBranch,
-      title,
-      body,
-    });
+  ): Promise<number> {
+    const response = await this.client.request(
+      `POST /repos/{owner}/{repo}/pulls`,
+      {
+        owner: this.owner,
+        repo: this.repo,
+        head: branchName,
+        base: baseBranch,
+        title,
+        body,
+      }
+    );
+    return response.data.number;
   }
 
   /**
@@ -197,13 +202,14 @@ export default class GithubRepositoryClient {
 
   /**
    * Create a pull request on GitHub from the specified files
+   * Returns the number that uniquely identifies this pull request
    */
   async createPullRequestFromFiles(
     baseBranch: string,
     files: FileWrite[],
     title: string,
     body: string
-  ) {
+  ): Promise<number> {
     const branchName = `web-spinner-${createId()}`;
     const fileBlobs = await Promise.all(
       files.map(async (file) => ({
@@ -219,7 +225,7 @@ export default class GithubRepositoryClient {
     const commit = await this.createCommit(tree, title, baseCommit);
 
     await this.createBranch(branchName, commit);
-    await this.createPullRequest(baseBranch, branchName, title, body);
+    return this.createPullRequest(baseBranch, branchName, title, body);
   }
 
   /**

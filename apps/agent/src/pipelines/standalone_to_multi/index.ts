@@ -1,7 +1,7 @@
 import { getGithubInstallationClient } from "@lib/github";
 import { RepositoryWalker } from "@lib/github/repository";
 import GithubRepositoryClient from "@lib/github/repository_client";
-import { Page, Project, Repository } from "database";
+import { Page, Project, Repository, prisma } from "database";
 import { BaseCallbackHandler, TraceGroup } from "langchain/callbacks";
 import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
 import { z } from "zod";
@@ -17,21 +17,11 @@ export const objectiveSchema = z.object({
     .describe("The paths to the files that were created"),
 });
 
-const objectiveFunctionName = "record_files";
-const objectiveDescription = "Record the new files that were created";
-
 type PopulatedPage = Page & {
   project: Project & {
     repository: Repository;
   };
 };
-
-interface IntermediateStep {
-  action: {
-    messageLog: BaseMessage[];
-  };
-  observation: string;
-}
 
 /**
  * Create a diff for multi-file changes from a standalone
@@ -125,12 +115,22 @@ export async function createMultiFromStandalonePage(page: PopulatedPage) {
       repository
     );
 
-    await repositoryClient.createPullRequestFromFiles(
+    const prNum = await repositoryClient.createPullRequestFromFiles(
       "main",
       fileWrites,
       `Create page: ${page.name}`,
       `Web Spinner created this PR`
     );
+
+    // Update latest PR
+    await prisma.page.update({
+      where: {
+        id: page.id,
+      },
+      data: {
+        prNum,
+      },
+    });
 
     return true;
   } finally {
