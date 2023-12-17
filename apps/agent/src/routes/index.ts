@@ -16,6 +16,6 @@ router.post("/agent/issues", scanIssues);
 router.post("/debug", debug);
 router.post("/canvas/page", convertCanvasInputToPage);
 router.post("/canvas/multi", convertStandaloneToMulti);
-router.get("/diffs/:pageId", getPullRequestDiffs);
+router.post("/diffs", getPullRequestDiffs);
 
 export default router;

@@ -15,6 +15,7 @@ import Canvas from "@ui/components/canvas";
 import CodeBlock from "@ui/components/code-block";
 import FileDiffView from "@ui/components/file-diff";
 import IconLabel from "@ui/components/icon-label";
+import LoadingButton from "@ui/components/loading-button";
 import ComboBox from "@ui/components/ui/combobox";
 import clsx from "clsx";
 import { Page, Project, Repository } from "database";
@@ -22,15 +23,18 @@ import {
   FileDiffIcon,
   GitBranchIcon,
   GithubIcon,
-  Loader2,
   RefreshCwIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useReducer, useState } from "react";
 import { convertEditorToCode } from "~/lib/editorToCode";
+import {
+  createPullRequestFromCanvas,
+  getDiffs,
+  revalidateServerTag,
+} from "~/server/canvas";
 import { FileDiff, GitDiff } from "./layout";
-import Link from "next/link";
-import LoadingButton from "@ui/components/loading-button";
-import { createPullRequestFromCanvas, getDiffs } from "~/server/canvas";
+import { useRouter } from "next/navigation";
 
 interface ReducerState {
   [key: string]: string;
@@ -65,6 +69,9 @@ export default function CanvasPage({
   pages: startPages,
   diffs: startDiffs,
 }: CanvasPageProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
 
@@ -90,8 +97,6 @@ export default function CanvasPage({
     ) as ReducerState
   );
 
-  const { toast } = useToast();
-
   // Update page ID to trigger secondary effects
   useEffect(() => {
     if (editor != null) {
@@ -99,28 +104,36 @@ export default function CanvasPage({
     }
   }, [editor]);
 
+  function reloadPanels(canvasPageId: TLPageId) {
+    const page = editor.getPage(canvasPageId);
+    setPage(page.name);
+    setSelectedDiff(diffs[canvasPageId]);
+    setStandaloneCode(state[canvasPageId] ?? "");
+    const diffMap = diffs[canvasPageId]?.fileDiffs?.reduce(
+      (acc, diff) => ({ ...acc, [diff.sha]: diff }),
+      {}
+    );
+    setFileDiffMap(diffMap);
+    setDiffOptions(
+      diffs[canvasPageId]?.fileDiffs?.map((diff) => ({
+        value: diff.sha,
+        label: diff.filename,
+      })) ?? []
+    );
+
+    const diff = diffs[canvasPageId]?.fileDiffs?.[0];
+    setSelectedFileDiff(diff);
+    console.log("Reloaded panels");
+    console.log(canvasPageId);
+    console.log(diffs);
+  }
+
   // Update page name in output pane
   useEffect(() => {
     if (canvasPageId != null && editor != null) {
       const page = editor.getPage(canvasPageId);
       if (page != null) {
-        setPage(page.name);
-        setSelectedDiff(diffs[canvasPageId]);
-        setStandaloneCode(state[canvasPageId] ?? "");
-        const diffMap = diffs[canvasPageId]?.fileDiffs?.reduce(
-          (acc, diff) => ({ ...acc, [diff.sha]: diff }),
-          {}
-        );
-        setFileDiffMap(diffMap);
-        setDiffOptions(
-          diffs[canvasPageId]?.fileDiffs?.map((diff) => ({
-            value: diff.sha,
-            label: diff.filename,
-          })) ?? []
-        );
-
-        const diff = diffs[canvasPageId]?.fileDiffs?.[0];
-        setSelectedFileDiff(diff);
+        reloadPanels(canvasPageId);
       }
     }
   }, [canvasPageId, editor]);
@@ -205,14 +218,24 @@ export default function CanvasPage({
             ) : (
               <>
                 <TabsContent value="preview" className="h-full">
-                  <iframe className="h-full w-full" srcDoc={standaloneCode} />
+                  {standaloneCode == null ? (
+                    <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
+                      Click the button below to see the magic
+                    </div>
+                  ) : (
+                    <iframe className="h-full w-full" srcDoc={standaloneCode} />
+                  )}
                 </TabsContent>
                 <TabsContent
                   value="code_standalone"
                   className="h-full overflow-x-auto overflow-y-auto"
                 >
-                  {standaloneCode?.length && (
+                  {standaloneCode?.length ? (
                     <CodeBlock text={standaloneCode} />
+                  ) : (
+                    <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
+                      Click the button below to see the magic
+                    </div>
                   )}
                 </TabsContent>
                 <TabsContent
@@ -228,17 +251,19 @@ export default function CanvasPage({
                         loading={loadingPr}
                         onClick={async () => {
                           setLoadingPr(true);
-                          // Create PR
+                          // // Create PR
                           const pageId = pages.find(
                             (page) => page.canvasPageId === canvasPageId
                           )?.id;
+                          await revalidateServerTag(`diffs`);
                           await createPullRequestFromCanvas(pageId);
 
                           // Refetch diffs
+                          router.refresh();
                           const newDiffs = await getDiffs(project, pages);
                           setDiffs(newDiffs);
-
                           setLoadingPr(false);
+                          reloadPanels(canvasPageId);
                         }}
                       />
                     </div>
@@ -284,8 +309,9 @@ export default function CanvasPage({
                                 // Refetch diffs
                                 const newDiffs = await getDiffs(project, pages);
                                 setDiffs(newDiffs);
-
                                 setLoadingPr(false);
+                                reloadPanels(canvasPageId);
+                                router.refresh();
                               }}
                             />
                           </div>

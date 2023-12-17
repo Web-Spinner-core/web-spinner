@@ -1,9 +1,10 @@
 "use server";
 
 import { TLPageId } from "@tldraw/tldraw";
-import { GitDiff } from "app/projects/[projectId]/canvas/layout";
+import { FileDiff, GitDiff } from "app/projects/[projectId]/canvas/layout";
 import axios from "axios";
 import { Page, Project, prisma } from "database";
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { env } from "~/env";
 
@@ -53,15 +54,25 @@ export async function getPages(projectId: string): Promise<Page[]> {
 }
 
 const diffSchema = z
-  .object({
-    sha: z.string(),
-    filename: z.string(),
-    additions: z.number(),
-    deletions: z.number(),
-    changes: z.number(),
-    patch: z.string(),
-  })
+  .tuple([
+    z.string(),
+    z.number(),
+    z
+      .object({
+        sha: z.string(),
+        filename: z.string(),
+        additions: z.number(),
+        deletions: z.number(),
+        changes: z.number(),
+        patch: z.string(),
+      })
+      .array(),
+  ])
   .array();
+
+export async function revalidateServerTag(tag: string) {
+  revalidateTag(tag);
+}
 
 /**
  * Get the diffs for the given pages
@@ -71,38 +82,45 @@ export async function getDiffs(
   pages: Page[]
 ): Promise<Record<string, GitDiff>> {
   // Handle cases where no diffs are available
-  const diffEntries = await Promise.all(
-    pages
-      .filter((page) => page.prNum)
-      .map(async (page) => {
-        try {
-          const response = await axios.get(
-            `${env.NEXT_PUBLIC_BACKEND_URL}/diffs/${page.id}`
-          );
-          const fileDiffs = diffSchema.parse(response.data);
-          const additions = fileDiffs.reduce(
-            (acc, fileDiff) => acc + fileDiff.additions,
-            0
-          );
-          const deletions = fileDiffs.reduce(
-            (acc, fileDiff) => acc + fileDiff.deletions,
-            0
-          );
+  const pagesWithPrs = pages.filter((page) => page.prNum);
+  const response = await fetch(`${env.NEXT_PUBLIC_BACKEND_URL}/diffs`, {
+    method: "POST",
+    body: JSON.stringify({
+      pageIds: pagesWithPrs.map((page) => page.id),
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+    next: {
+      tags: ["diffs"],
+    },
+  });
+  const body = await response.json();
+  const allDiffs = diffSchema.parse(body);
 
-          return [
-            page.canvasPageId,
-            {
-              fileDiffs,
-              additions,
-              deletions,
-              prLink: `https://github.com/${currentProject.repository.fullName}/pull/${page.prNum}`,
-            },
-          ];
-        } catch (error) {
-          return [page.canvasPageId, null];
-        }
-      })
-  );
+  const diffEntries = [] as [string, GitDiff][];
+  for (const [pageId, prNum, diff] of allDiffs) {
+    const additions = diff.reduce(
+      (acc, fileDiff) => acc + fileDiff.additions,
+      0
+    );
+    const deletions = diff.reduce(
+      (acc, fileDiff) => acc + fileDiff.deletions,
+      0
+    );
+
+    diffEntries.push([
+      pages.find((page) => page.id === pageId).canvasPageId,
+      {
+        fileDiffs: diff as FileDiff[],
+        additions,
+        deletions,
+        prLink: `https://github.com/${currentProject.repository.fullName}/pull/${prNum}`,
+      },
+    ]);
+  }
+
   const diffs: { [key: string]: GitDiff } = Object.fromEntries(
     diffEntries.filter(([, diff]) => diff)
   );

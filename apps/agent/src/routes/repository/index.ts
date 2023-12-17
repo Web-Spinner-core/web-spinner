@@ -5,16 +5,20 @@ import { Context, Next } from "koa";
 import { z } from "zod";
 
 const paramsSchema = z.object({
-  pageId: z.string(),
+  pageIds: z.string().array(),
 });
 
 /**
  * Get diffs associated with a page
  */
 export default async function getPullRequestDiffs(ctx: Context, next: Next) {
-  const { pageId } = paramsSchema.parse(ctx.params);
-  const page = await prisma.page.findUniqueOrThrow({
-    where: { id: pageId },
+  const { pageIds } = paramsSchema.parse(ctx.request.body);
+  const pages = await prisma.page.findMany({
+    where: {
+      id: {
+        in: pageIds,
+      },
+    },
     include: {
       project: {
         include: {
@@ -24,17 +28,23 @@ export default async function getPullRequestDiffs(ctx: Context, next: Next) {
     },
   });
 
-  if (!page.prNum) {
-    throw new Error(`Page ${pageId} does not have a pull request yet!`);
+  const diffs = [];
+  for (const page of pages) {
+    const installationClient = getGithubInstallationClient(
+      page.project.repository.installationId
+    );
+    const repositoryClient = new GithubRepositoryClient(
+      installationClient,
+      page.project.repository
+    );
+    if (page.prNum) {
+      const pageDiffs = await repositoryClient.getPullRequestDiffs(page.prNum);
+      diffs.push([page.id, page.prNum, pageDiffs]);
+    }
   }
-
-  const installationClient = getGithubInstallationClient(
-    page.project.repository.installationId
-  );
-  const repositoryClient = new GithubRepositoryClient(installationClient, page.project.repository);
-  const diffs = await repositoryClient.getPullRequestDiffs(page.prNum);
 
   ctx.status = 200;
   ctx.body = diffs;
+  console.log("Queried backend: ", diffs.length);
   return next();
 }

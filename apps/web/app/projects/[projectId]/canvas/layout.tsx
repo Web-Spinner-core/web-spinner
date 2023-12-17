@@ -17,9 +17,9 @@ interface Props {
 export interface FileDiff {
   sha: string;
   filename: string;
-  additions: string;
-  deletions: string;
-  changes: string;
+  additions: number;
+  deletions: number;
+  changes: number;
   patch: string;
 }
 
