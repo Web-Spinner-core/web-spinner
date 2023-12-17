@@ -7,12 +7,17 @@ import initialState from "./initial-state.json";
 interface CanvasProps {
   onPageChanged?: (newPageId: TLPageId, oldPageId: TLPageId) => void;
   setEditor?: Dispatch<SetStateAction<Editor>>;
+  projectId: string;
 }
 
 /**
  * Canvas wrapper for tldraw
  */
-export default function Canvas({ onPageChanged, setEditor }: CanvasProps) {
+export default function Canvas({
+  onPageChanged,
+  setEditor,
+  projectId,
+}: CanvasProps) {
   const onEditorMount = useCallback((editor: Editor) => {
     editor.on("change", (change) => {
       if (change.source !== "user") {
@@ -38,9 +43,11 @@ export default function Canvas({ onPageChanged, setEditor }: CanvasProps) {
     }
   }, []);
 
+  console.log("Persistence key", `web-spinner-${projectId}`);
+
   return (
     <Tldraw
-      persistenceKey="web-spinner-canvas"
+      persistenceKey={`web-spinner-${projectId}`}
       onMount={onEditorMount}
       snapshot={initialState}
       className="z-0"

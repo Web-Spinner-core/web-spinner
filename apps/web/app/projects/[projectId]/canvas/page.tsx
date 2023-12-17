@@ -187,6 +187,7 @@ export default function CanvasPage({
             onPageChanged={(newCanvasPageId) => {
               setCanvasPageId(newCanvasPageId);
             }}
+            projectId={project.id}
           />
         </div>
         {/* Output */}
