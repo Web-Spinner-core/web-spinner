@@ -31,7 +31,7 @@ When you have finished making all the components in your plan, you can create th
 Use Next.js Google fonts to pull in any open source fonts you require. \
 If you have any images, load them from Unsplash or use solid colored rectangles as placeholders.
 
-If you need to import any of your components in your page, remember to use the "@/components" path alias. \
+If you need to import any of components, remember to use the "@/components" path alias. \
 Instead of using lambda functions, use the "function" keyword to define functions in your components and pages.
 Since you're using TypeScript, remember to annotate the correct types for your code. \
 If your page or component requires props, you can create an interface and annotate the arguments using that type. \

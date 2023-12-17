@@ -5,6 +5,7 @@ import { z } from "zod";
 import { TitledHeader } from "~/components/header";
 import { env } from "~/env";
 import CanvasPage from "./page";
+import { getDiffs } from "~/server/canvas";
 
 interface Props {
   params: {
@@ -28,17 +29,6 @@ export interface GitDiff {
   deletions: number;
   prLink: string;
 }
-
-const diffSchema = z
-  .object({
-    sha: z.string(),
-    filename: z.string(),
-    additions: z.number(),
-    deletions: z.number(),
-    changes: z.number(),
-    patch: z.string(),
-  })
-  .array();
 
 export default async function CanvasLayout({ params: { projectId } }: Props) {
   const { userId } = auth();
@@ -67,43 +57,7 @@ export default async function CanvasLayout({ params: { projectId } }: Props) {
   if (!currentProject) {
     return <div>Project not found</div>;
   }
-
-  // Handle cases where no diffs are available
-  const diffEntries = await Promise.all(
-    pages
-      .filter((page) => page.prNum)
-      .map(async (page) => {
-        try {
-          const response = await axios.get(
-            `${env.NEXT_PUBLIC_BACKEND_URL}/diffs/${page.id}`
-          );
-          const fileDiffs = diffSchema.parse(response.data);
-          const additions = fileDiffs.reduce(
-            (acc, fileDiff) => acc + fileDiff.additions,
-            0
-          );
-          const deletions = fileDiffs.reduce(
-            (acc, fileDiff) => acc + fileDiff.deletions,
-            0
-          );
-
-          return [
-            page.canvasPageId,
-            {
-              fileDiffs,
-              additions,
-              deletions,
-              prLink: `https://github.com/${currentProject.repository.fullName}/pull/${page.prNum}`,
-            },
-          ];
-        } catch (error) {
-          return [page.canvasPageId, null];
-        }
-      })
-  );
-  const diffs: { [key: string]: GitDiff } = Object.fromEntries(
-    diffEntries.filter(([, diff]) => diff)
-  );
+  const diffs = await getDiffs(currentProject, pages);
 
   return (
     <main className="h-full w-full flex flex-col p-5 pl-10 pt-5">

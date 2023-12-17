@@ -1,5 +1,5 @@
 import { Editor, TLShapeId, getSvgAsImage } from "@tldraw/tldraw";
-import fetchCanvasToPageResponse from "./fetchCanvasToPageResponse";
+import { fetchCanvasToPageResponse } from "~/server/canvas";
 
 /**
  * Convert the editor selection to code

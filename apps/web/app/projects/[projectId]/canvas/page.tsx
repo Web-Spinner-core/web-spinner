@@ -30,6 +30,7 @@ import { convertEditorToCode } from "~/lib/editorToCode";
 import { FileDiff, GitDiff } from "./layout";
 import Link from "next/link";
 import LoadingButton from "@ui/components/loading-button";
+import { createPullRequestFromCanvas, getDiffs } from "~/server/canvas";
 
 interface ReducerState {
   [key: string]: string;
@@ -56,25 +57,31 @@ interface CanvasPageProps {
     repository: Repository;
   };
   pages: Page[];
-  diffs: {
-    [key: string]: GitDiff;
-  };
+  diffs: Record<string, GitDiff>;
 }
 
-export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
+export default function CanvasPage({
+  project,
+  pages: startPages,
+  diffs: startDiffs,
+}: CanvasPageProps) {
   const [editor, setEditor] = useState<Editor>();
   const [standaloneCode, setStandaloneCode] = useState<string>();
+
+  // Store in state to enable revalidation
+  const [pages, setPages] = useState<Page[]>(startPages);
+  const [diffs, setDiffs] = useState<Record<string, GitDiff>>(startDiffs);
 
   const [diffOptions, setDiffOptions] =
     useState<{ value: string; label: string }[]>();
   const [selectedDiff, setSelectedDiff] = useState<GitDiff>();
   const [fileDiffMap, setFileDiffMap] = useState<Record<string, FileDiff>>();
   const [selectedFileDiff, setSelectedFileDiff] = useState<FileDiff>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const { toast } = useToast();
-
-  const [pageId, setPageId] = useState<TLPageId>();
+  const [canvasPageId, setCanvasPageId] = useState<TLPageId>();
   const [page, setPage] = useState<string>("");
+
+  const [loadingStandalone, setLoadingStandalone] = useState<boolean>(false);
+  const [loadingPr, setLoadingPr] = useState<boolean>(false);
 
   const [state, dispatch] = useReducer(
     reducer,
@@ -83,38 +90,40 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
     ) as ReducerState
   );
 
+  const { toast } = useToast();
+
   // Update page ID to trigger secondary effects
   useEffect(() => {
     if (editor != null) {
-      setPageId(editor.getCurrentPageId());
+      setCanvasPageId(editor.getCurrentPageId());
     }
   }, [editor]);
 
   // Update page name in output pane
   useEffect(() => {
-    if (pageId != null && editor != null) {
-      const page = editor.getPage(pageId);
+    if (canvasPageId != null && editor != null) {
+      const page = editor.getPage(canvasPageId);
       if (page != null) {
         setPage(page.name);
-        setSelectedDiff(diffs[pageId]);
-        setStandaloneCode(state[pageId] ?? "");
-        const diffMap = diffs[pageId]?.fileDiffs?.reduce(
+        setSelectedDiff(diffs[canvasPageId]);
+        setStandaloneCode(state[canvasPageId] ?? "");
+        const diffMap = diffs[canvasPageId]?.fileDiffs?.reduce(
           (acc, diff) => ({ ...acc, [diff.sha]: diff }),
           {}
         );
         setFileDiffMap(diffMap);
         setDiffOptions(
-          diffs[pageId]?.fileDiffs?.map((diff) => ({
+          diffs[canvasPageId]?.fileDiffs?.map((diff) => ({
             value: diff.sha,
             label: diff.filename,
           })) ?? []
         );
 
-        const diff = diffs[pageId]?.fileDiffs?.[0];
+        const diff = diffs[canvasPageId]?.fileDiffs?.[0];
         setSelectedFileDiff(diff);
       }
     }
-  }, [pageId, editor]);
+  }, [canvasPageId, editor]);
 
   const sectionWidth = "w-[45vw]";
 
@@ -162,8 +171,8 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
         >
           <Canvas
             setEditor={setEditor}
-            onPageChanged={(newPageId) => {
-              setPageId(newPageId);
+            onPageChanged={(newCanvasPageId) => {
+              setCanvasPageId(newCanvasPageId);
             }}
           />
         </div>
@@ -191,7 +200,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                 <TabsTrigger value="code_changes">Code (PR)</TabsTrigger>
               </div>
             </TabsList>
-            {loading ? (
+            {loadingStandalone ? (
               <SkeletonPlaceholder />
             ) : (
               <>
@@ -216,7 +225,21 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                       <LoadingButton
                         icon="🪄"
                         text="Create PR"
-                        loading={false}
+                        loading={loadingPr}
+                        onClick={async () => {
+                          setLoadingPr(true);
+                          // Create PR
+                          const pageId = pages.find(
+                            (page) => page.canvasPageId === canvasPageId
+                          )?.id;
+                          await createPullRequestFromCanvas(pageId);
+
+                          // Refetch diffs
+                          const newDiffs = await getDiffs(project, pages);
+                          setDiffs(newDiffs);
+
+                          setLoadingPr(false);
+                        }}
                       />
                     </div>
                   ) : (
@@ -246,10 +269,25 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                                 View PR
                               </Button>
                             </Link>
-                            <Button className="text-sm flex flex-row gap-2 bg-slate-900 hover:bg-slate-800 drop-shadow">
-                              <RefreshCwIcon />
-                              Rebuild
-                            </Button>
+                            <LoadingButton
+                              icon={<RefreshCwIcon />}
+                              text="Rebuild"
+                              loading={loadingPr}
+                              onClick={async () => {
+                                setLoadingPr(true);
+                                // Create PR
+                                const pageId = pages.find(
+                                  (page) => page.canvasPageId === canvasPageId
+                                )?.id;
+                                await createPullRequestFromCanvas(pageId);
+
+                                // Refetch diffs
+                                const newDiffs = await getDiffs(project, pages);
+                                setDiffs(newDiffs);
+
+                                setLoadingPr(false);
+                              }}
+                            />
                           </div>
                         </div>
 
@@ -280,15 +318,19 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
           className="w-32"
           text="Generate"
           icon="✨"
-          loading={editor == null || loading}
+          loading={editor == null || loadingStandalone}
           onClick={async () => {
-            setLoading(true);
+            setLoadingStandalone(true);
             setStandaloneCode("");
             try {
               if (editor) {
                 const result = await convertEditorToCode(editor, project.id);
                 setStandaloneCode(result);
-                dispatch({ type: "add_page", pageId, code: result });
+                dispatch({
+                  type: "add_page",
+                  pageId: canvasPageId,
+                  code: result,
+                });
               } else {
                 throw new Error("Editor is not ready yet!");
               }
@@ -299,7 +341,7 @@ export default function CanvasPage({ project, pages, diffs }: CanvasPageProps) {
                 variant: "destructive",
               });
             } finally {
-              setLoading(false);
+              setLoadingStandalone(false);
             }
           }}
         />

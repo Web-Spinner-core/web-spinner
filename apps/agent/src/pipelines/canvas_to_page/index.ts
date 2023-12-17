@@ -22,6 +22,7 @@ If there are screenshots or images, use them to inform the colors, fonts, and la
 Use your best judgement to determine whether what you see should be part of the user interface, or else is just an annotation.
 
 Use what you know about applications and user experience to fill in any implicit business logic in the wireframes. Flesh it out, make it real!
+In your code, make sure to add descriptive comments to explain your thought process and any assumptions you made.
 
 The user may also provide you with designs from other pages in their website.
 Use the designs from these other pages to help drive your work so that the page you create is consistent with the rest of the website.
