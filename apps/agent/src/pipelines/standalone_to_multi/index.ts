@@ -51,7 +51,7 @@ export async function createMultiFromStandalonePage(page: PopulatedPage) {
       temperature: 0.1,
       modelName: "gpt-4-1106-preview",
       callbacks,
-      shouldCache: false,
+      shouldCache: true,
     });
 
     const messageQueue = [] as BaseMessage[][];

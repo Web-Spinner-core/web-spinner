@@ -29,10 +29,16 @@ export default async function getPullRequestDiffs(ctx: Context, next: Next) {
   });
 
   const diffs = [];
+  const installationClients = {} as Record<
+    string,
+    ReturnType<typeof getGithubInstallationClient>
+  >;
   for (const page of pages) {
-    const installationClient = getGithubInstallationClient(
-      page.project.repository.installationId
-    );
+    if (!installationClients[page.project.repository.id]) {
+      installationClients[page.project.repository.id] =
+        getGithubInstallationClient(page.project.repository.installationId);
+    }
+    const installationClient = installationClients[page.project.repository.id];
     const repositoryClient = new GithubRepositoryClient(
       installationClient,
       page.project.repository
@@ -45,6 +51,5 @@ export default async function getPullRequestDiffs(ctx: Context, next: Next) {
 
   ctx.status = 200;
   ctx.body = diffs;
-  console.log("Queried backend: ", diffs.length);
   return next();
 }

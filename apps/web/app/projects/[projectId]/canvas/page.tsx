@@ -218,12 +218,12 @@ export default function CanvasPage({
             ) : (
               <>
                 <TabsContent value="preview" className="h-full">
-                  {standaloneCode == null ? (
+                  {standaloneCode?.length ? (
+                    <iframe className="h-full w-full" srcDoc={standaloneCode} />
+                  ) : (
                     <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
                       Click the button below to see the magic
                     </div>
-                  ) : (
-                    <iframe className="h-full w-full" srcDoc={standaloneCode} />
                   )}
                 </TabsContent>
                 <TabsContent
@@ -243,30 +243,35 @@ export default function CanvasPage({
                   className="h-full overflow-x-auto overflow-y-auto"
                 >
                   {selectedFileDiff == null ? (
-                    <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
-                      <span>Satisfied with the design?</span>
-                      <LoadingButton
-                        icon="🪄"
-                        text="Create PR"
-                        loading={loadingPr}
-                        onClick={async () => {
-                          setLoadingPr(true);
-                          // // Create PR
-                          const pageId = pages.find(
-                            (page) => page.canvasPageId === canvasPageId
-                          )?.id;
-                          await revalidateServerTag(`diffs`);
-                          await createPullRequestFromCanvas(pageId);
+                    standaloneCode?.length ? (
+                      <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
+                        <span>Satisfied with the design?</span>
+                        <LoadingButton
+                          icon="🪄"
+                          text="Create PR"
+                          loading={loadingPr}
+                          onClick={async () => {
+                            setLoadingPr(true);
+                            // Create PR
+                            const pageId = pages.find(
+                              (page) => page.canvasPageId === canvasPageId
+                            )?.id;
+                            await revalidateServerTag(`diffs`);
+                            await createPullRequestFromCanvas(pageId);
 
-                          // Refetch diffs
-                          router.refresh();
-                          const newDiffs = await getDiffs(project, pages);
-                          setDiffs(newDiffs);
-                          setLoadingPr(false);
-                          reloadPanels(canvasPageId);
-                        }}
-                      />
-                    </div>
+                            // Refetch diffs
+                            const newDiffs = await getDiffs(project, pages);
+                            setDiffs(newDiffs);
+                            setLoadingPr(false);
+                            reloadPanels(canvasPageId);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
+                        Click the button below to see the magic
+                      </div>
+                    )
                   ) : (
                     <div>
                       <div className="w-full flex justify-between items-center mb-2 align-middle px-1 pl-3">

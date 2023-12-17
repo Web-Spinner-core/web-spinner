@@ -39,7 +39,7 @@ export default async function convertCanvasInputToPage(
 
   // Pull other page screenshot if it exists
   let styleImageUrl: string | undefined;
-  if (project.pages.length > 1) {
+  if (project.pages.length >= 1) {
     const stylePage = project.pages.find((page) => page.name != pageName);
     if (stylePage && stylePage.screenshotPath) {
       const storageClient = new StorageClient();
@@ -54,29 +54,29 @@ export default async function convertCanvasInputToPage(
   });
 
   // Update prisma
-  const page = await prisma.page.upsert({
-    where: {
-      projectId_canvasPageId: {
-        canvasPageId,
-        projectId,
-      },
-    },
-    update: {
-      standaloneCode: result,
-    },
-    create: {
-      id: generatePrefixedId(ID_PREFIXES.PAGE),
-      canvasPageId,
-      projectId,
-      name: pageName,
-      standaloneCode: result,
-    },
-  });
+  // const page = await prisma.page.upsert({
+  //   where: {
+  //     projectId_canvasPageId: {
+  //       canvasPageId,
+  //       projectId,
+  //     },
+  //   },
+  //   update: {
+  //     standaloneCode: result,
+  //   },
+  //   create: {
+  //     id: generatePrefixedId(ID_PREFIXES.PAGE),
+  //     canvasPageId,
+  //     projectId,
+  //     name: pageName,
+  //     standaloneCode: result,
+  //   },
+  // });
 
-  // Save async
-  if (!page.screenshotPath) {
-    void savePageScreenshot(result, project, page).catch(console.error);
-  }
+  // // Save async
+  // if (!page.screenshotPath) {
+  //   void savePageScreenshot(result, project, page).catch(console.error);
+  // }
 
   ctx.status = 200;
   ctx.body = result;

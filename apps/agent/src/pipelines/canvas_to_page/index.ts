@@ -37,7 +37,7 @@ You love your designers and want them to be happy. Incorporating their feedback 
 Respond ONLY with the contents of the html file.`;
 
 /**
- * Generate standalone React + Tailwind JSX from a request and an image
+ * Generate standalone HTML + Tailwind from a request and an image
  */
 export default async function convertCanvasToPage({
   imageUrl,
@@ -59,6 +59,7 @@ export default async function convertCanvasToPage({
       maxTokens: 4096,
       temperature: 0.1,
       callbacks,
+      cache: false
     });
     const response = await model.call(
       [new SystemMessage(systemPrompt), humanMessage],
@@ -126,10 +127,6 @@ async function generateStyledMessage(
       {
         type: "text",
         text: "Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?",
-      },
-      {
-        type: "text",
-        text: pageText,
       },
       {
         type: "image_url",
