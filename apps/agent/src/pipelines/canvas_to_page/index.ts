@@ -58,7 +58,6 @@ export default async function convertCanvasToPage({
       maxTokens: 4096,
       temperature: 0.1,
       callbacks,
-      cache: false,
     });
     const response = await model.call(
       [new SystemMessage(systemPrompt), humanMessage],

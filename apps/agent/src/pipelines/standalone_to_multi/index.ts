@@ -2,8 +2,8 @@ import { getGithubInstallationClient } from "@lib/github";
 import { RepositoryWalker } from "@lib/github/repository";
 import GithubRepositoryClient from "@lib/github/repository_client";
 import { Page, Project, Repository } from "database";
-import { TraceGroup } from "langchain/callbacks";
-import { BaseMessage } from "langchain/schema";
+import { BaseCallbackHandler, TraceGroup } from "langchain/callbacks";
+import { AIMessage, BaseMessage, FunctionMessage } from "langchain/schema";
 import { z } from "zod";
 import { createDevAgentExecutor } from "~/agents/dev_agent";
 import { createPlanAgentExecutor } from "~/agents/plan_agent";
@@ -58,19 +58,46 @@ export async function createMultiFromStandalonePage(page: PopulatedPage) {
       walker,
       systemPrompt: planSystemPrompt,
       userPrompt,
-      temperature: 0.7,
+      temperature: 0.1,
       modelName: "gpt-4-1106-preview",
       callbacks,
+      shouldCache: false,
     });
-    const { intermediateSteps } = await planAgent.call(
+
+    const messageQueue = [] as BaseMessage[][];
+    const handler = BaseCallbackHandler.fromMethods({
+      handleChatModelStart(llm, [incoming]) {
+        messageQueue.push(incoming);
+      },
+    });
+    callbacks.addHandler(handler);
+
+    const { output } = await planAgent.call(
       {
         input: page.standaloneCode,
         chat_history: [],
       },
       { callbacks }
     );
-    const messages = (intermediateSteps as IntermediateStep[]).flatMap(
-      (step) => step.action.messageLog
+
+    const messages = messageQueue?.pop();
+    if (!messages?.length) {
+      throw new Error("No messages were generated");
+    }
+    messages.push(
+      new AIMessage({
+        content: "",
+        additional_kwargs: {
+          function_call: {
+            name: "save_plan",
+            arguments: output,
+          },
+        },
+      }),
+      new FunctionMessage({
+        name: "save_plan",
+        content: "true",
+      })
     );
 
     const devAgent = await createDevAgentExecutor({
@@ -81,11 +108,13 @@ export async function createMultiFromStandalonePage(page: PopulatedPage) {
       modelName: "gpt-4-1106-preview",
       callbacks,
       writeAccumulator: accumulator,
+      shouldCache: true,
     });
     await devAgent.call(
       {
         input: page.standaloneCode,
-        chat_history: messages,
+        // Remove system message and user message
+        chat_history: messages.slice(2),
       },
       { callbacks }
     );

@@ -60,9 +60,9 @@ export async function createDevAgentExecutor(
     ),
   ];
 
-  const listAllFilesTool = new ListAllFilesTool(walker, toolParams);
-  const files = await listAllFilesTool.call({}, toolParams);
-  const prior = serializeFunctionCall(listAllFilesTool, "", files);
+  // const listAllFilesTool = new ListAllFilesTool(walker, toolParams);
+  // const files = await listAllFilesTool.call({}, toolParams);
+  // const prior = serializeFunctionCall(listAllFilesTool, "", files);
 
   return createAgentExecutor({
     userPrompt,
@@ -71,7 +71,7 @@ export async function createDevAgentExecutor(
     modelName,
     callbacks,
     tools,
-    prior,
+    // prior,
     shouldCache
   });
 }

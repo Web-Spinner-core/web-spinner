@@ -1,10 +1,10 @@
 import { auth } from "@clerk/nextjs";
-import { prisma } from "database";
-import { TitledHeader } from "~/components/header";
-import CanvasPage from "./page";
-import { z } from "zod";
 import axios from "axios";
+import { prisma } from "database";
+import { z } from "zod";
+import { TitledHeader } from "~/components/header";
 import { env } from "~/env";
+import CanvasPage from "./page";
 
 interface Props {
   params: {
@@ -70,34 +70,36 @@ export default async function CanvasLayout({ params: { projectId } }: Props) {
 
   // Handle cases where no diffs are available
   const diffEntries = await Promise.all(
-    pages.filter(page => page.prNum).map(async (page) => {
-      try {
-        const response = await axios.get(
-          `${env.NEXT_PUBLIC_BACKEND_URL}/diffs/${page.id}`
-        );
-        const fileDiffs = diffSchema.parse(response.data);
-        const additions = fileDiffs.reduce(
-          (acc, fileDiff) => acc + fileDiff.additions,
-          0
-        );
-        const deletions = fileDiffs.reduce(
-          (acc, fileDiff) => acc + fileDiff.deletions,
-          0
-        );
+    pages
+      .filter((page) => page.prNum)
+      .map(async (page) => {
+        try {
+          const response = await axios.get(
+            `${env.NEXT_PUBLIC_BACKEND_URL}/diffs/${page.id}`
+          );
+          const fileDiffs = diffSchema.parse(response.data);
+          const additions = fileDiffs.reduce(
+            (acc, fileDiff) => acc + fileDiff.additions,
+            0
+          );
+          const deletions = fileDiffs.reduce(
+            (acc, fileDiff) => acc + fileDiff.deletions,
+            0
+          );
 
-        return [
-          page.canvasPageId,
-          {
-            fileDiffs,
-            additions,
-            deletions,
-            prLink: `https://github.com/${currentProject.repository.fullName}/pull/${page.prNum}`
-          },
-        ];
-      } catch (error) {
-        return [page.canvasPageId, null];
-      }
-    })
+          return [
+            page.canvasPageId,
+            {
+              fileDiffs,
+              additions,
+              deletions,
+              prLink: `https://github.com/${currentProject.repository.fullName}/pull/${page.prNum}`,
+            },
+          ];
+        } catch (error) {
+          return [page.canvasPageId, null];
+        }
+      })
   );
   const diffs: { [key: string]: GitDiff } = Object.fromEntries(
     diffEntries.filter(([, diff]) => diff)
