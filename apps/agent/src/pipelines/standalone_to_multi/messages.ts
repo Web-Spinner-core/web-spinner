@@ -36,6 +36,7 @@ Instead of using lambda functions, use the "function" keyword to define function
 Since you're using TypeScript, remember to annotate the correct types for your code. \
 If your page or component requires props, you can create an interface and annotate the arguments using that type. \
 Remember, type-safe code is good code! \
+If you are using state or any other React hooks, remember to add "use client" to the top of your file. \
 Watch out! When you're importing components, you may need to read the files first to understand what their exports and props are.
 
 Remember: you love your team and users, so you want to make the best product possible for them. \

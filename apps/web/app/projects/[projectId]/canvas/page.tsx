@@ -26,15 +26,14 @@ import {
   RefreshCwIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useReducer, useState } from "react";
 import { convertEditorToCode } from "~/lib/editorToCode";
 import {
   createPullRequestFromCanvas,
-  getDiffs,
-  revalidateServerTag,
+  getDiffs
 } from "~/server/canvas";
 import { FileDiff, GitDiff } from "./layout";
-import { useRouter } from "next/navigation";
 
 interface ReducerState {
   [key: string]: string;
@@ -123,10 +122,13 @@ export default function CanvasPage({
 
     const diff = diffs[canvasPageId]?.fileDiffs?.[0];
     setSelectedFileDiff(diff);
-    console.log("Reloaded panels");
-    console.log(canvasPageId);
-    console.log(diffs);
   }
+
+  useEffect(() => {
+    if (canvasPageId != null && editor != null) {
+      reloadPanels(canvasPageId);
+    }
+  }, [diffs]);
 
   // Update page name in output pane
   useEffect(() => {
@@ -220,11 +222,7 @@ export default function CanvasPage({
               <>
                 <TabsContent value="preview" className="h-full">
                   {standaloneCode?.length ? (
-                    <iframe
-                      className="h-full w-full"
-                      srcDoc={standaloneCode}
-                      sandbox="allow-top-navigation"
-                    />
+                    <iframe className="h-full w-full" srcDoc={standaloneCode} />
                   ) : (
                     <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
                       Click the button below to see the magic
@@ -261,14 +259,12 @@ export default function CanvasPage({
                             const pageId = pages.find(
                               (page) => page.canvasPageId === canvasPageId
                             )?.id;
-                            await revalidateServerTag(`diffs`);
                             await createPullRequestFromCanvas(pageId);
 
                             // Refetch diffs
                             const newDiffs = await getDiffs(project, pages);
                             setDiffs(newDiffs);
                             setLoadingPr(false);
-                            reloadPanels(canvasPageId);
                           }}
                         />
                       </div>
@@ -320,8 +316,6 @@ export default function CanvasPage({
                                 const newDiffs = await getDiffs(project, pages);
                                 setDiffs(newDiffs);
                                 setLoadingPr(false);
-                                reloadPanels(canvasPageId);
-                                router.refresh();
                               }}
                             />
                           </div>

@@ -5,7 +5,7 @@ import {
   Page,
   Project,
   generatePrefixedId,
-  prisma
+  prisma,
 } from "database";
 import { Context, Next } from "koa";
 import { z } from "zod";
@@ -26,9 +26,8 @@ export default async function convertCanvasInputToPage(
   ctx: Context,
   next: Next
 ) {
-  const { projectId, canvasPageId, pageName, imageUrl, pageText } = bodySchema.parse(
-    ctx.request.body
-  );
+  const { projectId, canvasPageId, pageName, imageUrl, pageText } =
+    bodySchema.parse(ctx.request.body);
 
   const project = await prisma.project.findUniqueOrThrow({
     where: { id: projectId },
@@ -39,11 +38,15 @@ export default async function convertCanvasInputToPage(
 
   // Pull other page screenshot if it exists
   let styleImageUrl: string | undefined;
+  let styleCode: string | undefined;
   if (project.pages.length >= 1) {
     const stylePage = project.pages.find((page) => page.name != pageName);
     if (stylePage && stylePage.screenshotPath) {
       const storageClient = new StorageClient();
-      styleImageUrl = await storageClient.generateSignedUrl(stylePage.screenshotPath);
+      styleImageUrl = await storageClient.generateSignedUrl(
+        stylePage.screenshotPath
+      );
+      styleCode = stylePage.standaloneCode ?? undefined;
     }
   }
 
@@ -51,6 +54,7 @@ export default async function convertCanvasInputToPage(
     imageUrl,
     pageText,
     styleImageUrl,
+    styleCode,
   });
 
   // Update prisma
@@ -86,11 +90,7 @@ export default async function convertCanvasInputToPage(
 /**
  * Save screenshot to AWS bucket and update prisma
  */
-async function savePageScreenshot(
-  html: string,
-  project: Project,
-  page: Page
-) {
+async function savePageScreenshot(html: string, project: Project, page: Page) {
   const screenshot = await captureRenderedHtml(html);
   const fileName = `${project.id}/${page.id}.png`;
 

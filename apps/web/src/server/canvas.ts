@@ -81,12 +81,10 @@ export async function getDiffs(
   currentProject: Project,
   pages: Page[]
 ): Promise<Record<string, GitDiff>> {
-  // Handle cases where no diffs are available
-  const pagesWithPrs = pages.filter((page) => page.prNum);
   const response = await fetch(`${env.NEXT_PUBLIC_BACKEND_URL}/diffs`, {
     method: "POST",
     body: JSON.stringify({
-      pageIds: pagesWithPrs.map((page) => page.id),
+      pageIds: pages.map((page) => page.id),
     }),
     headers: {
       "Content-Type": "application/json",

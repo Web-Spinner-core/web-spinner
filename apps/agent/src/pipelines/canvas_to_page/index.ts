@@ -7,6 +7,7 @@ interface ConvertCanvasToPageParams {
   imageUrl: string;
   pageText: string;
   styleImageUrl?: string;
+  styleCode?: string;
 }
 
 /**
@@ -16,15 +17,21 @@ export default async function convertCanvasToPage({
   imageUrl,
   pageText,
   styleImageUrl,
+  styleCode,
 }: ConvertCanvasToPageParams) {
   // Observability group
   const traceGroup = new TraceGroup("convert_canvas_to_page");
   const callbacks = await traceGroup.start();
 
   const humanMessage =
-    styleImageUrl == null
+    styleImageUrl == null || styleCode == null
       ? await generateStandaloneMessage(imageUrl, pageText)
-      : await generateStyledMessage(imageUrl, pageText, styleImageUrl);
+      : await generateStyledMessage(
+          imageUrl,
+          pageText,
+          styleImageUrl,
+          styleCode
+        );
 
   try {
     const model = await createChatModel({
@@ -91,7 +98,8 @@ async function generateStandaloneMessage(
 async function generateStyledMessage(
   imageUrl: string,
   pageText: string,
-  styleImageUrl: string
+  styleImageUrl: string,
+  styleCode: string
 ): Promise<HumanMessage> {
   return new HumanMessage({
     content: [
@@ -115,7 +123,11 @@ async function generateStyledMessage(
       },
       {
         type: "text",
-        text: "Here is a picture of another page in the website. Could you make the new page designs consistent with this page?",
+        text: "Here is a picture of another page in the website. Make your new page look like this one. Think carefully about the styles, themes, and colors used in this page.",
+      },
+      {
+        type: "text",
+        text: `Also, here is the code used to generate the image shown in the screenshot:\n\n\`\`\`html\n${styleCode}\n\`\`\``,
       },
     ],
   });
