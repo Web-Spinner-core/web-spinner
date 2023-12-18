@@ -54,29 +54,29 @@ export default async function convertCanvasInputToPage(
   });
 
   // Update prisma
-  // const page = await prisma.page.upsert({
-  //   where: {
-  //     projectId_canvasPageId: {
-  //       canvasPageId,
-  //       projectId,
-  //     },
-  //   },
-  //   update: {
-  //     standaloneCode: result,
-  //   },
-  //   create: {
-  //     id: generatePrefixedId(ID_PREFIXES.PAGE),
-  //     canvasPageId,
-  //     projectId,
-  //     name: pageName,
-  //     standaloneCode: result,
-  //   },
-  // });
+  const page = await prisma.page.upsert({
+    where: {
+      projectId_canvasPageId: {
+        canvasPageId,
+        projectId,
+      },
+    },
+    update: {
+      standaloneCode: result,
+    },
+    create: {
+      id: generatePrefixedId(ID_PREFIXES.PAGE),
+      canvasPageId,
+      projectId,
+      name: pageName,
+      standaloneCode: result,
+    },
+  });
 
-  // // Save async
-  // if (!page.screenshotPath) {
-  //   void savePageScreenshot(result, project, page).catch(console.error);
-  // }
+  // Save async
+  if (!page.screenshotPath) {
+    void savePageScreenshot(result, project, page).catch(console.error);
+  }
 
   ctx.status = 200;
   ctx.body = result;

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@babel/standalone": "^7.23.6",
     "@clerk/nextjs": "^4.27.2",
     "@t3-oss/env-nextjs": "^0.7.1",
     "@tldraw/tldraw": "2.0.0-canary.699502d8c479",

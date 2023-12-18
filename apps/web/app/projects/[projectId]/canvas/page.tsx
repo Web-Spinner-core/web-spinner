@@ -26,7 +26,7 @@ import {
   RefreshCwIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { convertEditorToCode } from "~/lib/editorToCode";
 import {
   createPullRequestFromCanvas,
@@ -220,7 +220,11 @@ export default function CanvasPage({
               <>
                 <TabsContent value="preview" className="h-full">
                   {standaloneCode?.length ? (
-                    <iframe className="h-full w-full" srcDoc={standaloneCode} />
+                    <iframe
+                      className="h-full w-full"
+                      srcDoc={standaloneCode}
+                      sandbox="allow-top-navigation"
+                    />
                   ) : (
                     <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
                       Click the button below to see the magic

@@ -126,6 +126,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@babel/standalone':
+        specifier: ^7.23.6
+        version: 7.23.6
       '@clerk/nextjs':
         specifier: ^4.27.2
         version: 4.27.2(next@14.0.3)(react-dom@18.2.0)(react@18.2.0)
@@ -1269,6 +1272,11 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
+    dev: false
+
+  /@babel/standalone@7.23.6:
+    resolution: {integrity: sha512-+AzS6BZwZdSosrgS/TiGDYLxtlefARKClWgJ4ql//XfmV9KbPWbkEekvbvDRJ8a6qog8E9j3CziHLz5dbIEMyw==}
+    engines: {node: '>=6.9.0'}
     dev: false
 
   /@babel/template@7.22.15:
@@ -7656,7 +7664,7 @@ packages:
       ml-distance: 4.0.1
       openapi-types: 12.1.3
       p-retry: 4.6.2
-      puppeteer: 21.5.2(typescript@4.9.5)
+      puppeteer: 21.5.2(typescript@5.2.2)
       uuid: 9.0.1
       yaml: 2.3.4
       zod: 3.22.4

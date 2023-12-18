@@ -43,8 +43,6 @@ export default function Canvas({
     }
   }, []);
 
-  console.log("Persistence key", `web-spinner-${projectId}`);
-
   return (
     <Tldraw
       persistenceKey={`web-spinner-${projectId}`}
