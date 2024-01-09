@@ -11,14 +11,14 @@ pnpm run apps
 
 ## Screenshots
 ### Generate an interactive preview of your design in action
-<img width="500" src="assets/mockup.png">
+<img width="800" src="assets/mockup.png">
 
-<img width="500" src="assets/mockup-open.png">
+<img width="800" src="assets/mockup-open.png">
 
 ### View the draft code for the preview
-<img width="500" src="assets/standalone.png">
+<img width="800" src="assets/standalone.png">
 
 ### Generate a PR on your codebase with the modular code changes
-<img width="500" src="assets/pr.png">
+<img width="800" src="assets/pr.png">
 
-<img width="500" src="assets/gh-pr.png">
+<img width="800" src="assets/gh-pr.png">
